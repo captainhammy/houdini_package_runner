@@ -11,6 +11,9 @@ Supported file types include:
   - Shelf tools
 - Python code sections (+ included shelf tools) inside binary or expanded digital asset folders.
 
+
+Currently, the runner tools only function **outside** of Houdini on disk files.
+
 The following read-only tool runners are provided:
 - pylint - Perform [pylint](https://pypi.org/project/pylint/) analysis on Python code
 - flake8 - Perform [flake8](https://pypi.org/project/flake8/) analysis on Python code
