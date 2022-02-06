@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Run 'black' on Houdini related Python files."""
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
+# Houdini Package Runner
+from houdini_package_runner.discoverers import package
+from houdini_package_runner.runners.black import runner
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def main() -> None:
+    """Run 'black' on package files."""
+    parser = runner.build_parser()
+
+    parsed_args, unknown = parser.parse_known_args()
+
+    discoverer = package.init_standard_discoverer(parsed_args)
+
+    run_tool = runner.BlackRunner(discoverer)
+    run_tool.init_args_options(parsed_args, unknown)
+
+    run_tool.run()
+
+
+# =============================================================================
+
+if __name__ == "__main__":
+    main()
