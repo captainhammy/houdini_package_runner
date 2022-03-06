@@ -14,6 +14,28 @@ from typing import List
 # =============================================================================
 
 
+def add_or_append_to_flags(
+    flags: List[str], key: str, values: List[str], separator: str = ","
+):
+    """Add or append to an existing arg flag with the separator.
+
+    :param flags: The list of flags to modify.
+    :param key: The new flag.
+    :param values: The flag options.
+    :param separator: The character used to join flag values.
+    :return:
+
+    """
+    skip_str = separator.join(values)
+
+    if key in flags:
+        idx = flags.index(key) + 1
+        flags[idx] = flags[idx] + separator + skip_str
+
+    else:
+        flags.append(f"{key}={skip_str}")
+
+
 def execute_subprocess_command(command: List[str], verbose: bool = False) -> bool:
     """Execute a command in a subprocess, capturing and optionally outputting the output.
 

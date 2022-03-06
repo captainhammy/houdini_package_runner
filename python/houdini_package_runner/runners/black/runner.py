@@ -58,6 +58,19 @@ class BlackRunner(HoudiniPackageRunner):
     # METHODS
     # -------------------------------------------------------------------------
 
+    @staticmethod
+    def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
+        """Build a parser for the runner.
+
+        :param parser: Optional parser to add arguments to, otherwise a new one will be created.
+        :return: The common parser for the runner.
+
+        """
+        if parser is None:
+            parser = houdini_package_runner.parser.build_common_parser()
+
+        return parser
+
     def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
         """Initialize any extra options from parser data.
 
@@ -104,13 +117,3 @@ class BlackRunner(HoudiniPackageRunner):
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build a parser for the runner.
-
-    :return: The common parser for the runner.
-
-    """
-    parser = houdini_package_runner.parser.build_common_parser()
-
-    return parser

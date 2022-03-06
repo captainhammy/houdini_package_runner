@@ -40,7 +40,7 @@ def build_common_parser(
         action="append",
         dest="directories",
         default=[],
-        help="Add a directory to be modernized",
+        help="Add a directory to be processed",
     )
 
     parser.add_argument(
@@ -48,7 +48,7 @@ def build_common_parser(
         action="append",
         dest="files",
         default=[],
-        help="Add a file to be modernized",
+        help="Add a file to be processed",
     )
 
     parser.add_argument(

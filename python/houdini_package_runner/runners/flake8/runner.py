@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, List
 import houdini_package_runner.parser
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers.package import PackageItemDiscoverer
-from houdini_package_runner.items import xml
+from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
@@ -57,6 +57,28 @@ class Flake8Runner(HoudiniPackageRunner):
     # METHODS
     # -------------------------------------------------------------------------
 
+    @staticmethod
+    def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
+        """Build a parser for the runner.
+
+        :param parser: Optional parser to add arguments to, otherwise a new one will be created.
+        :return: The common parser for the runner.
+
+        """
+        if parser is None:
+            parser = houdini_package_runner.parser.build_common_parser()
+
+        parser.add_argument(
+            "--config",
+            action="store",
+            default=".flake8",
+            help="Specify a configuration file",
+        )
+
+        parser.add_argument("--ignore", action="store", help="Tests to ignore.")
+
+        return parser
+
     def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
         """Initialize any extra options from parser data.
 
@@ -91,6 +113,8 @@ class Flake8Runner(HoudiniPackageRunner):
         if self._ignored:
             to_ignore.extend(self._ignored)
 
+        known_builtins: List[str] = item.ignored_builtins
+
         if isinstance(self.discoverer, PackageItemDiscoverer):
             if isinstance(item, xml.XMLBase):
                 command.append("--max-line-length=150")
@@ -98,9 +122,21 @@ class Flake8Runner(HoudiniPackageRunner):
                 to_ignore.extend(
                     [
                         "W292",  # No newline at end of file
-                        "F821",  # Undefined name
                     ]
                 )
+
+            if isinstance(item, dialog_script.DialogScriptInternalItem):
+                to_ignore.extend(
+                    [
+                        "W292",  # No newline at end of file
+                        "F706",  # 'return' outside function
+                    ]
+                )
+
+        if known_builtins:
+            houdini_package_runner.utils.add_or_append_to_flags(
+                command, "--builtins", known_builtins
+            )
 
         if to_ignore:
             command.append(f"--ignore={','.join(to_ignore)}")
@@ -112,26 +148,3 @@ class Flake8Runner(HoudiniPackageRunner):
         return houdini_package_runner.utils.execute_subprocess_command(
             command, verbose=self._verbose
         )
-
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build a parser for the runner.
-
-    :return: The common parser for the runner.
-
-    """
-    parser = houdini_package_runner.parser.build_common_parser()
-    parser.add_argument(
-        "--config",
-        action="store",
-        default=".flake8",
-        help="Specify a configuration file",
-    )
-
-    parser.add_argument("--ignore", action="store", help="Tests to ignore.")
-
-    return parser

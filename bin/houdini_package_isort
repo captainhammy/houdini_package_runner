@@ -16,7 +16,7 @@ from houdini_package_runner.runners.isort import runner
 
 def main() -> None:
     """Run 'isort' on package files."""
-    parser = runner.build_parser()
+    parser = runner.IsortRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 

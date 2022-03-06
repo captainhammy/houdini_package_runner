@@ -16,7 +16,7 @@ from houdini_package_runner.runners.flake8 import runner
 
 def main() -> None:
     """Run 'flake8' on package files."""
-    parser = runner.build_parser()
+    parser = runner.Flake8Runner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 

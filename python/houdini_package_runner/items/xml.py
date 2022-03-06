@@ -36,6 +36,14 @@ if TYPE_CHECKING:
 class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     """The base class for XML based Houdini files."""
 
+    def __init__(
+        self, path: pathlib.Path, write_back: bool = False, display_name: str = None
+    ):
+        super().__init__(path, write_back, display_name)
+
+        # hou and kwargs are always available in menu items.
+        self.ignored_builtins.extend(("hou", "kwargs"))
+
     # -------------------------------------------------------------------------
     # NON-PUBLIC METHODS
     # -------------------------------------------------------------------------

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 # Standard Library
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 # Imports for type checking.
 if TYPE_CHECKING:
@@ -32,6 +32,8 @@ class BaseItem(ABC):
 
     def __init__(self, write_back: bool = False) -> None:
         self._contents_changed = False
+        self._ignored_builtins: List[str] = []
+        self._is_single_line = False
         self._is_test_item = False
         self._write_back = write_back
 
@@ -50,6 +52,20 @@ class BaseItem(ABC):
     @contents_changed.setter
     def contents_changed(self, contents_changed: bool):
         self._contents_changed = contents_changed
+
+    # -------------------------------------------------------------------------
+
+    @property
+    def ignored_builtins(self) -> List[str]:
+        """A list of known builtins to ignore for checks which look for imports."""
+        return self._ignored_builtins
+
+    # -------------------------------------------------------------------------
+
+    @property
+    def is_single_line(self) -> bool:
+        """Whether the item code on a single line."""
+        return self._is_single_line
 
     # -------------------------------------------------------------------------
 

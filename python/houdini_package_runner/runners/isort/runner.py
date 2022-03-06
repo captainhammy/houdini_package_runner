@@ -47,6 +47,7 @@ class IsortRunner(HoudiniPackageRunner):
     def _generate_config(self, namespace: argparse.Namespace):
         """Generate a .isort config file for the operation.
 
+        :param namespace: The command argparse namespace.
         :return: The path to the generated config file.
 
         """
@@ -112,11 +113,11 @@ class IsortRunner(HoudiniPackageRunner):
         """Optional isort config file."""
         return self._config_file
 
-    # -------------------------------------------------------------------------
-
     @config_file.setter
     def config_file(self, setting_file: str):
         self._config_file = setting_file
+
+    # -------------------------------------------------------------------------
 
     @property
     def extra_args(self) -> List[str]:
@@ -126,6 +127,37 @@ class IsortRunner(HoudiniPackageRunner):
     # -------------------------------------------------------------------------
     # METHODS
     # -------------------------------------------------------------------------
+
+    @staticmethod
+    def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
+        """Build a parser for the runner.
+
+        :param parser: Optional parser to add arguments to, otherwise a new one will be created.
+        :return: The common parser for the runner.
+
+        """
+        if parser is None:
+            parser = houdini_package_runner.parser.build_common_parser()
+
+        parser.add_argument(
+            "--config-file",
+            action="store",
+            default=".isort.cfg",
+            help="Optional config file to pass to isort commands",
+        )
+
+        parser.add_argument(
+            "--hfs-path",
+            action="store",
+            default="$HFS",
+            help="Path to a Houdini install directory for known Houdini modules",
+        )
+
+        parser.add_argument(
+            "--package-names", action="store", help="Known first party package names"
+        )
+
+        return parser
 
     def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
         """Initialize any extra options from parser data.
@@ -174,6 +206,7 @@ class IsortRunner(HoudiniPackageRunner):
 # =============================================================================
 # NON-PUBLIC FUNCTIONS
 # =============================================================================
+
 
 def _find_known_houdini(hfs_path: pathlib.Path) -> List[str]:
     """Find a list of known Houdini Python modules.
@@ -249,31 +282,3 @@ def _save_template_config(config: ConfigParser, temp_dir: pathlib.Path):
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build a parser for the runner.
-
-    :return: The common parser for the runner.
-
-    """
-    parser = houdini_package_runner.parser.build_common_parser()
-
-    parser.add_argument(
-        "--config-file",
-        action="store",
-        default=".isort.cfg",
-        help="Optional config file to pass to isort commands",
-    )
-
-    parser.add_argument(
-        "--hfs-path",
-        action="store",
-        default="$HFS",
-        help="Path to a Houdini install directory for known Houdini modules",
-    )
-
-    parser.add_argument(
-        "--package-names", action="store", help="Known first party package names"
-    )
-
-    return parser

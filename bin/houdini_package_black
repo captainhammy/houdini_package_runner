@@ -16,7 +16,7 @@ from houdini_package_runner.runners.black import runner
 
 def main() -> None:
     """Run 'black' on package files."""
-    parser = runner.build_parser()
+    parser = runner.BlackRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 

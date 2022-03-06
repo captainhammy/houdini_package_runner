@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, List
 
 # Houdini Package Runner
 from houdini_package_runner.items.base import BaseFileItem
+from houdini_package_runner.items.dialog_script import DialogScriptItem
 from houdini_package_runner.items.filesystem import FileToProcess
 from houdini_package_runner.items.xml import ShelfFile
 
@@ -34,6 +35,7 @@ class ExpandedOperatorType(BaseFileItem):
 
     :param name: The name of the operator.
     :param path: The path to the operator specific folder.
+    :param source_file: Optional source file for the expanded operator definition.
 
     """
 
@@ -97,13 +99,13 @@ class ExpandedOperatorType(BaseFileItem):
 
         return files_to_process
 
-    def _gather_files(self):
-        """Gather all operator related files.
+    def _gather_items(self) -> List[BaseFileItem]:
+        """Gather all operator related items.
 
-        This includes any Python sections or shelf tools.
+        This includes any Python sections, shelf tools or Python code from the DialogScript.
 
         """
-        files_to_process = self._find_python_sections()
+        items_to_process: List[BaseFileItem] = self._find_python_sections()
 
         shelf_path = self.path / "Tools.shelf"
 
@@ -111,13 +113,25 @@ class ExpandedOperatorType(BaseFileItem):
             display_name = None
 
             if self._source_file is not None:
-                display_name = self._source_file / "Tools.shelf"
+                display_name = str(self._source_file / "Tools.shelf")
 
-            files_to_process.append(
+            items_to_process.append(
                 ShelfFile(shelf_path, display_name=display_name, tool_name=self.name)
             )
 
-        return files_to_process
+        dialog_script_path = self.path / "DialogScript"
+
+        if self._source_file is not None:
+            display_name = self._source_file.stem.replace("::", "__") + "_DialogScript"
+
+        else:
+            display_name = (
+                self.name.replace("::", "__").replace("/", "_") + "_DialogScript"
+            )
+
+        items_to_process.append(DialogScriptItem(dialog_script_path, name=display_name))
+
+        return items_to_process
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -135,19 +149,19 @@ class ExpandedOperatorType(BaseFileItem):
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
     ) -> bool:
-        """Process the operator files.
+        """Process the operator items.
 
         :param runner: The package runner processing the item.
         :return: Whether processing was successful.
 
         """
-        files_to_process = self._gather_files()
+        items_to_process = self._gather_items()
 
         success = True
 
-        for file_to_process in files_to_process:
-            success &= file_to_process.process(runner)
-            self.contents_changed |= file_to_process.contents_changed
+        for item in items_to_process:
+            success &= item.process(runner)
+            self.contents_changed |= item.contents_changed
 
         return success
 
@@ -278,6 +292,7 @@ class BinaryDigitalAssetFile(BaseFileItem):
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
+
 
 def is_expanded_digital_asset_dir(path: pathlib.Path) -> bool:
     """Check if a folder is an expanded digital asset.

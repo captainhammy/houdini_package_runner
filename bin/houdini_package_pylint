@@ -16,7 +16,7 @@ from houdini_package_runner.runners.pylint import runner
 
 def main() -> None:
     """Run 'pylint' on package files."""
-    parser = runner.build_parser()
+    parser = runner.PyLintRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 

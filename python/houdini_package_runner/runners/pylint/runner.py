@@ -20,8 +20,9 @@ from pylint.reporters.text import ColorizedTextReporter
 
 # Houdini Package Runner
 import houdini_package_runner.parser
+import houdini_package_runner.utils
 from houdini_package_runner.discoverers.package import PackageItemDiscoverer
-from houdini_package_runner.items import xml
+from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
@@ -65,6 +66,28 @@ class PyLintRunner(HoudiniPackageRunner):
     # METHODS
     # -------------------------------------------------------------------------
 
+    @staticmethod
+    def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
+        """Build a parser for the runner.
+
+        :param parser: Optional parser to add arguments to, otherwise a new one will be created.
+        :return: The common parser for the runner.
+
+        """
+        if parser is None:
+            parser = houdini_package_runner.parser.build_common_parser()
+
+        parser.add_argument(
+            "--rcfile",
+            action="store",
+            default="pylint.rc",
+            help="Specify a configuration file",
+        )
+
+        parser.add_argument("--disable", action="store", help="Tests to disable.")
+
+        return parser
+
     def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
         """Initialize any extra options from parser data.
 
@@ -100,7 +123,14 @@ class PyLintRunner(HoudiniPackageRunner):
         if self._disabled:
             to_disable.extend(self._disabled)
 
+        # Many times the 'hou' module is automatically available in the evaluation
+        # context so for certain types we want to ignore any undefined variable errors
+        # related to it.
+        known_builtins: List[str] = []
+
         if isinstance(self.discoverer, PackageItemDiscoverer):
+            known_builtins.extend(item.ignored_builtins)
+
             if isinstance(item, xml.XMLBase):
                 to_disable.extend(
                     [
@@ -112,12 +142,20 @@ class PyLintRunner(HoudiniPackageRunner):
                     ]
                 )
 
-            if isinstance(item, xml.ShelfFile):
+            if isinstance(item, dialog_script.DialogScriptInternalItem):
                 to_disable.extend(
                     [
-                        "undefined-variable",
+                        "invalid-name",
+                        "missing-final-newline",
+                        "missing-module-docstring",
+                        "return-outside-function",
                     ]
                 )
+
+        if known_builtins:
+            houdini_package_runner.utils.add_or_append_to_flags(
+                flags, "--additional-builtins", known_builtins
+            )
 
         if to_disable:
             flags.append(f"--disable={','.join(to_disable)}")
@@ -142,27 +180,3 @@ class PyLintRunner(HoudiniPackageRunner):
             print()
 
         return not stdout
-
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build a parser for the runner.
-
-    :return: The common parser for the runner.
-
-    """
-    parser = houdini_package_runner.parser.build_common_parser()
-
-    parser.add_argument(
-        "--rcfile",
-        action="store",
-        default="pylint.rc",
-        help="Specify a configuration file",
-    )
-
-    parser.add_argument("--disable", action="store", help="Tests to disable.")
-
-    return parser

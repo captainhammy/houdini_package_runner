@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, List
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
+from houdini_package_runner.items.dialog_script import DialogScriptInternalItem
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
@@ -56,6 +57,18 @@ class ModernizeRunner(HoudiniPackageRunner):
     # METHODS
     # -------------------------------------------------------------------------
 
+    @staticmethod
+    def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
+        """Build a parser for the runner.
+        :param parser: Optional parser to add arguments to, otherwise a new one will be created.
+        :return: The common parser for the runner.
+
+        """
+        if parser is None:
+            parser = houdini_package_runner.parser.build_common_parser()
+
+        return parser
+
     def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
         """Initialize any extra options from parser data.
 
@@ -79,11 +92,25 @@ class ModernizeRunner(HoudiniPackageRunner):
 
         flags.extend(self.extra_args)
 
+        skip_fixers = []
+
+        # Don't want to run the import or print fixers.  The print one is already automatically
+        # imported by Houdini and the import one is not necessary as there are no relative imports
+        # and because of Houdini's bootstrapping will result in it complaining that __future__ imports
+        # are not on the first line.
+        if isinstance(item, DialogScriptInternalItem):
+            skip_fixers.extend(["import", "print"])
+
         command = [
             "python-modernize",
             "--write",
             "--nobackups",
         ]
+
+        if skip_fixers:
+            houdini_package_runner.utils.add_or_append_to_flags(
+                flags, "--nofix", skip_fixers
+            )
 
         command.extend(flags)
 
@@ -92,18 +119,3 @@ class ModernizeRunner(HoudiniPackageRunner):
         return houdini_package_runner.utils.execute_subprocess_command(
             command, verbose=self._verbose
         )
-
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build a parser for the runner.
-
-    :return: The common parser for the runner.
-
-    """
-    parser = houdini_package_runner.parser.build_common_parser()
-
-    return parser

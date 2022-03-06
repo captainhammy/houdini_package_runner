@@ -16,7 +16,7 @@ from houdini_package_runner.runners.modernize import runner
 
 def main() -> None:
     """Run 'python-modernize' on package files."""
-    parser = runner.build_parser()
+    parser = runner.ModernizeRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 

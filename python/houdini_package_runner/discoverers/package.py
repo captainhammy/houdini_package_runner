@@ -80,7 +80,9 @@ def get_digital_asset_items(otl_path: pathlib.Path) -> List[BaseItem]:
     items: List[BaseItem] = []
 
     for otl_folder in otl_path.iterdir():
-        if otl_folder.is_dir() and digital_asset.is_expanded_digital_asset_dir(otl_folder):
+        if otl_folder.is_dir() and digital_asset.is_expanded_digital_asset_dir(
+            otl_folder
+        ):
             extracted_otl = digital_asset.DigitalAssetDirectory(otl_folder)
             items.append(extracted_otl)
 
@@ -92,7 +94,9 @@ def get_digital_asset_items(otl_path: pathlib.Path) -> List[BaseItem]:
     return items
 
 
-def get_houdini_items(houdini_items: List[str], houdini_root: pathlib.Path) -> List[BaseItem]:
+def get_houdini_items(
+    houdini_items: List[str], houdini_root: pathlib.Path
+) -> List[BaseItem]:
     """Get Houdini-related items to process.
 
     :param houdini_items: The Houdini item names.
@@ -126,9 +130,7 @@ def get_houdini_items(houdini_items: List[str], houdini_root: pathlib.Path) -> L
         elif item_name in ("python2.7libs", "python3.7libs"):
             if item_path.exists():
                 items.append(
-                    filesystem.HoudiniDirectoryItem(
-                        item_path, traverse_children=True
-                    )
+                    filesystem.HoudiniDirectoryItem(item_path, traverse_children=True)
                 )
 
         else:
@@ -218,6 +220,9 @@ def process_directory(dir_path: pathlib.Path) -> filesystem.DirectoryToProcess:
 
     if dir_path.name == "python":
         return filesystem.PythonPackageDirectoryItem(dir_path)
+
+    if dir_path.name == "scripts":
+        return filesystem.HoudiniScriptsDirectoryItem(dir_path, traverse_children=True)
 
     if dir_path.name == "tests":
         item = filesystem.DirectoryToProcess(dir_path, traverse_children=True)

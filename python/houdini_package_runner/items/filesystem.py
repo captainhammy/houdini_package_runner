@@ -203,6 +203,26 @@ class HoudiniDirectoryItem(DirectoryToProcess):
     """Subclass to represent a directory under a package houdini/ directory."""
 
 
+class HoudiniScriptsDirectoryItem(DirectoryToProcess):
+    """Subclass to represent a scripts/ directory under a package houdini directory."""
+
+    def _get_child_items(self) -> List[BaseItem]:
+        """Find child items to process.
+
+        :return: A list of found child items.
+
+        """
+        items = super()._get_child_items()
+
+        for item in items:
+            # Mark any child files is ignoring the 'kwargs' builtin as it will always
+            # exist in the handler scripts.
+            if isinstance(item, FileToProcess):
+                item.ignored_builtins.append("kwargs")
+
+        return items
+
+
 class PythonPackageDirectoryItem(DirectoryToProcess):
     """Subclass to represent a directory which is a Python package."""
 
@@ -217,6 +237,7 @@ class PythonPackageDirectoryItem(DirectoryToProcess):
 # FUNCTIONS
 # =============================================================================
 
+
 def compute_file_hash(file_path: pathlib.Path) -> bytes:
     """Compute a hash for the file contents.
 
@@ -226,7 +247,7 @@ def compute_file_hash(file_path: pathlib.Path) -> bytes:
     """
     with open(file_path, "rb") as handle:
         file_hash = hashlib.md5()
-        # TODO: Replace with walrus operator once Houdini uses Python 3.8
+        # TODO: Replace with walrus operator once Houdini uses Python 3.8+
         # while chunk := handle.read(8192):
         chunk = handle.read(8192)
         while chunk:
@@ -262,7 +283,11 @@ def is_python_file(
 
     # Try to peak at the first line.
     with file_path.open() as handle:
-        first_line = handle.readline()
+        try:
+            first_line = handle.readline()
+
+        except UnicodeDecodeError:
+            return False
 
     python_bins = ["python"] if python_bins is None else python_bins
 
