@@ -33,16 +33,17 @@ class ExpandedOperatorType(BaseFileItem):
     """Class representing an operator type inside an expanded digital asset
     folder.
 
-    :param name: The name of the operator.
     :param path: The path to the operator specific folder.
+    :param name: The name of the operator.
+    :param write_back: Whether the item should write itself back to disk.
     :param source_file: Optional source file for the expanded operator definition.
 
     """
 
     def __init__(
-        self, path: pathlib.Path, name: str, source_file: pathlib.PurePath = None
+        self, path: pathlib.Path, name: str, write_back: bool = False, source_file: pathlib.PurePath = None
     ) -> None:
-        super().__init__(path)
+        super().__init__(path, write_back=write_back)
 
         self._name = name
         self._source_file = source_file
@@ -61,8 +62,6 @@ class ExpandedOperatorType(BaseFileItem):
         and the PythonCook section if it exists.
 
         """
-        files_to_process = []
-
         python_sections = []
 
         # The extra file options file.
@@ -86,6 +85,8 @@ class ExpandedOperatorType(BaseFileItem):
         if python_cook_path.exists():
             python_sections.append(python_cook_path)
 
+        files_to_process = []
+
         for section_path in python_sections:
             if self._source_file is not None:
                 display_name = self._source_file / section_path.name
@@ -94,7 +95,7 @@ class ExpandedOperatorType(BaseFileItem):
                 display_name = self.path / section_path.name
 
             files_to_process.append(
-                FileToProcess(section_path, display_name=display_name)
+                FileToProcess(section_path, write_back=self.write_back, display_name=display_name)
             )
 
         return files_to_process
@@ -116,7 +117,7 @@ class ExpandedOperatorType(BaseFileItem):
                 display_name = str(self._source_file / "Tools.shelf")
 
             items_to_process.append(
-                ShelfFile(shelf_path, display_name=display_name, tool_name=self.name)
+                ShelfFile(shelf_path, write_back=self.write_back, display_name=display_name, tool_name=self.name)
             )
 
         dialog_script_path = self.path / "DialogScript"
@@ -129,7 +130,7 @@ class ExpandedOperatorType(BaseFileItem):
                 self.name.replace("::", "__").replace("/", "_") + "_DialogScript"
             )
 
-        items_to_process.append(DialogScriptItem(dialog_script_path, name=display_name))
+        items_to_process.append(DialogScriptItem(dialog_script_path, display_name, write_back=self.write_back))
 
         return items_to_process
 
@@ -170,9 +171,9 @@ class DigitalAssetDirectory(BaseFileItem):
     """Class representing an extracted otl file."""
 
     def __init__(
-        self, path: pathlib.Path, source_file: pathlib.PurePath = None
+        self, path: pathlib.Path, write_back=False, source_file: pathlib.PurePath = None
     ) -> None:
-        super().__init__(path)
+        super().__init__(path, write_back=write_back)
 
         self._source_file = source_file
 
@@ -214,7 +215,7 @@ class DigitalAssetDirectory(BaseFileItem):
                 display_name = pathlib.PurePath(f"{self._source_file}?{definition[1]}")
 
             operator = ExpandedOperatorType(
-                self.path / definition[0], definition[1], display_name
+                self.path / definition[0], definition[1], write_back=self.write_back, source_file=display_name
             )
 
             operators.append(operator)
@@ -272,7 +273,7 @@ class BinaryDigitalAssetFile(BaseFileItem):
         )
 
         # Create a new DigitalAssetDirectory and process it.
-        asset_directory = DigitalAssetDirectory(target_folder, source_file=self.path)
+        asset_directory = DigitalAssetDirectory(target_folder, write_back=self.write_back, source_file=self.path)
 
         result = asset_directory.process(runner)
 

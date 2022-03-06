@@ -107,4 +107,5 @@ class HoudiniPackageRunner(abc.ABC):
         for item in self.discoverer.items:
             if self.write_back:
                 item.write_back = True
+
             item.process(self)

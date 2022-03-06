@@ -111,16 +111,17 @@ PythonMenuScriptResult = namedtuple(
 class DialogScriptItem(BaseFileItem):
     """Item representing a DialogScript section inside a digital asset definition.
 
-    :param path: The path to the operator specific folder.
-    :param name: The display name of the operator.
+    :param path: The file path to process.
+    :param name: The display name for test output.
+    :param write_back: Whether the item should write itself back to disk.
     :param source_file: Optional source file for the expanded operator definition.
 
     """
 
     def __init__(
-        self, path: pathlib.Path, name: str, source_file: pathlib.PurePath = None
+        self, path: pathlib.Path, name: str, write_back: bool = False, source_file: pathlib.PurePath = None
     ) -> None:
-        super().__init__(path)
+        super().__init__(path, write_back=write_back)
 
         self._name = name
         self._source_file = source_file
@@ -215,8 +216,6 @@ class DialogScriptItem(BaseFileItem):
         items_with_changed_contents = []
 
         for file_to_process in files_to_process:
-            file_to_process.write_back = self.write_back
-
             success &= file_to_process.process(runner)
 
             if file_to_process.contents_changed:
@@ -255,9 +254,9 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
         start_offset: int,
         end_offset: int,
         display_name: str,
+        write_back: bool = False
     ) -> None:
-        super().__init__()
-
+        super().__init__(write_back=write_back)
         self._code = code
         self._end_offset = end_offset
         self._parm = parm
@@ -379,10 +378,11 @@ class DialogScriptCallbackItem(DialogScriptInternalItem):
         parm_start: int,
         span: Tuple[int, int],
         display_name: str,
+        write_back: bool = False
     ) -> None:
         start_offset, end_offset = get_ds_file_offset(parm_start, span)
 
-        super().__init__(parm, code, start_offset, end_offset, display_name)
+        super().__init__(parm, code, start_offset, end_offset, display_name, write_back=write_back)
 
         self._display_hint = "callback"
         self._is_single_line = True
@@ -401,10 +401,11 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
         parm_start: int,
         span: Tuple[int, int],
         display_name: str,
+        write_back: bool = False
     ) -> None:
         start_offset, end_offset = get_ds_file_offset(parm_start, span)
 
-        super().__init__(parm, code, start_offset, end_offset, display_name)
+        super().__init__(parm, code, start_offset, end_offset, display_name, write_back=write_back)
 
         self._display_hint = "default"
         self._is_single_line = True
@@ -419,13 +420,14 @@ class DialogScriptMenuScriptItem(DialogScriptInternalItem):
         parm_start: int,
         display_name: str,
         menu_script_data: PythonMenuScriptResult,
+        write_back: bool = False
     ) -> None:
         start_offset, end_offset = get_ds_file_offset(
             parm_start, menu_script_data.span, inclusive=True
         )
 
         super().__init__(
-            parm, menu_script_data.menu_script, start_offset, end_offset, display_name
+            parm, menu_script_data.menu_script, start_offset, end_offset, display_name, write_back=write_back
         )
 
         self._display_hint = "menu_script"
