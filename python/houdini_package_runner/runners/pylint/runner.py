@@ -150,6 +150,17 @@ class PyLintRunner(HoudiniPackageRunner):
                 ]
             )
 
+        if item.is_test_item:
+            to_disable.extend(
+                [
+                    "abstract-class-instantiated",
+                    "no-self-use",
+                    "protected-access",
+                    "too-many-arguments",
+                    "too-many-locals",
+                ]
+            )
+
         if known_builtins:
             houdini_package_runner.utils.add_or_append_to_flags(
                 flags, "--additional-builtins", known_builtins

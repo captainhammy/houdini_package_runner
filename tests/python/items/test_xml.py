@@ -17,8 +17,6 @@ import houdini_package_runner.items.filesystem
 import houdini_package_runner.items.xml
 import houdini_package_runner.runners.base
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
-
 
 # =============================================================================
 # FIXTURES
@@ -78,12 +76,12 @@ def init_shelf(mocker):
     """Initialize a dummy ShelfFile for testing."""
     mocker.patch.multiple(
         houdini_package_runner.items.xml.ShelfFile,
-        __init__=lambda x, y, z, u, v, w: None,
+        __init__=lambda x, y, z, u, v: None,
     )
 
     def _create():
         return houdini_package_runner.items.xml.ShelfFile(
-            None, None, None, None, None
+            None, None, None, None
         )
 
     return _create
@@ -376,7 +374,7 @@ class TestShelfFile:
             assert result[1][1] == "$HDA_DEFAULT_TOOL"
 
 
-def _load_test_file(path: pathlib.Path) ->  etree._Element:  # pylint: disable=protected-access
+def _load_test_file(path: pathlib.Path) -> etree._Element:
     """Load a test xml file.
 
     :param path: The test file path.

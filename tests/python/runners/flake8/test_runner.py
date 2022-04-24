@@ -22,8 +22,6 @@ import houdini_package_runner.runners.base
 import houdini_package_runner.runners.flake8.runner
 from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
-
 
 # =============================================================================
 # FIXTURES

@@ -22,8 +22,6 @@ import houdini_package_runner.runners.base
 import houdini_package_runner.runners.pylint.runner
 from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
-
 
 # =============================================================================
 # FIXTURES
@@ -63,7 +61,7 @@ class TestPyLintRunner:
         inst = houdini_package_runner.runners.pylint.runner.PyLintRunner(mock_discoverer)
 
         assert inst._disabled == []
-        assert inst._extra_args == []
+        assert inst._extra_args == []  # pylint: disable=use-implicit-booleaness-not-comparison
 
         mock_super_init.assert_called_with(mock_discoverer)
 
@@ -151,14 +149,14 @@ class TestPyLintRunner:
             assert inst._disabled == []
 
     @pytest.mark.parametrize(
-        "has_disabled, item_type, has_builtins, verbose",
+        "has_disabled, item_type, has_builtins, verbose, test_item",
         (
-            (True, houdini_package_runner.items.dialog_script.DialogScriptInternalItem, True, True),
-            (False, houdini_package_runner.items.xml.MenuFile, False, False),
-            (False, houdini_package_runner.items.filesystem.FileToProcess, False, False),
+            (True, houdini_package_runner.items.dialog_script.DialogScriptInternalItem, True, True, True),
+            (False, houdini_package_runner.items.xml.MenuFile, False, False, False),
+            (False, houdini_package_runner.items.filesystem.FileToProcess, False, False, False),
         )
     )
-    def test_process_path(self, mocker, init_runner, has_disabled, item_type, has_builtins, verbose):
+    def test_process_path(self, mocker, init_runner, has_disabled, item_type, has_builtins, verbose, test_item):
         """Test PyLintRunner.process_path."""
         mock_io = mocker.patch("houdini_package_runner.runners.pylint.runner.StringIO")
         mock_run = mocker.patch("houdini_package_runner.runners.pylint.runner.lint.Run")
@@ -174,6 +172,7 @@ class TestPyLintRunner:
         mock_item = mocker.MagicMock(spec=item_type)
 
         mock_item.ignored_builtins = ["hou"] if has_builtins else []
+        mock_item.is_test_item = test_item
 
         mock_add_flags = mocker.patch("houdini_package_runner.utils.add_or_append_to_flags")
 
@@ -214,6 +213,17 @@ class TestPyLintRunner:
                     "missing-final-newline",
                     "missing-module-docstring",
                     "return-outside-function",
+                ]
+            )
+
+        if test_item:
+            expected_disabled.extend(
+                [
+                    "abstract-class-instantiated",
+                    "no-self-use",
+                    "protected-access",
+                    "too-many-arguments",
+                    "too-many-locals",
                 ]
             )
 

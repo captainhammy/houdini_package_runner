@@ -15,13 +15,10 @@ import houdini_package_runner.items.base
 import houdini_package_runner.items.filesystem
 import houdini_package_runner.runners.base
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
-
 
 # =============================================================================
 # FIXTURES
 # =============================================================================
-
 
 @pytest.fixture
 def init_dir_item(mocker):

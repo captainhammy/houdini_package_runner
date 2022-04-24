@@ -11,11 +11,9 @@ import pathlib
 import pytest
 
 # Houdini Package Runner
+import houdini_package_runner.items.base
 import houdini_package_runner.items.dialog_script
 import houdini_package_runner.runners.base
-from houdini_package_runner.items.base import BaseFileItem
-
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
 
 
 # =============================================================================
@@ -75,17 +73,15 @@ def init_menu_item(mocker):
     """Initialize a dummy DialogScriptMenuScriptItem for testing."""
     mocker.patch.multiple(
         houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem,
-        __init__=lambda x, y, z, u, v, w, a: None,
+        __init__=lambda x, y, z, u, v, w: None,
     )
 
     def _create():
         return houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem(
-            None, None, None, None, None, None
+            None, None, None, None, None
         )
 
     return _create
-
-
 
 
 # =============================================================================

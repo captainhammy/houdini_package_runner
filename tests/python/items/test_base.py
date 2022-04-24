@@ -13,7 +13,6 @@ import pytest
 # Houdini Package Runner
 import houdini_package_runner.items.base
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
 
 # =============================================================================
 # FIXTURES
@@ -72,7 +71,7 @@ class TestBaseItem:
             inst = houdini_package_runner.items.base.BaseItem()
 
         assert not inst._contents_changed
-        assert inst._ignored_builtins == []
+        assert inst._ignored_builtins == []  # pylint: disable=use-implicit-booleaness-not-comparison
         assert not inst._is_single_line
         assert not inst._is_test_item
         assert inst.write_back == bool(write_back)

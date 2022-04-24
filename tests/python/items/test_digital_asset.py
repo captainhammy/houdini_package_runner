@@ -18,8 +18,6 @@ import houdini_package_runner.items.filesystem
 import houdini_package_runner.items.xml
 import houdini_package_runner.runners.base
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
-
 
 # =============================================================================
 # FIXTURES
@@ -46,12 +44,12 @@ def init_asset_dir(mocker):
     """Initialize a dummy DigitalAssetDirectory for testing."""
     mocker.patch.multiple(
         houdini_package_runner.items.digital_asset.DigitalAssetDirectory,
-        __init__=lambda x, y, z, u, v: None,
+        __init__=lambda x, y, z, u: None,
     )
 
     def _create():
         return houdini_package_runner.items.digital_asset.DigitalAssetDirectory(
-            None, None, None, None
+            None, None, None
         )
 
     return _create
@@ -62,12 +60,12 @@ def init_binary(mocker):
     """Initialize a dummy BinaryDigitalAssetFile for testing."""
     mocker.patch.multiple(
         houdini_package_runner.items.digital_asset.BinaryDigitalAssetFile,
-        __init__=lambda x, y, z, u: None,
+        __init__=lambda x, y, z: None,
     )
 
     def _create():
         return houdini_package_runner.items.digital_asset.BinaryDigitalAssetFile(
-            None, None, None
+            None, None
         )
 
     return _create

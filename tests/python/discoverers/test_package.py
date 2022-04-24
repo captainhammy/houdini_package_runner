@@ -18,7 +18,6 @@ import houdini_package_runner.items.digital_asset
 import houdini_package_runner.items.filesystem
 import houdini_package_runner.items.xml
 
-# pylint: disable=abstract-class-instantiated,protected-access,no-self-use
 
 # =============================================================================
 # FIXTURES
