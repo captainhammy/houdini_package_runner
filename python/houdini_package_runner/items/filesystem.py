@@ -119,10 +119,6 @@ class DirectoryToProcess(BaseFileItem):
         """Whether to traverse children."""
         return self._traverse_children
 
-    @traverse_children.setter
-    def traverse_children(self, traverse_children: bool):
-        self._traverse_children = traverse_children
-
     # -------------------------------------------------------------------------
     # METHODS
     # -------------------------------------------------------------------------

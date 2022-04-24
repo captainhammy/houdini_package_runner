@@ -1,0 +1,7 @@
+        name    "newparameter3"
+        label   "Label"
+        type    float
+        default { "$F4" }
+        range   { 0 10 }
+        parmtag { "script_callback" "hou.hm().callback(hou.pwd())" }
+        parmtag { "script_callback_language" "python" }

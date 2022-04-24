@@ -112,8 +112,3 @@ class BlackRunner(HoudiniPackageRunner):
         return houdini_package_runner.utils.execute_subprocess_command(
             command, verbose=self._verbose
         )
-
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================

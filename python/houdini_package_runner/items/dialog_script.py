@@ -1,3 +1,4 @@
+
 """This module contains runnable items based on Houdini digital asset's DialogScript."""
 
 # =============================================================================
@@ -107,7 +108,6 @@ PythonMenuScriptResult = namedtuple(
 # CLASSES
 # =============================================================================
 
-
 class DialogScriptItem(BaseFileItem):
     """Item representing a DialogScript section inside a digital asset definition.
 
@@ -119,7 +119,11 @@ class DialogScriptItem(BaseFileItem):
     """
 
     def __init__(
-        self, path: pathlib.Path, name: str, write_back: bool = False, source_file: pathlib.PurePath = None
+        self,
+        path: pathlib.Path,
+        name: str,
+        write_back: bool = False,
+        source_file: pathlib.PurePath = None,
     ) -> None:
         super().__init__(path, write_back=write_back)
 
@@ -127,7 +131,7 @@ class DialogScriptItem(BaseFileItem):
         self._source_file = source_file
 
         # Stash the script contents.
-        with open(self.path, encoding="utf-8") as handle:
+        with self.path.open(encoding="utf-8") as handle:
             self._ds_contents = handle.read()
 
     def __repr__(self):
@@ -145,47 +149,40 @@ class DialogScriptItem(BaseFileItem):
         """
         items: List[DialogScriptInternalItem] = []
 
-        for match, parm_start, _ in _DS_PARM_GRAMMAR.scanString(
-            self._ds_contents
-        ):
+        for match, parm_start, _ in _DS_PARM_GRAMMAR.scanString(self._ds_contents):
             # The block of code related to the parameter definition.
             parm = match.asList()[0]
 
-            # Get the parameter's callback script language.
-            callback_language = get_callback_language(parm)
+            items.extend(_get_callback_items(parm, parm_start, self.name))
 
-            if callback_language == "python":
-                # Get the callback script data, if any.
-                results = get_script_callback(parm)
+            items.extend(_get_expression_items(parm, parm_start, self.name))
 
-                if results is not None:
-                    script, script_span = results
-
-                    items.append(
-                        DialogScriptCallbackItem(
-                            parm, script, parm_start, script_span, self.name
-                        )
-                    )
-
-            # Get a list of any parameters which have default expressions that are Python.
-            default_python_expressions = get_default_python_expressions(parm)
-
-            for expr, span in default_python_expressions:
-                items.append(
-                    DialogScriptDefaultExpressionItem(
-                        parm, expr, parm_start, span, self.name
-                    )
-                )
-
-            # Get any Python menu script data if it exists.
-            menu_script = get_python_menu_script(parm)
-
-            if menu_script is not None:
-                items.append(
-                    DialogScriptMenuScriptItem(parm, parm_start, self.name, menu_script)
-                )
+            items.extend(_get_menu_items(parm, parm_start, self.name))
 
         return tuple(items)
+
+    def _handle_changed_contents(self, items_with_changed_contents:  List[DialogScriptInternalItem]):
+        """Handle writing any items with changed contents to the file.
+
+        :param items_with_changed_contents: A list of items with changed contents.
+
+        """
+        items_with_changed_contents.sort(key=operator.attrgetter("start_offset"))
+
+        parts = []
+
+        script_offset = 0
+
+        for item in items_with_changed_contents:
+            parts.append(self._ds_contents[script_offset: item.start_offset])
+            parts.append(item.post_processed_code)
+            script_offset = item.end_offset
+
+        parts.append(self._ds_contents[script_offset:])
+        new_dialog_script = "".join(parts)
+
+        with open(self.path, "w", encoding="utf-8") as handle:
+            handle.write(new_dialog_script)
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -223,23 +220,7 @@ class DialogScriptItem(BaseFileItem):
 
         if self.write_back and items_with_changed_contents:
             self.contents_changed = True
-
-            items_with_changed_contents.sort(key=operator.attrgetter("start_offset"))
-
-            parts = []
-
-            script_offset = 0
-
-            for item in items_with_changed_contents:
-                parts.append(self._ds_contents[script_offset: item.start_offset])
-                parts.append(item.post_processed_code)
-                script_offset = item.end_offset
-
-            parts.append(self._ds_contents[script_offset:])
-            new_dialog_script = "".join(parts)
-
-            with open(self.path, "w", encoding="utf-8") as handle:
-                handle.write(new_dialog_script)
+            self._handle_changed_contents(items_with_changed_contents)
 
         return success
 
@@ -254,9 +235,10 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
         start_offset: int,
         end_offset: int,
         display_name: str,
-        write_back: bool = False
+        write_back: bool = False,
     ) -> None:
         super().__init__(write_back=write_back)
+
         self._code = code
         self._end_offset = end_offset
         self._parm = parm
@@ -277,7 +259,9 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
     # NON-PUBLIC METHODS
     # -------------------------------------------------------------------------
 
-    def _post_process_contents(self, contents: str) -> str:  # pylint: disable=no-self-use
+    def _post_process_contents(  # pylint: disable=no-self-use
+        self, contents: str
+    ) -> str:
         """Perform any post-processing on the contents.
 
         :param contents: The script contents.
@@ -348,7 +332,6 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
         # Dump the code to the temp file, so it can be processed.
         with temp_path.open("w") as handle:
             handle.write(self.code)
-            handle.flush()
 
         result = runner.process_path(temp_path, self)
 
@@ -358,7 +341,7 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
                 contents = handle.read()
 
             if self.is_single_line:
-                contents = escape_contents_for_single_line(contents)
+                contents = _escape_contents_for_single_line(contents)
 
             if self.code != contents:
                 self.contents_changed = True
@@ -378,11 +361,13 @@ class DialogScriptCallbackItem(DialogScriptInternalItem):
         parm_start: int,
         span: Tuple[int, int],
         display_name: str,
-        write_back: bool = False
+        write_back: bool = False,
     ) -> None:
-        start_offset, end_offset = get_ds_file_offset(parm_start, span)
+        start_offset, end_offset = _get_ds_file_offset(parm_start, span)
 
-        super().__init__(parm, code, start_offset, end_offset, display_name, write_back=write_back)
+        super().__init__(
+            parm, code, start_offset, end_offset, display_name, write_back=write_back
+        )
 
         self._display_hint = "callback"
         self._is_single_line = True
@@ -401,11 +386,13 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
         parm_start: int,
         span: Tuple[int, int],
         display_name: str,
-        write_back: bool = False
+        write_back: bool = False,
     ) -> None:
-        start_offset, end_offset = get_ds_file_offset(parm_start, span)
+        start_offset, end_offset = _get_ds_file_offset(parm_start, span)
 
-        super().__init__(parm, code, start_offset, end_offset, display_name, write_back=write_back)
+        super().__init__(
+            parm, code, start_offset, end_offset, display_name, write_back=write_back
+        )
 
         self._display_hint = "default"
         self._is_single_line = True
@@ -420,14 +407,19 @@ class DialogScriptMenuScriptItem(DialogScriptInternalItem):
         parm_start: int,
         display_name: str,
         menu_script_data: PythonMenuScriptResult,
-        write_back: bool = False
+        write_back: bool = False,
     ) -> None:
-        start_offset, end_offset = get_ds_file_offset(
+        start_offset, end_offset = _get_ds_file_offset(
             parm_start, menu_script_data.span, inclusive=True
         )
 
         super().__init__(
-            parm, menu_script_data.menu_script, start_offset, end_offset, display_name, write_back=write_back
+            parm,
+            menu_script_data.menu_script,
+            start_offset,
+            end_offset,
+            display_name,
+            write_back=write_back,
         )
 
         self._display_hint = "menu_script"
@@ -471,11 +463,30 @@ class DialogScriptMenuScriptItem(DialogScriptInternalItem):
 
 
 # =============================================================================
-# FUNCTIONS
+# NON-PUBLIC FUNCTIONS
 # =============================================================================
 
 
-def escape_contents_for_single_line(contents: str) -> str:
+def _discard_newlines(parm: str, start: int) -> int:
+    """Discard any newline characters.
+
+    :param parm: The parameter data.
+    :param start: The start index.
+    :return: The start index offset to discard any newlines
+
+    """
+    pos = start
+
+    while pos < len(parm):
+        if parm[pos] not in ("\r", "\n"):
+            break
+
+        pos += 1
+
+    return pos
+
+
+def _escape_contents_for_single_line(contents: str) -> str:
     """Escape characters to write as a single line.
 
     :param contents: The contents to escape.
@@ -487,7 +498,28 @@ def escape_contents_for_single_line(contents: str) -> str:
     return contents
 
 
-def get_callback_language(parm: str) -> Optional[str]:
+def _get_callback_items(parm, parm_start, name):
+    items = []
+    # Get the parameter's callback script language.
+    callback_language = _get_callback_language(parm)
+
+    if callback_language == "python":
+        # Get the callback script data, if any.
+        result = _get_script_callback(parm)
+
+        if result is not None:
+            script, script_span = result
+
+            items.append(
+                DialogScriptCallbackItem(
+                    parm, script, parm_start, script_span, name
+                )
+            )
+
+    return items
+
+
+def _get_callback_language(parm: str) -> Optional[str]:
     """Get a parameter's callback script language.
 
     :param parm: The parameter data.
@@ -500,7 +532,7 @@ def get_callback_language(parm: str) -> Optional[str]:
     return None
 
 
-def get_ds_file_offset(
+def _get_ds_file_offset(
     parm_start: int, span: Tuple[int, int], inclusive: bool = False
 ) -> Tuple[int, int]:
     """Get the file offsets for the parameter.
@@ -516,7 +548,7 @@ def get_ds_file_offset(
     return parm_start + span[0] + extra_offset, parm_start + span[1] - extra_offset
 
 
-def get_default_python_expressions(
+def _get_default_python_expressions(
     parm: str,
 ) -> Tuple[Tuple[str, Tuple[int, int]], ...]:
     """Get default Python expressions for a parameter tuple.
@@ -537,7 +569,36 @@ def get_default_python_expressions(
     return tuple(expressions)
 
 
-def get_python_menu_script(parm: str) -> Optional[PythonMenuScriptResult]:
+def _get_expression_items(parm, parm_start, name):
+    items = []
+
+    default_python_expressions = _get_default_python_expressions(parm)
+
+    for expr, span in default_python_expressions:
+        items.append(
+            DialogScriptDefaultExpressionItem(
+                parm, expr, parm_start, span, name
+            )
+        )
+
+    return items
+
+
+def _get_menu_items(parm, parm_start, name):
+    items = []
+
+    # Get any Python menu script data if it exists.
+    menu_script = _get_python_menu_script(parm)
+
+    if menu_script is not None:
+        items.append(
+            DialogScriptMenuScriptItem(parm, parm_start, name, menu_script)
+        )
+
+    return items
+
+
+def _get_python_menu_script(parm: str) -> Optional[PythonMenuScriptResult]:
     """Get any Python menu script data for a parameter.
 
     :param parm: The parameter data.
@@ -547,39 +608,41 @@ def get_python_menu_script(parm: str) -> Optional[PythonMenuScriptResult]:
     for match in _DS_MENU_GRAMMAR.searchString(parm):
         lines = match.asList()
         start = lines[0][0]
-        end = lines[-1][2] + 1
-
+        end = _discard_newlines(parm, lines[-1][2])
         menu_script = "\n".join([line[1] for line in lines])
         indent = 0
 
         uses_tabs = False
 
-        for i in range(start - 1, 0, -1):
+        for i in range(start - 1, 0, -1):  # pragma: no branch
             if parm[i] == " ":
                 indent += 1
+
             elif parm[i] == "\t":
                 indent += 1
                 uses_tabs = True
+
             else:
                 break
 
-        # there can only be one menu script
+        # There can only be one menu script so return it.
         return PythonMenuScriptResult(menu_script, (start, end), indent, uses_tabs)
 
     return None
 
 
-def get_script_callback(parm: str) -> Optional[Tuple[str, Tuple[int, int]]]:
+def _get_script_callback(parm: str) -> Optional[Tuple[str, Tuple[int, int]]]:
     """Get the callback script data for a parameter if it has one.
 
     The result contains the script contents and start/end offset values.
 
     :param parm: The parameter data.
-    :return: The parameter callback script.
+    :return: The parameter callback script if the parameter has one.
 
     """
     for match in _DS_CB_SCRIPT_GRAMMAR.searchString(parm):
-        for start, text, end in match:
-            return text, (start, end)
+        # There can only been one callback script entry per parameter.
+        start, text, end = match[0]
+        return text, (start, end)
 
     return None

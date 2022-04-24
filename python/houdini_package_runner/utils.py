@@ -26,14 +26,14 @@ def add_or_append_to_flags(
     :return:
 
     """
-    skip_str = separator.join(values)
+    flag_str = separator.join(values)
 
     if key in flags:
         idx = flags.index(key) + 1
-        flags[idx] = flags[idx] + separator + skip_str
+        flags[idx] = flags[idx] + separator + flag_str
 
     else:
-        flags.append(f"{key}={skip_str}")
+        flags.extend((key, flag_str))
 
 
 def execute_subprocess_command(command: List[str], verbose: bool = False) -> bool:
@@ -44,6 +44,8 @@ def execute_subprocess_command(command: List[str], verbose: bool = False) -> boo
     :return: Whether the command finished successfully.
 
     """
+    # If verbose mode is turned on then we don't want to capture the output.
+    # so we'll set the output pipe to be None, otherwise we'll capture it.
     output_pipe = None if verbose else subprocess.PIPE
 
     env = os.environ.copy()
@@ -61,12 +63,12 @@ def execute_subprocess_command(command: List[str], verbose: bool = False) -> boo
         return_code = proc.returncode
 
         if return_code and not verbose:
-            if proc.stdout is not None:
+            if proc.stdout is not None:  # pragma: no branch
                 for line in proc.stdout.readlines():
                     print(line.decode("utf-8"))
 
-            if proc.stderr is not None:
+            if proc.stderr is not None:  # pragma: no branch
                 for line in proc.stderr.readlines():
                     print(line.decode("utf-8"))
 
-        return return_code != 0
+        return return_code == 0

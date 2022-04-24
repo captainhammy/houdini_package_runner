@@ -221,6 +221,7 @@ good-names=i,
            k,
 	   t,
            ex,
+	   fp,  # for pytest-subprocess fixture
            Run,
            _
 

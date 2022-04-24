@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, List
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
-from houdini_package_runner.discoverers.package import PackageItemDiscoverer
 from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
@@ -115,23 +114,22 @@ class Flake8Runner(HoudiniPackageRunner):
 
         known_builtins: List[str] = item.ignored_builtins
 
-        if isinstance(self.discoverer, PackageItemDiscoverer):
-            if isinstance(item, xml.XMLBase):
-                command.append("--max-line-length=150")
+        if isinstance(item, xml.XMLBase):
+            command.append("--max-line-length=150")
 
-                to_ignore.extend(
-                    [
-                        "W292",  # No newline at end of file
-                    ]
-                )
+            to_ignore.extend(
+                [
+                    "W292",  # No newline at end of file
+                ]
+            )
 
-            if isinstance(item, dialog_script.DialogScriptInternalItem):
-                to_ignore.extend(
-                    [
-                        "W292",  # No newline at end of file
-                        "F706",  # 'return' outside function
-                    ]
-                )
+        elif isinstance(item, dialog_script.DialogScriptInternalItem):
+            to_ignore.extend(
+                [
+                    "W292",  # No newline at end of file
+                    "F706",  # 'return' outside function
+                ]
+            )
 
         if known_builtins:
             houdini_package_runner.utils.add_or_append_to_flags(

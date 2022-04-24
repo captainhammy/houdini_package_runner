@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import pathlib
 import subprocess
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 # Houdini Package Runner
 from houdini_package_runner.items.base import BaseFileItem
@@ -41,7 +41,11 @@ class ExpandedOperatorType(BaseFileItem):
     """
 
     def __init__(
-        self, path: pathlib.Path, name: str, write_back: bool = False, source_file: pathlib.PurePath = None
+        self,
+        path: pathlib.Path,
+        name: str,
+        write_back: bool = False,
+        source_file: pathlib.PurePath = None,
     ) -> None:
         super().__init__(path, write_back=write_back)
 
@@ -55,11 +59,120 @@ class ExpandedOperatorType(BaseFileItem):
     # NON-PUBLIC METHODS
     # -------------------------------------------------------------------------
 
-    def _find_python_sections(self):
+    def _build_python_section_items(self, python_sections: List[pathlib.Path]) -> List[FileToProcess]:
+        """Build a list of files to process based on Python sections.
+
+        :param python_sections: The Python section files to process.
+        :return: The created Python section items.
+
+        """
+        files_to_process = []
+
+        for section_path in python_sections:
+            if self._source_file is not None:
+                display_name = self._source_file / section_path.name
+
+            else:
+                display_name = self.path / section_path.name
+
+            files_to_process.append(
+                FileToProcess(
+                    section_path, write_back=self.write_back, display_name=str(display_name)
+                )
+            )
+
+        return list(files_to_process)
+
+    def _find_internal_shelf_item(self) -> Optional[ShelfFile]:
+        """Find the internal shelf item to process, if possible.
+
+        :return: An item representing the internal tool shelves, if any.
+
+        """
+
+        shelf_path = self.path / "Tools.shelf"
+
+        if not shelf_path.exists():
+            return None
+
+        display_name = None
+
+        if self._source_file is not None:
+            display_name = str(self._source_file / "Tools.shelf")
+
+        item = ShelfFile(
+            shelf_path,
+            write_back=self.write_back,
+            display_name=display_name,
+            tool_name=self.name,
+        )
+
+        return item
+
+    def _find_python_section_paths(self) -> List[pathlib.Path]:
         """Build a list of all Python related section files to process.
 
         This list will include any section files with IsPython in ExtraFileOptions
         and the PythonCook section if it exists.
+
+        :return: A list of Python file sections.
+
+        """
+        python_sections = self._get_extra_python_section_files()
+
+        # PythonCook sections are implicitly Python so check for them manually.
+        python_cook_path = self.path / "PythonCook"
+
+        if python_cook_path.exists():
+            python_sections.append(python_cook_path)
+
+        return python_sections
+
+    def _gather_items(self) -> List[BaseFileItem]:
+        """Gather all operator related items.
+
+        This includes any Python sections, shelf tools or Python code from the DialogScript.
+
+        :return: A list of all the processable items associated with the expanded digital asset.
+
+        """
+        python_sections = self._find_python_section_paths()
+
+        items_to_process: List[BaseFileItem] = list(self._build_python_section_items(python_sections))
+
+        shelf_item = self._find_internal_shelf_item()
+
+        if shelf_item is not None:
+            items_to_process.append(shelf_item)
+
+        items_to_process.append(self._get_dialog_script_item())
+
+        return items_to_process
+
+    def _get_dialog_script_item(self) -> DialogScriptItem:
+        """Get an item for processing the DialogScript section.
+
+        :return: The DialogScript item.
+
+        """
+        dialog_script_path = self.path / "DialogScript"
+
+        if self._source_file is not None:
+            display_name = self._source_file.stem.replace("::", "__") + "_DialogScript"
+
+        else:
+            display_name = (
+                    self.name.replace("::", "__").replace("/", "_") + "_DialogScript"
+            )
+
+        return DialogScriptItem(
+            dialog_script_path, display_name, write_back=self.write_back
+        )
+
+    def _get_extra_python_section_files(self) -> List[pathlib.Path]:
+        """Find any sections which contain Python code.
+
+        :return: Any section files which contain Python code.
 
         """
         python_sections = []
@@ -79,60 +192,7 @@ class ExpandedOperatorType(BaseFileItem):
                         section_path = self.path / script_name
                         python_sections.append(section_path)
 
-        # PythonCook sections are implicitly Python so check for them manually.
-        python_cook_path = self.path / "PythonCook"
-
-        if python_cook_path.exists():
-            python_sections.append(python_cook_path)
-
-        files_to_process = []
-
-        for section_path in python_sections:
-            if self._source_file is not None:
-                display_name = self._source_file / section_path.name
-
-            else:
-                display_name = self.path / section_path.name
-
-            files_to_process.append(
-                FileToProcess(section_path, write_back=self.write_back, display_name=display_name)
-            )
-
-        return files_to_process
-
-    def _gather_items(self) -> List[BaseFileItem]:
-        """Gather all operator related items.
-
-        This includes any Python sections, shelf tools or Python code from the DialogScript.
-
-        """
-        items_to_process: List[BaseFileItem] = self._find_python_sections()
-
-        shelf_path = self.path / "Tools.shelf"
-
-        if shelf_path.exists():
-            display_name = None
-
-            if self._source_file is not None:
-                display_name = str(self._source_file / "Tools.shelf")
-
-            items_to_process.append(
-                ShelfFile(shelf_path, write_back=self.write_back, display_name=display_name, tool_name=self.name)
-            )
-
-        dialog_script_path = self.path / "DialogScript"
-
-        if self._source_file is not None:
-            display_name = self._source_file.stem.replace("::", "__") + "_DialogScript"
-
-        else:
-            display_name = (
-                self.name.replace("::", "__").replace("/", "_") + "_DialogScript"
-            )
-
-        items_to_process.append(DialogScriptItem(dialog_script_path, display_name, write_back=self.write_back))
-
-        return items_to_process
+        return python_sections
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -189,6 +249,27 @@ class DigitalAssetDirectory(BaseFileItem):
         """
         operators = []
 
+        operator_dirs = self._find_operator_dirs()
+
+        for definition in operator_dirs:
+            directory_name, operator_name = definition
+            display_name = None
+
+            if self._source_file is not None:
+                display_name = pathlib.PurePath(f"{self._source_file}?{operator_name}")
+
+            operator = ExpandedOperatorType(
+                self.path / directory_name,
+                operator_name,
+                write_back=self.write_back,
+                source_file=display_name,
+            )
+
+            operators.append(operator)
+
+        return operators
+
+    def _find_operator_dirs(self) -> List[List[str]]:
         sections_list = self.path / "Sections.list"
 
         if not sections_list.exists():
@@ -204,23 +285,11 @@ class DigitalAssetDirectory(BaseFileItem):
         for line in data:
             components = line.split()
 
-            if components:
+            if len(components) == 2:
                 if (self.path / components[0]).is_dir():
                     results.append(components)
 
-        for definition in results:
-            display_name = None
-
-            if self._source_file is not None:
-                display_name = pathlib.PurePath(f"{self._source_file}?{definition[1]}")
-
-            operator = ExpandedOperatorType(
-                self.path / definition[0], definition[1], write_back=self.write_back, source_file=display_name
-            )
-
-            operators.append(operator)
-
-        return operators
+        return results
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -250,6 +319,36 @@ class BinaryDigitalAssetFile(BaseFileItem):
     """Class representing a binary digital asset file that will be extracted for testing."""
 
     # -------------------------------------------------------------------------
+    # NON-PUBLIC METHODS
+    # -------------------------------------------------------------------------
+
+    def _collapse_dir(self, hotl_command: str, target_folder: pathlib.Path) -> None:
+        """Collapse the target folder to the digital asset file.
+
+        :param hotl_command: The hotl command to use.
+        :param target_folder: The folder to collapse.
+
+        """
+        subprocess.call(
+            [hotl_command, "-l", target_folder, self.path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+    def _extract_file(self,  hotl_command: str, target_folder: pathlib.Path) -> None:
+        """Expand the digital asset file to the target folder.
+
+        :param hotl_command: The hotl command to use.
+        :param target_folder: The folder to expand to.
+
+        """
+        subprocess.call(
+            [hotl_command, "-t", target_folder, self.path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+    # -------------------------------------------------------------------------
     # METHODS
     # -------------------------------------------------------------------------
 
@@ -262,18 +361,14 @@ class BinaryDigitalAssetFile(BaseFileItem):
         :return: Whether processing was successful.
 
         """
-        file_name = self.path.name
+        target_folder = runner.temp_dir / self.path.name
 
-        target_folder = runner.temp_dir / file_name
-
-        subprocess.call(
-            [runner.hotl_command, "-t", target_folder, self.path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        self._extract_file(runner.hotl_command, target_folder)
 
         # Create a new DigitalAssetDirectory and process it.
-        asset_directory = DigitalAssetDirectory(target_folder, write_back=self.write_back, source_file=self.path)
+        asset_directory = DigitalAssetDirectory(
+            target_folder, write_back=self.write_back, source_file=self.path
+        )
 
         result = asset_directory.process(runner)
 
@@ -281,11 +376,7 @@ class BinaryDigitalAssetFile(BaseFileItem):
 
         # If writing back, call 'hotl -l' to collapse all the changes.
         if self.write_back and self.contents_changed:
-            subprocess.call(
-                [runner.hotl_command, "-l", target_folder, self.path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
+            self._collapse_dir(runner.hotl_command, target_folder)
 
         return result
 

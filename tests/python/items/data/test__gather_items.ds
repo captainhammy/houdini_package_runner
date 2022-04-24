@@ -1,0 +1,9 @@
+    parm {
+        name    "newparameter"
+        label   "Label"
+        type    float
+        default { [ "hou.pwd().path()[-1]" python ] }
+        range   { 0 10 }
+        parmtag { "script_callback" "" }
+        parmtag { "script_callback_language" "python" }
+    }

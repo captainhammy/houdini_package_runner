@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pythonPanelDocument>
+  <interface name="test_panel" label="Test Panel" icon="PANETYPES_viewer_cop" help_url="">
+    <script><![CDATA[script code]]></script>
+  </interface>
+  <not_interface name="test_not_panel" label="Test Not Pane" icon="PANETYPES_viewer_cop" help_url="">
+    <thing><![CDATA[script_code]]></thing>
+  </not_interface>
+    <interface name="test_other_panel" label="Other Test Panel" icon="PANETYPES_viewer_cop" help_url="">
+    <script><![CDATA[more script code]]></script>
+  </interface>
+</pythonPanelDocument>
