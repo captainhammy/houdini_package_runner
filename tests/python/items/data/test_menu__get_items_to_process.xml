@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<menuDocument>
+    <menu>
+        <scriptItem id="promote_item">
+            <label>Promote Parameter to Node</label>
+            <scriptCode><![CDATA[promote code]]></scriptCode>
+        </scriptItem>
+        <scriptItem id="broke_script_item">
+            <label>Promote Parameter to Node</label>
+        </scriptItem>
+        <scriptItem id="item_with_context">
+            <label>Convert to Absolute Path</label>
+            <context>
+                <expression><![CDATA[context code]]></expression>
+            </context>
+            <scriptCode><![CDATA[item code]]></scriptCode>
+        </scriptItem>
+            <scriptItem id="item_with_context_missing_expressions">
+            <label>Convert to Absolute Path</label>
+            <context />
+            <scriptCode><![CDATA[missing context item code]]></scriptCode>
+        </scriptItem>
+    </menu>
+</menuDocument>

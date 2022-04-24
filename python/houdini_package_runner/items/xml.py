@@ -39,7 +39,7 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     def __init__(
         self, path: pathlib.Path, write_back: bool = False, display_name: str = None
     ):
-        super().__init__(path, write_back, display_name)
+        super().__init__(path, write_back=write_back, display_name=display_name)
 
         # hou and kwargs are always available in menu items.
         self.ignored_builtins.extend(("hou", "kwargs"))
@@ -47,6 +47,50 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     # -------------------------------------------------------------------------
     # NON-PUBLIC METHODS
     # -------------------------------------------------------------------------
+
+    @abc.abstractmethod
+    def _get_items_to_process(
+        self,
+        root: etree._Element,  # pylint: disable=protected-access
+    ) -> ItemsToProcess:
+        """Get any xml items that need to be processed.
+
+        :param root: An xml element.
+        :return: A list of items to be processed.
+
+        """
+
+    def _handle_write_back(
+        self,
+        section: etree._Element,  # pylint: disable=protected-access
+        temp_path: pathlib.Path,
+    ):
+        """Handle updating the section and checking if the contents changed.
+
+        :param section: The section to process.
+        :param temp_path: The temp file name for the code.
+        :return:
+
+        """
+        # Stash the pre-updated text.
+        script_code = section.text
+
+        # Read the possibly modified file.
+        with temp_path.open("r") as handle:
+            contents = handle.read()
+
+        # Check if the code blob is in a CDATA block.  If the original code was in
+        # a CDATA block, wrap the result in one and set it
+        # back to the section.
+        if "CDATA" in etree.tostring(section, encoding="unicode"):
+            section.text = etree.CDATA(contents)
+
+        # Otherwise, just use the raw values.
+        else:
+            section.text = contents
+
+        if section.text != script_code:
+            self.contents_changed = True
 
     def _process_code_section(
         self,
@@ -62,52 +106,19 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         :return: Whether processing was successful.
 
         """
-        # Check if the code blob is in a CDATA block.
-        has_cdata = "CDATA" in etree.tostring(section, encoding="unicode")
-
-        # Get the text of the section.
-        script_code = section.text
-
         # Create a temp Python file for the code blob.
         temp_path = runner.temp_dir / f"{base_file_name}.py"
 
         # Dump the code to the temp file, so it can be processed.
         with temp_path.open("w") as handle:
-            handle.write(str(script_code))
-            handle.flush()
+            handle.write(str(section.text))
 
         result = runner.process_path(temp_path, self)
 
         if self.write_back:
-            # Read the possibly modified file.
-            with temp_path.open("r") as handle:
-                contents = handle.read()
-
-            # If the original code was in a CDATA block, wrap the result in one and set it
-            # back to the section.
-            if has_cdata:
-                section.text = etree.CDATA(contents)
-
-            # Otherwise, just use the raw values.
-            else:
-                section.text = contents
-
-            if section.text != script_code:
-                self.contents_changed = True
+            self._handle_write_back(section, temp_path)
 
         return result
-
-    @abc.abstractmethod
-    def _get_items_to_process(
-        self,
-        root: etree._Element,  # pylint: disable=protected-access
-    ) -> ItemsToProcess:
-        """Get any xml items that need to be processed.
-
-        :param root: An xml element.
-        :return: A list of items to be processed.
-
-        """
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -220,7 +231,7 @@ class ShelfFile(XMLBase):
         display_name: str = None,
         tool_name: str = None,
     ) -> None:
-        super().__init__(path, write_back, display_name)
+        super().__init__(path, write_back=write_back, display_name=display_name)
 
         self._tool_name = tool_name
 
@@ -253,7 +264,7 @@ class ShelfFile(XMLBase):
 
             tool_name = str(tool.attrib["name"])
 
-            if self._tool_name is not None and tool_name == "$HDA_DEFAULT_TOOL":
+            if tool_name == "$HDA_DEFAULT_TOOL" and self._tool_name is not None:
                 tool_name = (
                     self._tool_name.replace("::", "__").replace("/", "_")
                     + "_DEFAULT_TOOL"

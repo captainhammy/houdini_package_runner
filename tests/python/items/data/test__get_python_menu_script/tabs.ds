@@ -1,0 +1,11 @@
+	name    "newparameter4"
+	label   "Label"
+	type    string
+	default { "" }
+	menu {
+		[ "import os" ]
+		[ "" ]
+		[ "return [1,2,3,4]" ]
+		language python
+	}
+	parmtag { "script_callback_language" "python" }

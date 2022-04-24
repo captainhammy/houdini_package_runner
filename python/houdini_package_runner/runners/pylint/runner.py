@@ -21,7 +21,6 @@ from pylint.reporters.text import ColorizedTextReporter
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
-from houdini_package_runner.discoverers.package import PackageItemDiscoverer
 from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
@@ -51,16 +50,16 @@ class PyLintRunner(HoudiniPackageRunner):
         super().__init__(discoverer)
 
         self._disabled: List[str] = []
-        self._extra_parts: List[str] = []
+        self._extra_args: List[str] = []
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
     @property
-    def extra_parts(self) -> List[str]:
+    def extra_args(self) -> List[str]:
         """A list of extra args to pass to the lint command."""
-        return self._extra_parts
+        return self._extra_args
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -104,7 +103,7 @@ class PyLintRunner(HoudiniPackageRunner):
             self._disabled = namespace.disable.split(",")
 
         if extra_args:
-            self._extra_parts.extend(extra_args)
+            self._extra_args.extend(extra_args)
 
     def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
         """Process a file path.
@@ -116,7 +115,7 @@ class PyLintRunner(HoudiniPackageRunner):
         """
         flags = []
 
-        flags.extend(self.extra_parts)
+        flags.extend(self.extra_args)
 
         to_disable = []
 
@@ -128,29 +127,39 @@ class PyLintRunner(HoudiniPackageRunner):
         # related to it.
         known_builtins: List[str] = []
 
-        if isinstance(self.discoverer, PackageItemDiscoverer):
-            known_builtins.extend(item.ignored_builtins)
+        known_builtins.extend(item.ignored_builtins)
 
-            if isinstance(item, xml.XMLBase):
-                to_disable.extend(
-                    [
-                        "invalid-name",
-                        "missing-final-newline",
-                        "missing-module-docstring",
-                        "missing-docstring",
-                        "return-outside-function",
-                    ]
-                )
+        if isinstance(item, xml.XMLBase):
+            to_disable.extend(
+                [
+                    "invalid-name",
+                    "missing-final-newline",
+                    "missing-module-docstring",
+                    "missing-docstring",
+                    "return-outside-function",
+                ]
+            )
 
-            if isinstance(item, dialog_script.DialogScriptInternalItem):
-                to_disable.extend(
-                    [
-                        "invalid-name",
-                        "missing-final-newline",
-                        "missing-module-docstring",
-                        "return-outside-function",
-                    ]
-                )
+        if isinstance(item, dialog_script.DialogScriptInternalItem):
+            to_disable.extend(
+                [
+                    "invalid-name",
+                    "missing-final-newline",
+                    "missing-module-docstring",
+                    "return-outside-function",
+                ]
+            )
+
+        if item.is_test_item:
+            to_disable.extend(
+                [
+                    "abstract-class-instantiated",
+                    "no-self-use",
+                    "protected-access",
+                    "too-many-arguments",
+                    "too-many-locals",
+                ]
+            )
 
         if known_builtins:
             houdini_package_runner.utils.add_or_append_to_flags(

@@ -20,7 +20,7 @@ from houdini_package_runner.items import digital_asset, filesystem, xml
 if TYPE_CHECKING:
     import argparse
 
-    from houdini_package_runner.items.base import BaseItem
+    from houdini_package_runner.items.base import BaseFileItem, BaseItem
 
 
 # =============================================================================
@@ -70,26 +70,23 @@ class PackageItemDiscoverer(BaseItemDiscoverer):
 # =============================================================================
 
 
-def get_digital_asset_items(otl_path: pathlib.Path) -> List[BaseItem]:
+def get_digital_asset_items(otl_path: pathlib.Path) -> List[BaseFileItem]:
     """Get a list of shelf items to process.
 
     :param otl_path: The path to the otls folder.
     :return: A list otl items.
 
     """
-    items: List[BaseItem] = []
+    items: List[BaseFileItem] = []
 
     for otl_folder in otl_path.iterdir():
         if otl_folder.is_dir() and digital_asset.is_expanded_digital_asset_dir(
             otl_folder
         ):
-            extracted_otl = digital_asset.DigitalAssetDirectory(otl_folder)
-            items.append(extracted_otl)
+            items.append(digital_asset.DigitalAssetDirectory(otl_folder))
 
         elif otl_folder.suffix in (".hda", ".otl"):
-
-            otl_file = digital_asset.BinaryDigitalAssetFile(otl_folder)
-            items.append(otl_file)
+            items.append(digital_asset.BinaryDigitalAssetFile(otl_folder))
 
     return items
 
@@ -104,7 +101,7 @@ def get_houdini_items(
     :return: The Houdini items to process.
 
     """
-    items = []
+    items: List[BaseItem] = []
 
     for item_name in houdini_items:
         if not item_name:
@@ -146,9 +143,9 @@ def get_houdini_items(
 
 
 def get_menu_items(houdini_root: pathlib.Path) -> List[xml.MenuFile]:
-    """Get a list of shelf items to process.
+    """Get a list of xml menu items to process.
 
-    :param houdini_root: The path to the houdini folder.
+    :param houdini_root: The path to a houdini directory.
     :return: A list of menu items.
 
     """
@@ -157,15 +154,18 @@ def get_menu_items(houdini_root: pathlib.Path) -> List[xml.MenuFile]:
     return menu_files
 
 
-def get_python_panel_items(panel_dir: pathlib.Path) -> List[xml.PythonPanelFile]:
-    """Get a list of shelf items to process.
+def get_python_panel_items(
+    python_panel_path: pathlib.Path,
+) -> List[xml.PythonPanelFile]:
+    """Get a list of python panel items to process.
 
-    :param panel_dir: The path to the shelf file folder.
+    :param python_panel_path: The path to a python_panel directory.
     :return: A list of shelf python panel items.
 
     """
     panel_files = [
-        xml.PythonPanelFile(panel_file) for panel_file in panel_dir.glob("*.pypanel")
+        xml.PythonPanelFile(panel_file)
+        for panel_file in python_panel_path.glob("*.pypanel")
     ]
 
     return panel_files
@@ -174,7 +174,7 @@ def get_python_panel_items(panel_dir: pathlib.Path) -> List[xml.PythonPanelFile]
 def get_tool_items(toolbar_path: pathlib.Path) -> List[xml.ShelfFile]:
     """Get a list of shelf items to process.
 
-    :param toolbar_path: The path to the shelf file folder.
+    :param toolbar_path: The path to a toolbar directory.
     :return: A list of shelf tool items.
 
     """
@@ -224,10 +224,9 @@ def process_directory(dir_path: pathlib.Path) -> filesystem.DirectoryToProcess:
     if dir_path.name == "scripts":
         return filesystem.HoudiniScriptsDirectoryItem(dir_path, traverse_children=True)
 
+    item = filesystem.DirectoryToProcess(dir_path, traverse_children=True)
+
     if dir_path.name == "tests":
-        item = filesystem.DirectoryToProcess(dir_path, traverse_children=True)
         item.is_test_item = True
 
-        return item
-
-    return filesystem.DirectoryToProcess(dir_path, traverse_children=True)
+    return item

@@ -74,21 +74,13 @@ class IsortRunner(HoudiniPackageRunner):
         if namespace.package_names is not None:
             first_party_packages = namespace.package_names
 
-        # If no first party package names we passed we can try and figure out any
+        # If no first party package names were passed we can try and figure out any
         # based on the Python root.
-        else:
-            if namespace.python_root is not None:
-                python_root = self.discoverer.path / namespace.python_root
-                package_names = []
+        elif namespace.python_root is not None:
+            python_root = self.discoverer.path / namespace.python_root
 
-                if python_root.exists():
-                    # Check for any folders under
-                    for path in python_root.iterdir():
-                        if path.is_dir() and (path / "__init__.py").exists():
-                            package_names.append(path.stem)
-
-                if package_names:
-                    first_party_packages = ",".join(package_names)
+            if python_root.exists():
+                first_party_packages = _find_python_packages_from_path(python_root)
 
         hfs_path = pathlib.Path(os.path.expandvars(namespace.hfs_path))
 
@@ -227,7 +219,7 @@ def _find_known_houdini(hfs_path: pathlib.Path) -> List[str]:
     for path in soho_paths:
         module_names.extend(_find_python_modules(path))
 
-    return sorted(module_names)
+    return sorted(set(module_names))
 
 
 def _find_python_modules(folder: pathlib.Path) -> List[str]:
@@ -240,13 +232,30 @@ def _find_python_modules(folder: pathlib.Path) -> List[str]:
     module_names = []
 
     for child in folder.iterdir():
-        if child.is_file and child.suffix in (".py", ".so"):
+        if child.is_file() and child.suffix in (".py", ".so"):
             module_names.append(child.stem)
 
         elif child.is_dir():
             module_names.append(child.stem)
 
-    return module_names
+    return sorted(module_names)
+
+
+def _find_python_packages_from_path(search_root: pathlib.Path) -> Optional[str]:
+    """Attempt to find any Python package names under the search path.
+
+    :param search_root: The path to search under.
+    :return: Any found package names.
+
+    """
+    package_names = []
+
+    # Check for any folders under the root.
+    for path in search_root.iterdir():
+        if path.is_dir() and (path / "__init__.py").exists():
+            package_names.append(path.stem)
+
+    return ",".join(sorted(package_names)) if package_names else None
 
 
 def _load_template_config() -> ConfigParser:
@@ -277,8 +286,3 @@ def _save_template_config(config: ConfigParser, temp_dir: pathlib.Path):
         config.write(handle)
 
     return file_path
-
-
-# =============================================================================
-# FUNCTIONS
-# =============================================================================
