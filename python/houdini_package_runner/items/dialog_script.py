@@ -1,4 +1,3 @@
-
 """This module contains runnable items based on Houdini digital asset's DialogScript."""
 
 # =============================================================================
@@ -108,6 +107,7 @@ PythonMenuScriptResult = namedtuple(
 # CLASSES
 # =============================================================================
 
+
 class DialogScriptItem(BaseFileItem):
     """Item representing a DialogScript section inside a digital asset definition.
 
@@ -161,7 +161,9 @@ class DialogScriptItem(BaseFileItem):
 
         return tuple(items)
 
-    def _handle_changed_contents(self, items_with_changed_contents:  List[DialogScriptInternalItem]):
+    def _handle_changed_contents(
+        self, items_with_changed_contents: List[DialogScriptInternalItem]
+    ):
         """Handle writing any items with changed contents to the file.
 
         :param items_with_changed_contents: A list of items with changed contents.
@@ -174,7 +176,7 @@ class DialogScriptItem(BaseFileItem):
         script_offset = 0
 
         for item in items_with_changed_contents:
-            parts.append(self._ds_contents[script_offset: item.start_offset])
+            parts.append(self._ds_contents[script_offset : item.start_offset])
             parts.append(item.post_processed_code)
             script_offset = item.end_offset
 
@@ -511,9 +513,7 @@ def _get_callback_items(parm, parm_start, name):
             script, script_span = result
 
             items.append(
-                DialogScriptCallbackItem(
-                    parm, script, parm_start, script_span, name
-                )
+                DialogScriptCallbackItem(parm, script, parm_start, script_span, name)
             )
 
     return items
@@ -576,9 +576,7 @@ def _get_expression_items(parm, parm_start, name):
 
     for expr, span in default_python_expressions:
         items.append(
-            DialogScriptDefaultExpressionItem(
-                parm, expr, parm_start, span, name
-            )
+            DialogScriptDefaultExpressionItem(parm, expr, parm_start, span, name)
         )
 
     return items
@@ -591,9 +589,7 @@ def _get_menu_items(parm, parm_start, name):
     menu_script = _get_python_menu_script(parm)
 
     if menu_script is not None:
-        items.append(
-            DialogScriptMenuScriptItem(parm, parm_start, name, menu_script)
-        )
+        items.append(DialogScriptMenuScriptItem(parm, parm_start, name, menu_script))
 
     return items
 

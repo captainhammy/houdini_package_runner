@@ -18,9 +18,8 @@ import houdini_package_runner.parser
 # TESTS
 # =============================================================================
 
-@pytest.mark.parametrize(
-    "pass_args", (True, False)
-)
+
+@pytest.mark.parametrize("pass_args", (True, False))
 def test_build_common_parser(mocker, pass_args):
     """Test houdini_package_runner.parser.build_common_parser."""
     # Store a reference to the parser class, so we can compare to it later on after
@@ -32,9 +31,7 @@ def test_build_common_parser(mocker, pass_args):
 
     if pass_args:
         result = houdini_package_runner.parser.build_common_parser(
-            prog="program name",
-            usage="usage",
-            description="description"
+            prog="program name", usage="usage", description="description"
         )
     else:
         result = houdini_package_runner.parser.build_common_parser()
@@ -47,7 +44,7 @@ def test_build_common_parser(mocker, pass_args):
             action="append",
             dest="directories",
             default=[],
-            help="Add a directory to be processed"
+            help="Add a directory to be processed",
         ),
         mocker.call(
             "--add-file",
@@ -100,9 +97,11 @@ def test_build_common_parser(mocker, pass_args):
         (True, False, False, False),
         (True, True, True, True),
         (False, True, True, True),
-    )
+    ),
 )
-def test_process_common_arg_settings(mocker, root_passed, has_py_root, skip_tests, tests_exists):
+def test_process_common_arg_settings(
+    mocker, root_passed, has_py_root, skip_tests, tests_exists
+):
     """Test houdini_package_runner.parser.process_common_arg_settings."""
     namespace = argparse.Namespace()
     namespace.root = pathlib.Path("/some/root") if root_passed else None

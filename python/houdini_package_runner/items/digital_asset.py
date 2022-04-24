@@ -59,7 +59,9 @@ class ExpandedOperatorType(BaseFileItem):
     # NON-PUBLIC METHODS
     # -------------------------------------------------------------------------
 
-    def _build_python_section_items(self, python_sections: List[pathlib.Path]) -> List[FileToProcess]:
+    def _build_python_section_items(
+        self, python_sections: List[pathlib.Path]
+    ) -> List[FileToProcess]:
         """Build a list of files to process based on Python sections.
 
         :param python_sections: The Python section files to process.
@@ -77,7 +79,9 @@ class ExpandedOperatorType(BaseFileItem):
 
             files_to_process.append(
                 FileToProcess(
-                    section_path, write_back=self.write_back, display_name=str(display_name)
+                    section_path,
+                    write_back=self.write_back,
+                    display_name=str(display_name),
                 )
             )
 
@@ -138,7 +142,9 @@ class ExpandedOperatorType(BaseFileItem):
         """
         python_sections = self._find_python_section_paths()
 
-        items_to_process: List[BaseFileItem] = list(self._build_python_section_items(python_sections))
+        items_to_process: List[BaseFileItem] = list(
+            self._build_python_section_items(python_sections)
+        )
 
         shelf_item = self._find_internal_shelf_item()
 
@@ -162,7 +168,7 @@ class ExpandedOperatorType(BaseFileItem):
 
         else:
             display_name = (
-                    self.name.replace("::", "__").replace("/", "_") + "_DialogScript"
+                self.name.replace("::", "__").replace("/", "_") + "_DialogScript"
             )
 
         return DialogScriptItem(
@@ -335,7 +341,7 @@ class BinaryDigitalAssetFile(BaseFileItem):
             stderr=subprocess.PIPE,
         )
 
-    def _extract_file(self,  hotl_command: str, target_folder: pathlib.Path) -> None:
+    def _extract_file(self, hotl_command: str, target_folder: pathlib.Path) -> None:
         """Expand the digital asset file to the target folder.
 
         :param hotl_command: The hotl command to use.

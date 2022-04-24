@@ -26,6 +26,7 @@ from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def init_runner(mocker):
     """Initialize a dummy BlackRunner for testing."""
@@ -35,9 +36,7 @@ def init_runner(mocker):
     )
 
     def _create():
-        return houdini_package_runner.runners.black.runner.BlackRunner(
-            None
-        )
+        return houdini_package_runner.runners.black.runner.BlackRunner(None)
 
     return _create
 
@@ -45,6 +44,7 @@ def init_runner(mocker):
 # =============================================================================
 # TESTS
 # =============================================================================
+
 
 class TestBlackRunner:
     """Test houdini_package_runner.runners.black.runner.BlackRunner."""
@@ -87,13 +87,19 @@ class TestBlackRunner:
         if pass_parser:
             mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
 
-            result = houdini_package_runner.runners.black.runner.BlackRunner.build_parser(parser=mock_parser)
+            result = (
+                houdini_package_runner.runners.black.runner.BlackRunner.build_parser(
+                    parser=mock_parser
+                )
+            )
             assert result == mock_parser
 
             mock_build.assert_not_called()
 
         else:
-            result = houdini_package_runner.runners.black.runner.BlackRunner.build_parser()
+            result = (
+                houdini_package_runner.runners.black.runner.BlackRunner.build_parser()
+            )
 
             assert result == mock_build.return_value
 
@@ -103,7 +109,8 @@ class TestBlackRunner:
         mock_extra_args = mocker.MagicMock(spec=list)
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.black.runner.HoudiniPackageRunner, "init_args_options"
+            houdini_package_runner.runners.black.runner.HoudiniPackageRunner,
+            "init_args_options",
         )
 
         inst = init_runner()
@@ -119,7 +126,7 @@ class TestBlackRunner:
         (
             (False, False),
             (True, True),
-        )
+        ),
     )
     def test_process_path(self, mocker, init_runner, is_xml, pass_target_version):
         """Test BlackRunner.process_path."""
@@ -129,16 +136,24 @@ class TestBlackRunner:
             mock_item = mocker.MagicMock(spec=houdini_package_runner.items.xml.MenuFile)
 
         else:
-            mock_item = mocker.MagicMock(spec=houdini_package_runner.items.filesystem.FileToProcess)
+            mock_item = mocker.MagicMock(
+                spec=houdini_package_runner.items.filesystem.FileToProcess
+            )
 
-        mock_execute = mocker.patch("houdini_package_runner.utils.execute_subprocess_command")
+        mock_execute = mocker.patch(
+            "houdini_package_runner.utils.execute_subprocess_command"
+        )
 
         extra_args = ["--flag", "arg"]
 
         if pass_target_version:
             extra_args.append("--target-version=py34")
 
-        mocker.patch.object(houdini_package_runner.runners.black.runner.BlackRunner, "extra_args", extra_args)
+        mocker.patch.object(
+            houdini_package_runner.runners.black.runner.BlackRunner,
+            "extra_args",
+            extra_args,
+        )
 
         mock_verbose = mocker.MagicMock(spec=bool)
 

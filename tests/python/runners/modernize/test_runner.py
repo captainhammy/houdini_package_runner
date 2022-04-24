@@ -26,6 +26,7 @@ from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def init_runner(mocker):
     """Initialize a dummy ModernizeRunner for testing."""
@@ -35,9 +36,7 @@ def init_runner(mocker):
     )
 
     def _create():
-        return houdini_package_runner.runners.modernize.runner.ModernizeRunner(
-            None
-        )
+        return houdini_package_runner.runners.modernize.runner.ModernizeRunner(None)
 
     return _create
 
@@ -45,6 +44,7 @@ def init_runner(mocker):
 # =============================================================================
 # TESTS
 # =============================================================================
+
 
 class TestModernizeRunner:
     """Test houdini_package_runner.runners.modernize.runner.ModernizeRunner."""
@@ -54,10 +54,13 @@ class TestModernizeRunner:
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.modernize.runner.HoudiniPackageRunner, "__init__"
+            houdini_package_runner.runners.modernize.runner.HoudiniPackageRunner,
+            "__init__",
         )
 
-        inst = houdini_package_runner.runners.modernize.runner.ModernizeRunner(mock_discoverer)
+        inst = houdini_package_runner.runners.modernize.runner.ModernizeRunner(
+            mock_discoverer
+        )
 
         assert inst._extra_args == []
 
@@ -87,13 +90,17 @@ class TestModernizeRunner:
         if pass_parser:
             mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
 
-            result = houdini_package_runner.runners.modernize.runner.ModernizeRunner.build_parser(parser=mock_parser)
+            result = houdini_package_runner.runners.modernize.runner.ModernizeRunner.build_parser(
+                parser=mock_parser
+            )
             assert result == mock_parser
 
             mock_build.assert_not_called()
 
         else:
-            result = houdini_package_runner.runners.modernize.runner.ModernizeRunner.build_parser()
+            result = (
+                houdini_package_runner.runners.modernize.runner.ModernizeRunner.build_parser()
+            )
 
             assert result == mock_build.return_value
 
@@ -103,7 +110,8 @@ class TestModernizeRunner:
         mock_extra_args = mocker.MagicMock(spec=list)
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.modernize.runner.HoudiniPackageRunner, "init_args_options"
+            houdini_package_runner.runners.modernize.runner.HoudiniPackageRunner,
+            "init_args_options",
         )
 
         inst = init_runner()
@@ -115,23 +123,34 @@ class TestModernizeRunner:
         assert inst._extra_args == mock_extra_args
 
     @pytest.mark.parametrize(
-        "is_dialog_script", (True, False),
+        "is_dialog_script",
+        (True, False),
     )
     def test_process_path(self, mocker, init_runner, is_dialog_script):
         """Test ModernizeRunner.process_path."""
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
         if is_dialog_script:
-            mock_item = mocker.MagicMock(spec=houdini_package_runner.items.dialog_script.DialogScriptInternalItem)
+            mock_item = mocker.MagicMock(
+                spec=houdini_package_runner.items.dialog_script.DialogScriptInternalItem
+            )
 
         else:
-            mock_item = mocker.MagicMock(spec=houdini_package_runner.items.filesystem.FileToProcess)
+            mock_item = mocker.MagicMock(
+                spec=houdini_package_runner.items.filesystem.FileToProcess
+            )
 
-        mock_execute = mocker.patch("houdini_package_runner.utils.execute_subprocess_command")
+        mock_execute = mocker.patch(
+            "houdini_package_runner.utils.execute_subprocess_command"
+        )
 
         extra_args = ["--flag", "arg"]
 
-        mocker.patch.object(houdini_package_runner.runners.modernize.runner.ModernizeRunner, "extra_args", extra_args)
+        mocker.patch.object(
+            houdini_package_runner.runners.modernize.runner.ModernizeRunner,
+            "extra_args",
+            extra_args,
+        )
 
         mock_verbose = mocker.MagicMock(spec=bool)
 
@@ -140,7 +159,11 @@ class TestModernizeRunner:
 
         inst.process_path(mock_path, mock_item)
 
-        expected_args = ["python-modernize", "--write", "--nobackups"] + extra_args + [str(mock_path)]
+        expected_args = (
+            ["python-modernize", "--write", "--nobackups"]
+            + extra_args
+            + [str(mock_path)]
+        )
 
         if is_dialog_script:
             expected_args.insert(5, "import,print")

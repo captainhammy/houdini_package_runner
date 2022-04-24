@@ -20,6 +20,7 @@ import houdini_package_runner.runners.base
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def init_item(mocker):
     """Initialize a dummy DialogScriptItem for testing."""
@@ -88,6 +89,7 @@ def init_menu_item(mocker):
 # TESTS
 # =============================================================================
 
+
 class TestDialogScriptItem:
     """Test houdini_package_runner.items.dialog_script.DialogScriptItem."""
 
@@ -111,16 +113,25 @@ class TestDialogScriptItem:
         )
 
         mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptItem, "path", new_callable=mocker.PropertyMock(return_value=mock_path)
+            houdini_package_runner.items.dialog_script.DialogScriptItem,
+            "path",
+            new_callable=mocker.PropertyMock(return_value=mock_path),
         )
 
         if pass_defaults:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptItem(mock_path, mock_name)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptItem(
+                mock_path, mock_name
+            )
             mock_super_init.assert_called_with(mock_path, write_back=False)
             assert inst._source_file is None
 
         else:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptItem(mock_path, mock_name, write_back=mock_write_back, source_file=mock_source_file)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptItem(
+                mock_path,
+                mock_name,
+                write_back=mock_write_back,
+                source_file=mock_source_file,
+            )
             mock_super_init.assert_called_with(mock_path, write_back=mock_write_back)
             assert inst._source_file == mock_source_file
 
@@ -142,9 +153,18 @@ class TestDialogScriptItem:
         mock_expressions = [mocker.MagicMock()]
         mock_menus = [mocker.MagicMock(), mocker.MagicMock()]
 
-        mock_get_callbacks = mocker.patch("houdini_package_runner.items.dialog_script._get_callback_items", return_value=mock_callbacks)
-        mock_get_expressions = mocker.patch("houdini_package_runner.items.dialog_script._get_expression_items", return_value=mock_expressions)
-        mock_get_menus = mocker.patch("houdini_package_runner.items.dialog_script._get_menu_items", return_value=mock_menus)
+        mock_get_callbacks = mocker.patch(
+            "houdini_package_runner.items.dialog_script._get_callback_items",
+            return_value=mock_callbacks,
+        )
+        mock_get_expressions = mocker.patch(
+            "houdini_package_runner.items.dialog_script._get_expression_items",
+            return_value=mock_expressions,
+        )
+        mock_get_menus = mocker.patch(
+            "houdini_package_runner.items.dialog_script._get_menu_items",
+            return_value=mock_menus,
+        )
 
         parm_value = 'parm {\n        name    "newparameter"\n        label   "Label"\n        type    float\n        default { [ "hou.pwd().path()[-1]" python ] }\n        range   { 0 10 }\n        parmtag { "script_callback" "" }\n        parmtag { "script_callback_language" "python" }\n    }'
 
@@ -170,10 +190,14 @@ class TestDialogScriptItem:
         """Test DialogScriptItem._handle_changed_contents"""
         output_path = shared_datadir / "_handle_changed_contents.ds"
 
-        with (shared_datadir / "test__handle_changed_contents" / "original.ds").open() as handle:
+        with (
+            shared_datadir / "test__handle_changed_contents" / "original.ds"
+        ).open() as handle:
             original_contents = handle.read()
 
-        with (shared_datadir / "test__handle_changed_contents" / "expected.ds").open() as handle:
+        with (
+            shared_datadir / "test__handle_changed_contents" / "expected.ds"
+        ).open() as handle:
             expected_contents = handle.read()
 
         mock_item1 = mocker.MagicMock()
@@ -222,11 +246,13 @@ class TestDialogScriptItem:
             (True, True),
             (True, False),
             (False, True),
-        )
+        ),
     )
     def test_process(self, mocker, init_item, write_back, has_changed_contents):
         """Test DialogScriptItem.process."""
-        mock_runner = mocker.MagicMock(spec=houdini_package_runner.runners.base.HoudiniPackageRunner)
+        mock_runner = mocker.MagicMock(
+            spec=houdini_package_runner.runners.base.HoudiniPackageRunner
+        )
 
         mock_file1 = mocker.MagicMock()
         mock_file1.contents_changed = has_changed_contents
@@ -236,8 +262,15 @@ class TestDialogScriptItem:
         mock_file2.contents_changed = False
         mock_file2.process.return_value = False
 
-        mocker.patch.object(houdini_package_runner.items.dialog_script.DialogScriptItem, "_gather_items", return_value=[mock_file1, mock_file2])
-        mock_handle = mocker.patch.object(houdini_package_runner.items.dialog_script.DialogScriptItem, "_handle_changed_contents")
+        mocker.patch.object(
+            houdini_package_runner.items.dialog_script.DialogScriptItem,
+            "_gather_items",
+            return_value=[mock_file1, mock_file2],
+        )
+        mock_handle = mocker.patch.object(
+            houdini_package_runner.items.dialog_script.DialogScriptItem,
+            "_handle_changed_contents",
+        )
 
         inst = init_item()
         inst._contents_changed = False
@@ -279,24 +312,37 @@ class TestDialogScriptInternalItem:
         ignored = []
 
         mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptInternalItem, "ignored_builtins", ignored
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "ignored_builtins",
+            ignored,
         )
 
         parm_name_result = [["first", "second"], ["third"]]
-        mock_search = mocker.patch("houdini_package_runner.items.dialog_script._DS_NAME_EXPR_GRAMMAR.searchString")
+        mock_search = mocker.patch(
+            "houdini_package_runner.items.dialog_script._DS_NAME_EXPR_GRAMMAR.searchString"
+        )
         mock_search.return_value = parm_name_result
 
         if pass_defaults:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptInternalItem(mock_parm, mock_code,
-                                                                                   mock_start_offset, mock_end_offset,
-                                                                                   mock_display_name)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptInternalItem(
+                mock_parm,
+                mock_code,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+            )
 
             mock_super_init.assert_called_with(write_back=False)
 
         else:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptInternalItem(mock_parm, mock_code,
-                                                                                   mock_start_offset, mock_end_offset,
-                                                                                   mock_display_name, write_back=mock_write_back)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptInternalItem(
+                mock_parm,
+                mock_code,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=mock_write_back,
+            )
 
             mock_super_init.assert_called_with(write_back=mock_write_back)
 
@@ -426,16 +472,20 @@ class TestDialogScriptInternalItem:
             (True, True, False),
             (True, True, True),
             (True, False, True),
-        )
+        ),
     )
-    def test_process(self, mocker, init_internal_item, write_back, single_line, contents_changed):
+    def test_process(
+        self, mocker, init_internal_item, write_back, single_line, contents_changed
+    ):
         """Test DialogScriptInternalItem.process."""
         mock_temp_path = mocker.MagicMock(spec=pathlib.Path)
 
         mock_temp_dir = mocker.MagicMock(spec=pathlib.Path)
         mock_temp_dir.__truediv__.return_value = mock_temp_path
 
-        mock_runner = mocker.MagicMock(spec=houdini_package_runner.runners.base.HoudiniPackageRunner)
+        mock_runner = mocker.MagicMock(
+            spec=houdini_package_runner.runners.base.HoudiniPackageRunner
+        )
         mock_runner.temp_dir = mock_temp_dir
 
         mock_code = mocker.MagicMock(spec=str)
@@ -446,11 +496,16 @@ class TestDialogScriptInternalItem:
 
         mock_temp_path.open = mock_handle
 
-        mock_escape = mocker.patch("houdini_package_runner.items.dialog_script._escape_contents_for_single_line")
+        mock_escape = mocker.patch(
+            "houdini_package_runner.items.dialog_script._escape_contents_for_single_line"
+        )
         if not contents_changed:
             mock_escape.return_value = mock_code
 
-        mock_post = mocker.patch.object(houdini_package_runner.items.dialog_script.DialogScriptInternalItem, "_post_process_contents")
+        mock_post = mocker.patch.object(
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "_post_process_contents",
+        )
 
         inst = init_internal_item()
         inst._contents_changed = False
@@ -497,16 +552,22 @@ class TestDialogScriptCallbackItem:
         mock_start_offset = mocker.MagicMock(spec=int)
         mock_end_offset = mocker.MagicMock(spec=int)
 
-        mock_get_offset = mocker.patch("houdini_package_runner.items.dialog_script._get_ds_file_offset", return_value=[mock_start_offset, mock_end_offset])
+        mock_get_offset = mocker.patch(
+            "houdini_package_runner.items.dialog_script._get_ds_file_offset",
+            return_value=[mock_start_offset, mock_end_offset],
+        )
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptInternalItem, "__init__"
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "__init__",
         )
 
         ignored = []
 
         mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptCallbackItem, "ignored_builtins", ignored
+            houdini_package_runner.items.dialog_script.DialogScriptCallbackItem,
+            "ignored_builtins",
+            ignored,
         )
 
         mock_parm = mocker.MagicMock(spec=str)
@@ -517,13 +578,35 @@ class TestDialogScriptCallbackItem:
         mock_write_back = mocker.MagicMock(spec=bool)
 
         if pass_defaults:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptCallbackItem(mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name)
-            mock_super_init.assert_called_with(mock_parm, mock_code, mock_start_offset, mock_end_offset, mock_display_name, write_back=False)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptCallbackItem(
+                mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name
+            )
+            mock_super_init.assert_called_with(
+                mock_parm,
+                mock_code,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=False,
+            )
 
         else:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptCallbackItem(mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name, write_back=mock_write_back)
-            mock_super_init.assert_called_with(mock_parm, mock_code, mock_start_offset, mock_end_offset,
-                                               mock_display_name, write_back=mock_write_back)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptCallbackItem(
+                mock_parm,
+                mock_code,
+                mock_parm_start,
+                mock_span,
+                mock_display_name,
+                write_back=mock_write_back,
+            )
+            mock_super_init.assert_called_with(
+                mock_parm,
+                mock_code,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=mock_write_back,
+            )
 
         mock_get_offset.assert_called_with(mock_parm_start, mock_span)
 
@@ -542,10 +625,14 @@ class TestDialogScriptDefaultExpressionItem:
         mock_start_offset = mocker.MagicMock(spec=int)
         mock_end_offset = mocker.MagicMock(spec=int)
 
-        mock_get_offset = mocker.patch("houdini_package_runner.items.dialog_script._get_ds_file_offset", return_value=[mock_start_offset, mock_end_offset])
+        mock_get_offset = mocker.patch(
+            "houdini_package_runner.items.dialog_script._get_ds_file_offset",
+            return_value=[mock_start_offset, mock_end_offset],
+        )
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptInternalItem, "__init__"
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "__init__",
         )
 
         mock_parm = mocker.MagicMock(spec=str)
@@ -556,13 +643,35 @@ class TestDialogScriptDefaultExpressionItem:
         mock_write_back = mocker.MagicMock(spec=bool)
 
         if pass_defaults:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem(mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name)
-            mock_super_init.assert_called_with(mock_parm, mock_code, mock_start_offset, mock_end_offset, mock_display_name, write_back=False)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem(
+                mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name
+            )
+            mock_super_init.assert_called_with(
+                mock_parm,
+                mock_code,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=False,
+            )
 
         else:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem(mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name, write_back=mock_write_back)
-            mock_super_init.assert_called_with(mock_parm, mock_code, mock_start_offset, mock_end_offset,
-                                               mock_display_name, write_back=mock_write_back)
+            inst = houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem(
+                mock_parm,
+                mock_code,
+                mock_parm_start,
+                mock_span,
+                mock_display_name,
+                write_back=mock_write_back,
+            )
+            mock_super_init.assert_called_with(
+                mock_parm,
+                mock_code,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=mock_write_back,
+            )
 
         mock_get_offset.assert_called_with(mock_parm_start, mock_span)
 
@@ -579,33 +688,69 @@ class TestDialogScriptMenuScriptItem:
         mock_start_offset = mocker.MagicMock(spec=int)
         mock_end_offset = mocker.MagicMock(spec=int)
 
-        mock_get_offset = mocker.patch("houdini_package_runner.items.dialog_script._get_ds_file_offset", return_value=[mock_start_offset, mock_end_offset])
+        mock_get_offset = mocker.patch(
+            "houdini_package_runner.items.dialog_script._get_ds_file_offset",
+            return_value=[mock_start_offset, mock_end_offset],
+        )
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptInternalItem, "__init__"
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "__init__",
         )
 
         ignored = []
 
         mocker.patch.object(
-            houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem, "ignored_builtins", ignored
+            houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem,
+            "ignored_builtins",
+            ignored,
         )
 
         mock_parm = mocker.MagicMock(spec=str)
         mock_parm_start = mocker.MagicMock(spec=int)
         mock_display_name = mocker.MagicMock(spec=str)
-        mock_data = mocker.MagicMock(spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult)
+        mock_data = mocker.MagicMock(
+            spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult
+        )
         mock_write_back = mocker.MagicMock(spec=bool)
 
         if pass_defaults:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem(mock_parm, mock_parm_start, mock_display_name, mock_data)
-            mock_super_init.assert_called_with(mock_parm, mock_data.menu_script, mock_start_offset, mock_end_offset, mock_display_name, write_back=False)
+            inst = (
+                houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem(
+                    mock_parm, mock_parm_start, mock_display_name, mock_data
+                )
+            )
+            mock_super_init.assert_called_with(
+                mock_parm,
+                mock_data.menu_script,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=False,
+            )
 
         else:
-            inst = houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem(mock_parm, mock_parm_start, mock_display_name, mock_data, write_back=mock_write_back)
-            mock_super_init.assert_called_with(mock_parm, mock_data.menu_script, mock_start_offset, mock_end_offset, mock_display_name, write_back=mock_write_back)
+            inst = (
+                houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem(
+                    mock_parm,
+                    mock_parm_start,
+                    mock_display_name,
+                    mock_data,
+                    write_back=mock_write_back,
+                )
+            )
+            mock_super_init.assert_called_with(
+                mock_parm,
+                mock_data.menu_script,
+                mock_start_offset,
+                mock_end_offset,
+                mock_display_name,
+                write_back=mock_write_back,
+            )
 
-        mock_get_offset.assert_called_with(mock_parm_start, mock_data.span, inclusive=True)
+        mock_get_offset.assert_called_with(
+            mock_parm_start, mock_data.span, inclusive=True
+        )
 
         assert inst._display_hint == "menu_script"
         assert inst._menu_script_data == mock_data
@@ -616,11 +761,13 @@ class TestDialogScriptMenuScriptItem:
         (
             (True, '[ "foo" ]\n\t\t\t\t[ "bar" ]\n\t\t\t\t[ "baz" ]\n'),
             (False, '[ "foo" ]\n    [ "bar" ]\n    [ "baz" ]\n'),
-        )
+        ),
     )
     def test__post_process_contents(self, mocker, init_menu_item, use_tabs, expected):
         """Test DialogScriptMenuScriptItem._post_process_contents."""
-        mock_data = mocker.MagicMock(spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult)
+        mock_data = mocker.MagicMock(
+            spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult
+        )
         mock_data.uses_tabs = use_tabs
         mock_data.indent = 4
 
@@ -637,7 +784,9 @@ class TestDialogScriptMenuScriptItem:
 
     def test_menu_script_data(self, mocker, init_menu_item):
         """Test DialogScriptMenuScriptItem.menu_script_data."""
-        mock_data = mocker.MagicMock(spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult)
+        mock_data = mocker.MagicMock(
+            spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult
+        )
 
         inst = init_menu_item()
         inst._menu_script_data = mock_data
@@ -654,7 +803,7 @@ class TestDialogScriptMenuScriptItem:
         ("ab\r\r\nfoo", 0, 0),
         ("\r\r\nfoo", 0, 3),
         ("\r\r\nfoo", 10, 10),
-    )
+    ),
 )
 def test__discard_newlines(value, start, expected):
     """Test houdini_package_runner.items.dialog_script._discard_newlines."""
@@ -666,7 +815,11 @@ def test__escape_contents_for_single_line():
     """Test houdini_package_runner.items.dialog_script._escape_contents_for_single_line."""
     test_str = 'foo\rbar\n"thing"'
 
-    result = houdini_package_runner.items.dialog_script._escape_contents_for_single_line(test_str)
+    result = (
+        houdini_package_runner.items.dialog_script._escape_contents_for_single_line(
+            test_str
+        )
+    )
 
     assert result == 'foo\\rbar\\n\\"thing\\"'
 
@@ -676,8 +829,8 @@ def test__escape_contents_for_single_line():
     (
         ('parmtag { "script_callback_language" "python" }', "python"),
         ('parmtag { "script_callback_language" "hscript" }', "hscript"),
-        ('parmtag { }', None),
-    )
+        ("parmtag { }", None),
+    ),
 )
 def test__get_callback_language(value, expected):
     """Test houdini_package_runner.items.dialog_script._get_callback_language."""
@@ -693,11 +846,13 @@ def test__get_callback_language(value, expected):
             (0, (3, 10), True, (3, 10)),
             (0, (3, 10), False, (4, 9)),
         )
-    )
+    ),
 )
 def test__get_ds_file_offset(parm_start, span, inclusive, expected):
     """Test houdini_package_runner.items.dialog_script._get_ds_file_offset."""
-    result = houdini_package_runner.items.dialog_script._get_ds_file_offset(parm_start, span, inclusive)
+    result = houdini_package_runner.items.dialog_script._get_ds_file_offset(
+        parm_start, span, inclusive
+    )
 
     assert result == expected
 
@@ -708,7 +863,7 @@ def test__get_ds_file_offset(parm_start, span, inclusive, expected):
         (True, True),
         (True, False),
         (False, False),
-    )
+    ),
 )
 def test__get_callback_items(mocker, is_python, has_callback):
     """Test houdini_package_runner.items.dialog_script._get_callback_items."""
@@ -720,15 +875,25 @@ def test__get_callback_items(mocker, is_python, has_callback):
     mock_span = mocker.MagicMock(spec=tuple)
 
     language = "python" if is_python else "hscript"
-    mock_get_lang = mocker.patch("houdini_package_runner.items.dialog_script._get_callback_language", return_value=language)
+    mock_get_lang = mocker.patch(
+        "houdini_package_runner.items.dialog_script._get_callback_language",
+        return_value=language,
+    )
 
     script = (mock_script, mock_span) if has_callback else None
 
-    mock_get_script = mocker.patch("houdini_package_runner.items.dialog_script._get_script_callback", return_value=script)
+    mock_get_script = mocker.patch(
+        "houdini_package_runner.items.dialog_script._get_script_callback",
+        return_value=script,
+    )
 
-    mock_callback_item = mocker.patch("houdini_package_runner.items.dialog_script.DialogScriptCallbackItem")
+    mock_callback_item = mocker.patch(
+        "houdini_package_runner.items.dialog_script.DialogScriptCallbackItem"
+    )
 
-    result = houdini_package_runner.items.dialog_script._get_callback_items(mock_parm, mock_parm_start, mock_name)
+    result = houdini_package_runner.items.dialog_script._get_callback_items(
+        mock_parm, mock_parm_start, mock_name
+    )
 
     if is_python:
         mock_get_script.assert_called_with(mock_parm)
@@ -736,7 +901,9 @@ def test__get_callback_items(mocker, is_python, has_callback):
     if is_python and has_callback:
         assert result == [mock_callback_item.return_value]
 
-        mock_callback_item.assert_called_with(mock_parm, mock_script, mock_parm_start, mock_span, mock_name)
+        mock_callback_item.assert_called_with(
+            mock_parm, mock_script, mock_parm_start, mock_span, mock_name
+        )
 
     else:
         assert not result
@@ -753,9 +920,11 @@ def test__get_default_python_expressions(shared_datadir):
     with test_path.open() as handle:
         contents = handle.read()
 
-    result = houdini_package_runner.items.dialog_script._get_default_python_expressions(contents)
+    result = houdini_package_runner.items.dialog_script._get_default_python_expressions(
+        contents
+    )
 
-    assert result == (('hou.hscript("$FF")', (123, 145)), )
+    assert result == (('hou.hscript("$FF")', (123, 145)),)
 
 
 def test__get_expression_items(mocker):
@@ -768,17 +937,26 @@ def test__get_expression_items(mocker):
     mock_span = mocker.MagicMock(spec=tuple)
 
     mock_default_expressions = [(mock_expr, mock_span)]
-    mock_get_exprs = mocker.patch("houdini_package_runner.items.dialog_script._get_default_python_expressions", return_value=mock_default_expressions)
+    mock_get_exprs = mocker.patch(
+        "houdini_package_runner.items.dialog_script._get_default_python_expressions",
+        return_value=mock_default_expressions,
+    )
 
-    mock_expr_item = mocker.patch("houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem")
+    mock_expr_item = mocker.patch(
+        "houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem"
+    )
 
-    result = houdini_package_runner.items.dialog_script._get_expression_items(mock_parm, mock_parm_start, mock_name)
+    result = houdini_package_runner.items.dialog_script._get_expression_items(
+        mock_parm, mock_parm_start, mock_name
+    )
 
     assert result == [mock_expr_item.return_value]
 
     mock_get_exprs.assert_called_with(mock_parm)
 
-    mock_expr_item.assert_called_with(mock_parm, mock_expr, mock_parm_start, mock_span, mock_name)
+    mock_expr_item.assert_called_with(
+        mock_parm, mock_expr, mock_parm_start, mock_span, mock_name
+    )
 
 
 @pytest.mark.parametrize("script_exists", (True, False))
@@ -788,17 +966,32 @@ def test__get_menu_items(mocker, script_exists):
     mock_parm_start = mocker.MagicMock(spec=int)
     mock_name = mocker.MagicMock(spec=str)
 
-    mock_item = mocker.MagicMock(spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult) if script_exists else None
+    mock_item = (
+        mocker.MagicMock(
+            spec=houdini_package_runner.items.dialog_script.PythonMenuScriptResult
+        )
+        if script_exists
+        else None
+    )
 
-    mock_get_script = mocker.patch("houdini_package_runner.items.dialog_script._get_python_menu_script", return_value=mock_item)
+    mock_get_script = mocker.patch(
+        "houdini_package_runner.items.dialog_script._get_python_menu_script",
+        return_value=mock_item,
+    )
 
-    mock_ds_item = mocker.patch("houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem")
+    mock_ds_item = mocker.patch(
+        "houdini_package_runner.items.dialog_script.DialogScriptMenuScriptItem"
+    )
 
-    result = houdini_package_runner.items.dialog_script._get_menu_items(mock_parm, mock_parm_start, mock_name)
+    result = houdini_package_runner.items.dialog_script._get_menu_items(
+        mock_parm, mock_parm_start, mock_name
+    )
 
     if script_exists:
         assert result == [mock_ds_item.return_value]
-        mock_ds_item.assert_called_with(mock_parm, mock_parm_start, mock_name, mock_item)
+        mock_ds_item.assert_called_with(
+            mock_parm, mock_parm_start, mock_name, mock_item
+        )
 
     else:
         assert not result
@@ -812,7 +1005,7 @@ def test__get_menu_items(mocker, script_exists):
         ("tabs.ds", ((84, 134), 2, True)),
         ("spaces.ds", ((129, 199), 12, False)),
         (None, ()),
-    )
+    ),
 )
 def test__get_python_menu_script(shared_datadir, test_file, expected):
     """Test houdini_package_runner.items.dialog_script._get_python_menu_script."""
@@ -828,7 +1021,9 @@ return [1,2,3,4]"""
     else:
         contents = ""
 
-    result = houdini_package_runner.items.dialog_script._get_python_menu_script(contents)
+    result = houdini_package_runner.items.dialog_script._get_python_menu_script(
+        contents
+    )
 
     if test_file is not None:
         assert result.menu_script == expected_script
@@ -855,7 +1050,7 @@ def test__get_script_callback(shared_datadir, has_match):
     result = houdini_package_runner.items.dialog_script._get_script_callback(contents)
 
     if has_match:
-        assert result == ('hou.hm().callback(hou.pwd())', (165, 195))
+        assert result == ("hou.hm().callback(hou.pwd())", (165, 195))
 
     else:
         assert result is None

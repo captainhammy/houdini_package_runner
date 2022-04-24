@@ -199,6 +199,7 @@ class IsortRunner(HoudiniPackageRunner):
 # NON-PUBLIC FUNCTIONS
 # =============================================================================
 
+
 def _find_known_houdini(hfs_path: pathlib.Path) -> List[str]:
     """Find a list of known Houdini Python modules.
 

@@ -20,6 +20,7 @@ import houdini_package_runner.runners.base
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def init_dir_item(mocker):
     """Initialize a dummy DirectoryToProcess for testing."""

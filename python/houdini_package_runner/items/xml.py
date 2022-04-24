@@ -63,7 +63,7 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     def _handle_write_back(
         self,
         section: etree._Element,  # pylint: disable=protected-access
-        temp_path: pathlib.Path
+        temp_path: pathlib.Path,
     ):
         """Handle updating the section and checking if the contents changed.
 

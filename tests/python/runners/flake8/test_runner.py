@@ -27,6 +27,7 @@ from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def init_runner(mocker):
     """Initialize a dummy Flake8Runner for testing."""
@@ -36,9 +37,7 @@ def init_runner(mocker):
     )
 
     def _create():
-        return houdini_package_runner.runners.flake8.runner.Flake8Runner(
-            None
-        )
+        return houdini_package_runner.runners.flake8.runner.Flake8Runner(None)
 
     return _create
 
@@ -46,6 +45,7 @@ def init_runner(mocker):
 # =============================================================================
 # TESTS
 # =============================================================================
+
 
 class TestFlake8Runner:
     """Test houdini_package_runner.runners.flake8.runner.Flake8Runner."""
@@ -55,10 +55,13 @@ class TestFlake8Runner:
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.flake8.runner.HoudiniPackageRunner, "__init__"
+            houdini_package_runner.runners.flake8.runner.HoudiniPackageRunner,
+            "__init__",
         )
 
-        inst = houdini_package_runner.runners.flake8.runner.Flake8Runner(mock_discoverer)
+        inst = houdini_package_runner.runners.flake8.runner.Flake8Runner(
+            mock_discoverer
+        )
 
         assert inst._ignored == []
         assert inst._extra_args == []
@@ -86,25 +89,38 @@ class TestFlake8Runner:
         """Test Flake8Runner.build_parser."""
         mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
 
-        mock_build = mocker.patch("houdini_package_runner.parser.build_common_parser", return_value=mock_parser)
+        mock_build = mocker.patch(
+            "houdini_package_runner.parser.build_common_parser",
+            return_value=mock_parser,
+        )
 
         if pass_parser:
-            result = houdini_package_runner.runners.flake8.runner.Flake8Runner.build_parser(parser=mock_parser)
+            result = (
+                houdini_package_runner.runners.flake8.runner.Flake8Runner.build_parser(
+                    parser=mock_parser
+                )
+            )
 
             mock_build.assert_not_called()
 
         else:
-            result = houdini_package_runner.runners.flake8.runner.Flake8Runner.build_parser()
+            result = (
+                houdini_package_runner.runners.flake8.runner.Flake8Runner.build_parser()
+            )
             mock_build.assert_called()
 
         assert result == mock_parser
 
         result.add_argument.assert_has_calls(
             [
-                mocker.call("--config", action="store", default=".flake8", help="Specify a configuration file"),
-                mocker.call("--ignore", action="store", help="Tests to ignore.")
+                mocker.call(
+                    "--config",
+                    action="store",
+                    default=".flake8",
+                    help="Specify a configuration file",
+                ),
+                mocker.call("--ignore", action="store", help="Tests to ignore."),
             ]
-
         )
 
     @pytest.mark.parametrize("has_options_set", (True, False))
@@ -128,7 +144,8 @@ class TestFlake8Runner:
             expected_extra_args.insert(0, f"--config={mock_namespace.config}")
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.flake8.runner.HoudiniPackageRunner, "init_args_options"
+            houdini_package_runner.runners.flake8.runner.HoudiniPackageRunner,
+            "init_args_options",
         )
 
         inst = init_runner()
@@ -149,12 +166,18 @@ class TestFlake8Runner:
     @pytest.mark.parametrize(
         "has_ignored, item_type, has_builtins",
         (
-            (True, houdini_package_runner.items.dialog_script.DialogScriptInternalItem, True),
+            (
+                True,
+                houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+                True,
+            ),
             (False, houdini_package_runner.items.xml.MenuFile, False),
             (False, houdini_package_runner.items.filesystem.FileToProcess, False),
-        )
+        ),
     )
-    def test_process_path(self, mocker, init_runner, has_ignored, item_type, has_builtins):
+    def test_process_path(
+        self, mocker, init_runner, has_ignored, item_type, has_builtins
+    ):
         """Test Flake8Runner.process_path."""
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
@@ -162,13 +185,21 @@ class TestFlake8Runner:
 
         mock_item.ignored_builtins = ["hou"] if has_builtins else []
 
-        mock_add_flags = mocker.patch("houdini_package_runner.utils.add_or_append_to_flags")
+        mock_add_flags = mocker.patch(
+            "houdini_package_runner.utils.add_or_append_to_flags"
+        )
 
-        mock_execute = mocker.patch("houdini_package_runner.utils.execute_subprocess_command")
+        mock_execute = mocker.patch(
+            "houdini_package_runner.utils.execute_subprocess_command"
+        )
 
         extra_args = ["--flag", "arg"]
 
-        mocker.patch.object(houdini_package_runner.runners.flake8.runner.Flake8Runner, "extra_args", extra_args)
+        mocker.patch.object(
+            houdini_package_runner.runners.flake8.runner.Flake8Runner,
+            "extra_args",
+            extra_args,
+        )
 
         mock_verbose = mocker.MagicMock(spec=bool)
 
@@ -190,7 +221,10 @@ class TestFlake8Runner:
             expected_args.append("--max-line-length=150")
             expected_ignored.append("W292")
 
-        elif isinstance(mock_item, houdini_package_runner.items.dialog_script.DialogScriptInternalItem):
+        elif isinstance(
+            mock_item,
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+        ):
             expected_ignored.extend(["W292", "F706"])
 
         if has_builtins:

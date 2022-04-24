@@ -27,6 +27,7 @@ from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 # FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def init_runner(mocker):
     """Initialize a dummy PyLintRunner for testing."""
@@ -36,9 +37,7 @@ def init_runner(mocker):
     )
 
     def _create():
-        return houdini_package_runner.runners.pylint.runner.PyLintRunner(
-            None
-        )
+        return houdini_package_runner.runners.pylint.runner.PyLintRunner(None)
 
     return _create
 
@@ -46,6 +45,7 @@ def init_runner(mocker):
 # =============================================================================
 # TESTS
 # =============================================================================
+
 
 class TestPyLintRunner:
     """Test houdini_package_runner.runners.pylint.runner.PyLintRunner."""
@@ -55,13 +55,18 @@ class TestPyLintRunner:
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.pylint.runner.HoudiniPackageRunner, "__init__"
+            houdini_package_runner.runners.pylint.runner.HoudiniPackageRunner,
+            "__init__",
         )
 
-        inst = houdini_package_runner.runners.pylint.runner.PyLintRunner(mock_discoverer)
+        inst = houdini_package_runner.runners.pylint.runner.PyLintRunner(
+            mock_discoverer
+        )
 
         assert inst._disabled == []
-        assert inst._extra_args == []  # pylint: disable=use-implicit-booleaness-not-comparison
+        assert (
+            inst._extra_args == []  # pylint: disable=use-implicit-booleaness-not-comparison
+        )
 
         mock_super_init.assert_called_with(mock_discoverer)
 
@@ -86,15 +91,24 @@ class TestPyLintRunner:
         """Test PyLintRunner.build_parser."""
         mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
 
-        mock_build = mocker.patch("houdini_package_runner.parser.build_common_parser", return_value=mock_parser)
+        mock_build = mocker.patch(
+            "houdini_package_runner.parser.build_common_parser",
+            return_value=mock_parser,
+        )
 
         if pass_parser:
-            result = houdini_package_runner.runners.pylint.runner.PyLintRunner.build_parser(parser=mock_parser)
+            result = (
+                houdini_package_runner.runners.pylint.runner.PyLintRunner.build_parser(
+                    parser=mock_parser
+                )
+            )
 
             mock_build.assert_not_called()
 
         else:
-            result = houdini_package_runner.runners.pylint.runner.PyLintRunner.build_parser()
+            result = (
+                houdini_package_runner.runners.pylint.runner.PyLintRunner.build_parser()
+            )
 
             mock_build.assert_called()
 
@@ -102,7 +116,12 @@ class TestPyLintRunner:
 
         result.add_argument.assert_has_calls(
             [
-                mocker.call("--rcfile", action="store", default="pylint.rc", help="Specify a configuration file"),
+                mocker.call(
+                    "--rcfile",
+                    action="store",
+                    default="pylint.rc",
+                    help="Specify a configuration file",
+                ),
                 mocker.call("--disable", action="store", help="Tests to disable."),
             ]
         )
@@ -128,7 +147,8 @@ class TestPyLintRunner:
             expected_extra_args.insert(0, f"--rcfile={mock_namespace.rcfile}")
 
         mock_super_init = mocker.patch.object(
-            houdini_package_runner.runners.pylint.runner.HoudiniPackageRunner, "init_args_options"
+            houdini_package_runner.runners.pylint.runner.HoudiniPackageRunner,
+            "init_args_options",
         )
 
         inst = init_runner()
@@ -151,16 +171,39 @@ class TestPyLintRunner:
     @pytest.mark.parametrize(
         "has_disabled, item_type, has_builtins, verbose, test_item",
         (
-            (True, houdini_package_runner.items.dialog_script.DialogScriptInternalItem, True, True, True),
+            (
+                True,
+                houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+                True,
+                True,
+                True,
+            ),
             (False, houdini_package_runner.items.xml.MenuFile, False, False, False),
-            (False, houdini_package_runner.items.filesystem.FileToProcess, False, False, False),
-        )
+            (
+                False,
+                houdini_package_runner.items.filesystem.FileToProcess,
+                False,
+                False,
+                False,
+            ),
+        ),
     )
-    def test_process_path(self, mocker, init_runner, has_disabled, item_type, has_builtins, verbose, test_item):
+    def test_process_path(
+        self,
+        mocker,
+        init_runner,
+        has_disabled,
+        item_type,
+        has_builtins,
+        verbose,
+        test_item,
+    ):
         """Test PyLintRunner.process_path."""
         mock_io = mocker.patch("houdini_package_runner.runners.pylint.runner.StringIO")
         mock_run = mocker.patch("houdini_package_runner.runners.pylint.runner.lint.Run")
-        mock_reporter = mocker.patch("houdini_package_runner.runners.pylint.runner.ColorizedTextReporter")
+        mock_reporter = mocker.patch(
+            "houdini_package_runner.runners.pylint.runner.ColorizedTextReporter"
+        )
 
         mock_print = mocker.patch("builtins.print")
         mock_write = mocker.patch("sys.stdout.write")
@@ -174,11 +217,17 @@ class TestPyLintRunner:
         mock_item.ignored_builtins = ["hou"] if has_builtins else []
         mock_item.is_test_item = test_item
 
-        mock_add_flags = mocker.patch("houdini_package_runner.utils.add_or_append_to_flags")
+        mock_add_flags = mocker.patch(
+            "houdini_package_runner.utils.add_or_append_to_flags"
+        )
 
         extra_args = ["--flag", "arg"]
 
-        mocker.patch.object(houdini_package_runner.runners.pylint.runner.PyLintRunner, "extra_args", extra_args)
+        mocker.patch.object(
+            houdini_package_runner.runners.pylint.runner.PyLintRunner,
+            "extra_args",
+            extra_args,
+        )
 
         expected_disabled = []
 
@@ -206,7 +255,10 @@ class TestPyLintRunner:
                 ]
             )
 
-        elif isinstance(mock_item, houdini_package_runner.items.dialog_script.DialogScriptInternalItem):
+        elif isinstance(
+            mock_item,
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+        ):
             expected_disabled.extend(
                 [
                     "invalid-name",
@@ -249,7 +301,9 @@ class TestPyLintRunner:
                 )
             )
 
-        mock_run.assert_called_with(expected_args, reporter=mock_reporter.return_value, exit=False)
+        mock_run.assert_called_with(
+            expected_args, reporter=mock_reporter.return_value, exit=False
+        )
 
         mock_reporter.assert_called_with(mock_io.return_value)
         mock_write.assert_called_with(mock_io.return_value.getvalue.return_value)
