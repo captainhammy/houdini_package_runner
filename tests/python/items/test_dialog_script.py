@@ -166,7 +166,7 @@ class TestDialogScriptItem:
             return_value=mock_menus,
         )
 
-        parm_value = 'parm {\n        name    "newparameter"\n        label   "Label"\n        type    float\n        default { [ "hou.pwd().path()[-1]" python ] }\n        range   { 0 10 }\n        parmtag { "script_callback" "" }\n        parmtag { "script_callback_language" "python" }\n    }'
+        parm_value = 'parm {\n        name    "newparameter"\n        label   "Label"\n        type    float\n        default { [ "hou.pwd().path()[-1]" python ] }\n        range   { 0 10 }\n        parmtag { "script_callback" "" }\n        parmtag { "script_callback_language" "python" }\n    }'  # noqa: E501
 
         mock_name = mocker.MagicMock(spec=str)
 
