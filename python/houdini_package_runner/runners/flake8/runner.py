@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, List
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
+from houdini_package_runner.discoverers import package
 from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
@@ -70,7 +71,6 @@ class Flake8Runner(HoudiniPackageRunner):
         parser.add_argument(
             "--config",
             action="store",
-            default=".flake8",
             help="Specify a configuration file",
         )
 
@@ -146,3 +146,22 @@ class Flake8Runner(HoudiniPackageRunner):
         return houdini_package_runner.utils.execute_subprocess_command(
             command, verbose=self._verbose
         )
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def main() -> None:
+    """Run 'flake8' on package files."""
+    parser = Flake8Runner.build_parser()
+
+    parsed_args, unknown = parser.parse_known_args()
+
+    discoverer = package.init_standard_discoverer(parsed_args)
+
+    run_tool = Flake8Runner(discoverer)
+    run_tool.init_args_options(parsed_args, unknown)
+
+    run_tool.run()

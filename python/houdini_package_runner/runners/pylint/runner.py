@@ -21,6 +21,7 @@ from pylint.reporters.text import ColorizedTextReporter
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
+from houdini_package_runner.discoverers import package
 from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
@@ -79,7 +80,6 @@ class PyLintRunner(HoudiniPackageRunner):
         parser.add_argument(
             "--rcfile",
             action="store",
-            default="pylint.rc",
             help="Specify a configuration file",
         )
 
@@ -158,6 +158,7 @@ class PyLintRunner(HoudiniPackageRunner):
                     "protected-access",
                     "too-many-arguments",
                     "too-many-locals",
+                    "cannot-enumerate-pytest-fixtures",
                 ]
             )
 
@@ -189,3 +190,21 @@ class PyLintRunner(HoudiniPackageRunner):
             print()
 
         return not stdout
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def main() -> None:
+    """Run 'pylint' on package files."""
+    parser = PyLintRunner.build_parser()
+    parsed_args, unknown = parser.parse_known_args()
+
+    discoverer = package.init_standard_discoverer(parsed_args)
+
+    run_tool = PyLintRunner(discoverer)
+    run_tool.init_args_options(parsed_args, unknown)
+
+    run_tool.run()

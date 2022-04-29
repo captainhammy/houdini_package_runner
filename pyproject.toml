@@ -1,0 +1,113 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "black"
+src_paths= ["bin", "python"]
+import_heading_future="Future"
+import_heading_stdlib="Standard Library"
+import_heading_thirdparty="Third Party"
+import_heading_firstparty="Houdini Package Runner"
+dedup_headings = true
+skip_glob = "*icons.py"
+indented_import_headings=false
+
+[tool.mypy]
+files = "python"
+mypy_path = "python"
+
+[tool.pylint]
+[tool.pylint.master]
+extension-pkg-whitelist = ['PySide2']
+ignore=['CVS']
+ignore-patterns=["icons.py"]
+persistent = ['no']
+load-plugins = ['pylint_pytest']
+suggestion-mode = ['yes']
+unsafe-load-any-extension = ['no']
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = [
+    'import-error,c-extension-no-member,line-too-long,duplicate-code,fixme,too-many-lines,import-outside-toplevel'
+    ]
+enable = ['no-else-return']
+
+[tool.pylint.'REPORTS']
+reports = ['no']
+score = ['no']
+
+[tool.pylint.'LOGGING']
+logging-modules = ['logging']
+
+[tool.pylint.'VARIABLES']
+allow-global-unused-variables = ['yes']
+dummy-variables-rgx = ['_+$|(_[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored_|^unused_']
+ignored-argument-names = ['_.*|^ignored_|^unused_']
+init-import = ['no']
+redefining-builtins-modules = ['six.moves,future.builtins,io']
+
+[tool.pylint.'FORMAT']
+ignore-long-lines = ['^\s*(# )?<?https?://\S+>?$']
+indent-after-paren = 4
+indent-string = '    '
+max-line-length = 100
+max-module-lines = 1000
+no-space-check = ['trailing-comma,dict-separator']
+single-line-class-stmt = ['no']
+single-line-if-stmt = ['no']
+
+[tool.pylint.'TYPECHECK']
+contextmanager-decorators = ['contextlib.contextmanager']
+ignore-mixin-members = ['yes']
+ignore-on-opaque-inference = ['yes']
+ignored-classes = ['optparse.Values,thread._local,_thread._local,Signal']
+ignored-modules = ['PySide2,shiboken2']
+missing-member-hint = ['yes']
+missing-member-hint-distance = 1
+missing-member-max-choices = 1
+
+[tool.pylint.'MISCELLANEOUS']
+notes = ['FIXME,XXX,TODO,BUG']
+
+[tool.pylint.'BASIC']
+argument-naming-style=['snake_case']
+attr-naming-style=['snake_case']
+bad-names=['foo,bar,foobar,baz']
+class-attribute-naming-style='any'
+class-naming-style='PascalCase'
+const-rgx=['(([a-zA-Z_][a-zA-Z0-9_]*)|(__.*__))$']
+docstring-min-length = -1
+function-naming-style='snake_case'
+good-names=['i,j,k,t,ex,fp,Run,_']  # fp for pytest_subprocess
+inlinevar-naming-style='any'
+method-naming-style='snake_case'
+module-rgx='(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+)|([0-9]+))$'
+name-group=''
+no-docstring-rgx='^_'
+property-classes='abc.abstractproperty'
+variable-naming-style='snake_case'
+bad-functions='apply,input'
+
+[tool.pylint.'DESIGN']
+max-args = 7
+max-attributes = 30
+max-bool-expr = 5
+max-branches = 40
+max-locals = 15
+max-parents = 7
+max-public-methods = 20
+max-returns = 6
+max-statements = 100
+min-public-methods = 0
+
+[tool.pylint.'CLASSES']
+defining-attr-methods = ['__init__,__new__,setUp']
+valid-classmethod-first-arg = ['cls']
+valid-metaclass-classmethod-first-arg = ['mcs']
+
+[tool.pylint.'IMPORTS']
+allow-wildcard-with-all = ['no']
+
+[tool.pylint.'EXCEPTIONS']
+overgeneral-exceptions = ['Exception,hou.Error']

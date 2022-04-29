@@ -170,3 +170,36 @@ class TestModernizeRunner:
             expected_args.insert(5, "--nofix")
 
         mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
+
+
+def test_main(mocker):
+    """Test houdini_package_runner.runners.modernize.runner.main."""
+    mock_parsed = mocker.MagicMock(spec=argparse.Namespace)
+    mock_unknown = mocker.MagicMock(spec=list)
+
+    mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
+    mock_parser.parse_known_args.return_value = (mock_parsed, mock_unknown)
+
+    mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
+    mock_init = mocker.patch(
+        "houdini_package_runner.runners.modernize.runner.package.init_standard_discoverer",
+        return_value=mock_discoverer,
+    )
+
+    mock_runner = mocker.MagicMock(
+        spec=houdini_package_runner.runners.modernize.runner.ModernizeRunner
+    )
+
+    mock_runner_init = mocker.patch(
+        "houdini_package_runner.runners.modernize.runner.ModernizeRunner",
+        return_value=mock_runner,
+    )
+    mock_runner_init.build_parser.return_value = mock_parser
+
+    houdini_package_runner.runners.modernize.runner.main()
+
+    mock_init.assert_called_with(mock_parsed)
+
+    mock_runner_init.assert_called_with(mock_discoverer)
+    mock_runner.init_args_options.assert_called_with(mock_parsed, mock_unknown)
+    mock_runner.run.assert_called()

@@ -176,7 +176,7 @@ class DialogScriptItem(BaseFileItem):
         script_offset = 0
 
         for item in items_with_changed_contents:
-            parts.append(self._ds_contents[script_offset: item.start_offset])
+            parts.append(self._ds_contents[script_offset : item.start_offset])
             parts.append(item.post_processed_code)
             script_offset = item.end_offset
 

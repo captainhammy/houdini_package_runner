@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, List
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
+from houdini_package_runner.discoverers import package
 from houdini_package_runner.items import xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
@@ -112,3 +113,22 @@ class BlackRunner(HoudiniPackageRunner):
         return houdini_package_runner.utils.execute_subprocess_command(
             command, verbose=self._verbose
         )
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def main() -> None:
+    """Run 'black' on package files."""
+    parser = BlackRunner.build_parser()
+
+    parsed_args, unknown = parser.parse_known_args()
+
+    discoverer = package.init_standard_discoverer(parsed_args)
+
+    run_tool = BlackRunner(discoverer)
+    run_tool.init_args_options(parsed_args, unknown)
+
+    run_tool.run()

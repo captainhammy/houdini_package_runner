@@ -116,7 +116,6 @@ class TestFlake8Runner:
                 mocker.call(
                     "--config",
                     action="store",
-                    default=".flake8",
                     help="Specify a configuration file",
                 ),
                 mocker.call("--ignore", action="store", help="Tests to ignore."),
@@ -238,3 +237,36 @@ class TestFlake8Runner:
         expected_args.append(str(mock_path))
 
         mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
+
+
+def test_main(mocker):
+    """Test houdini_package_runner.runners.flake8.runner.main."""
+    mock_parsed = mocker.MagicMock(spec=argparse.Namespace)
+    mock_unknown = mocker.MagicMock(spec=list)
+
+    mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
+    mock_parser.parse_known_args.return_value = (mock_parsed, mock_unknown)
+
+    mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
+    mock_init = mocker.patch(
+        "houdini_package_runner.runners.flake8.runner.package.init_standard_discoverer",
+        return_value=mock_discoverer,
+    )
+
+    mock_runner = mocker.MagicMock(
+        spec=houdini_package_runner.runners.flake8.runner.Flake8Runner
+    )
+
+    mock_runner_init = mocker.patch(
+        "houdini_package_runner.runners.flake8.runner.Flake8Runner",
+        return_value=mock_runner,
+    )
+    mock_runner_init.build_parser.return_value = mock_parser
+
+    houdini_package_runner.runners.flake8.runner.main()
+
+    mock_init.assert_called_with(mock_parsed)
+
+    mock_runner_init.assert_called_with(mock_discoverer)
+    mock_runner.init_args_options.assert_called_with(mock_parsed, mock_unknown)
+    mock_runner.run.assert_called()
