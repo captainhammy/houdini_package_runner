@@ -23,7 +23,6 @@ import houdini_package_runner.runners.base
 import houdini_package_runner.runners.isort.runner
 from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
