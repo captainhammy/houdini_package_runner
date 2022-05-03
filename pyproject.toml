@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "black"
-src_paths= ["src"]
-import_heading_future="Future"
-import_heading_stdlib="Standard Library"
-import_heading_thirdparty="Third Party"
-import_heading_firstparty="Houdini Package Runner"
+src_paths = ["src"]
+import_heading_future = "Future"
+import_heading_stdlib = "Standard Library"
+import_heading_thirdparty = "Third Party"
+import_heading_firstparty = "Houdini Package Runner"
 dedup_headings = true
 skip_glob = "*icons.py"
-indented_import_headings=false
+indented_import_headings = false
 
 [tool.mypy]
 files = "src"

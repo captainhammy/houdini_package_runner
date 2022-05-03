@@ -66,6 +66,11 @@ def test_build_common_parser(mocker, pass_args):
             help="The root directory the package will be in",
         ),
         mocker.call(
+            "--skip-python",
+            action="store_true",
+            help="Skip processing of files under the python root.",
+        ),
+        mocker.call(
             "--root",
             action="store",
             help="Optional root directory to look for things from.  By default uses the cwd",
@@ -91,26 +96,33 @@ def test_build_common_parser(mocker, pass_args):
 
 
 @pytest.mark.parametrize(
-    "root_passed, has_py_root, skip_tests, tests_exists",
+    "root_passed, has_py_root, python_exists, skip_python, skip_tests, tests_exists",
     (
-        (True, False, False, True),
-        (True, False, False, False),
-        (True, True, True, True),
-        (False, True, True, True),
+        (True, False, False, False, False, True),
+        (True, False, False, False, False, False),
+        (True, True, True, False, True, True),
+        (False, True, False, False, True, True),
+        (False, True, True, True, True, True),
     ),
 )
 def test_process_common_arg_settings(
-    mocker, root_passed, has_py_root, skip_tests, tests_exists
+    mocker, root_passed, has_py_root, python_exists, skip_python, skip_tests, tests_exists
 ):
     """Test houdini_package_runner.parser.process_common_arg_settings."""
     namespace = argparse.Namespace()
     namespace.root = pathlib.Path("/some/root") if root_passed else None
     namespace.directories = ["directory1"]
     namespace.python_root = "python" if has_py_root else None
+    namespace.skip_python = skip_python
     namespace.skip_tests = skip_tests
     namespace.files = ["file1"]
 
-    mocker.patch.object(pathlib.Path, "is_dir", return_value=tests_exists)
+    dir_exists = [tests_exists]
+
+    if not skip_python and has_py_root:
+        dir_exists.insert(0, python_exists)
+
+    mocker.patch.object(pathlib.Path, "is_dir", side_effect=dir_exists)
 
     namespace.houdini_items = "otls,hda,python3.7libs"
 
@@ -120,7 +132,7 @@ def test_process_common_arg_settings(
 
     expected_dirs = [expected_root / "directory1"]
 
-    if has_py_root:
+    if has_py_root and not skip_python and python_exists:
         expected_dirs.append(expected_root / "python")
 
     if not skip_tests and tests_exists:
