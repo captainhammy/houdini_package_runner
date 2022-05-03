@@ -4,9 +4,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "houdini_package_runner"
-VERSION = "0.1.0"
-
-DESCRIPTION = "Bleeding Edge Math"
+DESCRIPTION = "Tooling to analyze or perform actions on Python code in Houdini packages"
 URL = "https://github.com/captainhammy/houdini_package_runner"
 AUTHOR = "Graham Thompson"
 AUTHOR_EMAIL = "captainhammy@gmail.com"
@@ -17,7 +15,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name=NAME,
-    version=VERSION,
+    use_scm_version=True,
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -25,8 +23,8 @@ setup(
     author_email=AUTHOR_EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    package_dir={"": "python"},
-    packages=find_packages(where="python", exclude=("tests",)),
+    package_dir={"": "src"},
+    packages=find_packages(where="src", exclude=("tests",)),
     install_requires=[
         "black",
         "flake8",

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=42", "setuptools_scm[toml]>=6.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "black"
-src_paths= ["bin", "python"]
+src_paths= ["src"]
 import_heading_future="Future"
 import_heading_stdlib="Standard Library"
 import_heading_thirdparty="Third Party"
@@ -14,10 +14,63 @@ skip_glob = "*icons.py"
 indented_import_headings=false
 
 [tool.mypy]
-files = "python"
-mypy_path = "python"
+files = "src"
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = "hou.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "hdefereval.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pylint.*"
+ignore_missing_imports = true
+
+[tool.coverage]
+
+[tool.coverage.run]
+branch = true
+source =  ["houdini_package_runner"]
+omit = [
+    "*manager.py",
+    "*hipfile.py",
+    "*hip_file.py",
+    "*version.py"
+]
+disable_warnings = [
+	"module-not-imported",
+	"module-not-measured",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self.debug",
+    "if TYPE_CHECKING",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
+ignore_errors = true
+skip_empty = true
+
+[tool.coverage.html]
+directory = "coverage_html_report"
 
 [tool.pylint]
+
 [tool.pylint.master]
 extension-pkg-whitelist = ['PySide2']
 ignore=['CVS']
