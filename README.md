@@ -19,7 +19,7 @@ The following read-only tool runners are provided:
 - flake8 - Perform [flake8](https://pypi.org/project/flake8/) analysis on Python code
 
 The following tool runner which can modify files are provided:
-- black - Perform [Black](https://pypi.org/project/black/) formatting on Python code
+- black - Perform [black](https://pypi.org/project/black/) formatting on Python code
 - isort - Use [isort](https://pypi.org/project/isort) to sort Python imports
 - modernize - Use [python-modernize](https://pypi.org/project/modernize) for support Python 2 to 3 conversion.
 

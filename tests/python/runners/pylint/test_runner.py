@@ -22,7 +22,6 @@ import houdini_package_runner.runners.base
 import houdini_package_runner.runners.pylint.runner
 from houdini_package_runner.discoverers.base import BaseItemDiscoverer
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
@@ -64,9 +63,8 @@ class TestPyLintRunner:
         )
 
         assert inst._disabled == []
-        assert (
-            inst._extra_args == []  # pylint: disable=use-implicit-booleaness-not-comparison
-        )
+        assert isinstance(inst._extra_args, list)
+        assert not inst._extra_args
 
         mock_super_init.assert_called_with(mock_discoverer)
 
@@ -119,7 +117,6 @@ class TestPyLintRunner:
                 mocker.call(
                     "--rcfile",
                     action="store",
-                    default="pylint.rc",
                     help="Specify a configuration file",
                 ),
                 mocker.call("--disable", action="store", help="Tests to disable."),
@@ -276,6 +273,7 @@ class TestPyLintRunner:
                     "protected-access",
                     "too-many-arguments",
                     "too-many-locals",
+                    "cannot-enumerate-pytest-fixtures",
                 ]
             )
 
@@ -307,3 +305,36 @@ class TestPyLintRunner:
 
         mock_reporter.assert_called_with(mock_io.return_value)
         mock_write.assert_called_with(mock_io.return_value.getvalue.return_value)
+
+
+def test_main(mocker):
+    """Test houdini_package_runner.runners.black.runner.main."""
+    mock_parsed = mocker.MagicMock(spec=argparse.Namespace)
+    mock_unknown = mocker.MagicMock(spec=list)
+
+    mock_parser = mocker.MagicMock(spec=argparse.ArgumentParser)
+    mock_parser.parse_known_args.return_value = (mock_parsed, mock_unknown)
+
+    mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
+    mock_init = mocker.patch(
+        "houdini_package_runner.runners.pylint.runner.package.init_standard_discoverer",
+        return_value=mock_discoverer,
+    )
+
+    mock_runner = mocker.MagicMock(
+        spec=houdini_package_runner.runners.pylint.runner.PyLintRunner
+    )
+
+    mock_runner_init = mocker.patch(
+        "houdini_package_runner.runners.pylint.runner.PyLintRunner",
+        return_value=mock_runner,
+    )
+    mock_runner_init.build_parser.return_value = mock_parser
+
+    houdini_package_runner.runners.pylint.runner.main()
+
+    mock_init.assert_called_with(mock_parsed)
+
+    mock_runner_init.assert_called_with(mock_discoverer)
+    mock_runner.init_args_options.assert_called_with(mock_parsed, mock_unknown)
+    mock_runner.run.assert_called()

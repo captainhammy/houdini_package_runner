@@ -10,10 +10,10 @@ from __future__ import annotations
 # Standard Library
 import json
 import pathlib
-import subprocess
 from typing import TYPE_CHECKING, List, Optional
 
 # Houdini Package Runner
+import houdini_package_runner.utils
 from houdini_package_runner.items.base import BaseFileItem
 from houdini_package_runner.items.dialog_script import DialogScriptItem
 from houdini_package_runner.items.filesystem import FileToProcess
@@ -335,11 +335,12 @@ class BinaryDigitalAssetFile(BaseFileItem):
         :param target_folder: The folder to collapse.
 
         """
-        subprocess.call(
-            [hotl_command, "-l", target_folder, self.path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        command = [hotl_command, "-l", str(target_folder), str(self.path)]
+
+        result = houdini_package_runner.utils.execute_subprocess_command(command)
+
+        if not result:
+            raise RuntimeError(f"An error occurred running the command: {command}")
 
     def _extract_file(self, hotl_command: str, target_folder: pathlib.Path) -> None:
         """Expand the digital asset file to the target folder.
@@ -348,11 +349,12 @@ class BinaryDigitalAssetFile(BaseFileItem):
         :param target_folder: The folder to expand to.
 
         """
-        subprocess.call(
-            [hotl_command, "-t", target_folder, self.path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        command = [hotl_command, "-t", str(target_folder), str(self.path)]
+
+        result = houdini_package_runner.utils.execute_subprocess_command(command)
+
+        if not result:
+            raise RuntimeError(f"An error occurred running the command: {command}")
 
     # -------------------------------------------------------------------------
     # METHODS

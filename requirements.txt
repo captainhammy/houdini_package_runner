@@ -1,4 +1,0 @@
-lxml
-pylint
-pyparsing
-termcolor

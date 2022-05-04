@@ -14,7 +14,6 @@ import pytest
 import houdini_package_runner.discoverers.base
 import houdini_package_runner.items.filesystem
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================

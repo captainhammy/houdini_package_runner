@@ -66,6 +66,12 @@ def build_common_parser(
     )
 
     parser.add_argument(
+        "--skip-python",
+        action="store_true",
+        help="Skip processing of files under the python root.",
+    )
+
+    parser.add_argument(
         "--root",
         action="store",
         help="Optional root directory to look for things from.  By default uses the cwd",
@@ -95,13 +101,18 @@ def process_common_arg_settings(
     """
     if parsed_args.root is not None:
         root = pathlib.Path(parsed_args.root)
+
     else:
         root = pathlib.Path.cwd()
 
     dirs = [root / dir_name for dir_name in parsed_args.directories]
 
-    if parsed_args.python_root is not None:
-        dirs.append(root / parsed_args.python_root)
+    if not parsed_args.skip_python:
+        if parsed_args.python_root is not None:
+            python_dir = root / parsed_args.python_root
+
+            if python_dir.is_dir():
+                dirs.append(python_dir)
 
     if not parsed_args.skip_tests:
         test_dir = root / "tests"

@@ -1,4 +1,4 @@
-"""This module contains the definition for an flake8 package runner."""
+"""This module contains the definition for a black HoudiniPackageRunner."""
 
 # =============================================================================
 # IMPORTS
@@ -8,18 +8,19 @@
 from __future__ import annotations
 
 # Standard Library
-import pathlib
 from typing import TYPE_CHECKING, List
 
 # Houdini Package Runner
 import houdini_package_runner.parser
 import houdini_package_runner.utils
-from houdini_package_runner.items import dialog_script, xml
+from houdini_package_runner.discoverers import package
+from houdini_package_runner.items import xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
 if TYPE_CHECKING:
     import argparse
+    import pathlib
 
     from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
@@ -30,17 +31,19 @@ if TYPE_CHECKING:
 # =============================================================================
 
 
-class Flake8Runner(HoudiniPackageRunner):
-    """Implementation for a flake8 package runner.
+class BlackRunner(HoudiniPackageRunner):
+    """Implementation for a black package runner.
 
     :param discoverer: The item discoverer used by the runner.
 
     """
 
-    def __init__(self, discoverer: BaseItemDiscoverer) -> None:
+    def __init__(
+        self,
+        discoverer: BaseItemDiscoverer,
+    ) -> None:
         super().__init__(discoverer, write_back=True)
 
-        self._ignored: List[str] = []
         self._extra_args: List[str] = []
 
     # -------------------------------------------------------------------------
@@ -49,7 +52,7 @@ class Flake8Runner(HoudiniPackageRunner):
 
     @property
     def extra_args(self) -> List[str]:
-        """A list of extra args to pass to the format command."""
+        """A list of extra args to pass to the black command."""
         return self._extra_args
 
     # -------------------------------------------------------------------------
@@ -67,15 +70,6 @@ class Flake8Runner(HoudiniPackageRunner):
         if parser is None:
             parser = houdini_package_runner.parser.build_common_parser()
 
-        parser.add_argument(
-            "--config",
-            action="store",
-            default=".flake8",
-            help="Specify a configuration file",
-        )
-
-        parser.add_argument("--ignore", action="store", help="Tests to ignore.")
-
         return parser
 
     def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
@@ -87,12 +81,6 @@ class Flake8Runner(HoudiniPackageRunner):
         """
         super().init_args_options(namespace, extra_args)
 
-        if namespace.config:
-            extra_args.insert(0, f"--config={namespace.config}")
-
-        if namespace.ignore:
-            self._ignored = namespace.ignore.split(",")
-
         self._extra_args = extra_args
 
     def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
@@ -103,46 +91,44 @@ class Flake8Runner(HoudiniPackageRunner):
         :return: Whether the black was successful.
 
         """
+        flags = []
+
+        if isinstance(item, xml.MenuFile):
+            flags.append("--line-length=150")
+
+        flags.extend(self.extra_args)
+
         command = [
-            "flake8",
+            "black",
         ]
 
-        to_ignore = []
+        # Set the target Python version if not passed via flags.
+        if not any("target-version" in flag for flag in flags):
+            command.append("--target-version=py37")
 
-        if self._ignored:
-            to_ignore.extend(self._ignored)
-
-        known_builtins: List[str] = item.ignored_builtins
-
-        if isinstance(item, xml.XMLBase):
-            command.append("--max-line-length=150")
-
-            to_ignore.extend(
-                [
-                    "W292",  # No newline at end of file
-                ]
-            )
-
-        elif isinstance(item, dialog_script.DialogScriptInternalItem):
-            to_ignore.extend(
-                [
-                    "W292",  # No newline at end of file
-                    "F706",  # 'return' outside function
-                ]
-            )
-
-        if known_builtins:
-            houdini_package_runner.utils.add_or_append_to_flags(
-                command, "--builtins", known_builtins
-            )
-
-        if to_ignore:
-            command.append(f"--ignore={','.join(to_ignore)}")
-
-        command.extend(self.extra_args)
+        command.extend(flags)
 
         command.append(str(file_path))
 
         return houdini_package_runner.utils.execute_subprocess_command(
             command, verbose=self._verbose
         )
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
+
+
+def main() -> None:
+    """Run 'black' on package files."""
+    parser = BlackRunner.build_parser()
+
+    parsed_args, unknown = parser.parse_known_args()
+
+    discoverer = package.init_standard_discoverer(parsed_args)
+
+    run_tool = BlackRunner(discoverer)
+    run_tool.init_args_options(parsed_args, unknown)
+
+    run_tool.run()

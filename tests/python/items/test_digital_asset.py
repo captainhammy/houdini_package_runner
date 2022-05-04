@@ -18,7 +18,6 @@ import houdini_package_runner.items.filesystem
 import houdini_package_runner.items.xml
 import houdini_package_runner.runners.base
 
-
 # =============================================================================
 # FIXTURES
 # =============================================================================
@@ -665,7 +664,10 @@ class TestDigitalAssetDirectory:
 class TestBinaryDigitalAssetFile:
     """Test houdini_package_runner.items.digital_asset.BinaryDigitalAssetFile."""
 
-    def test__collapse_dir(self, mocker, fp, init_binary):
+    @pytest.mark.parametrize(
+        "error", (True, False)
+    )
+    def test__collapse_dir(self, mocker, init_binary, error):
         """Test BinaryDigitalAssetFile._collapse_dir"""
         mock_target = mocker.MagicMock(spec=pathlib.Path)
 
@@ -676,14 +678,23 @@ class TestBinaryDigitalAssetFile:
             mock_path,
         )
 
-        cmd = ["hotl", "-l", mock_target, mock_path]
-
-        fp.register(cmd)
+        mock_execute = mocker.patch("houdini_package_runner.utils.execute_subprocess_command", return_value=not error)
 
         inst = init_binary()
-        inst._collapse_dir("hotl", mock_target)
 
-    def test__extract_file(self, mocker, fp, init_binary):
+        if error:
+            with pytest.raises(RuntimeError):
+                inst._collapse_dir("hotl", mock_target)
+
+        else:
+            inst._collapse_dir("hotl", mock_target)
+
+        mock_execute.assert_called_with(["hotl", "-l", str(mock_target), str(mock_path)])
+
+    @pytest.mark.parametrize(
+        "error", (True, False)
+    )
+    def test__extract_file(self, mocker, init_binary, error):
         """Test BinaryDigitalAssetFile._extract_file"""
         mock_target = mocker.MagicMock(spec=pathlib.Path)
 
@@ -694,12 +705,18 @@ class TestBinaryDigitalAssetFile:
             mock_path,
         )
 
-        cmd = ["hotl", "-t", mock_target, mock_path]
-
-        fp.register(cmd)
+        mock_execute = mocker.patch("houdini_package_runner.utils.execute_subprocess_command", return_value=not error)
 
         inst = init_binary()
-        inst._extract_file("hotl", mock_target)
+
+        if error:
+            with pytest.raises(RuntimeError):
+                inst._extract_file("hotl", mock_target)
+
+        else:
+            inst._extract_file("hotl", mock_target)
+
+        mock_execute.assert_called_with(["hotl", "-t", str(mock_target), str(mock_path)])
 
     @pytest.mark.parametrize(
         "contents_changed, write_back", ((True, True), (True, False), (False, False))
