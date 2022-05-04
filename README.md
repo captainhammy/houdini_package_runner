@@ -9,8 +9,13 @@ Supported file types include:
   - Menus (MainMenu*.xml, ParmMenu.xml, etc)
   - Python panels
   - Shelf tools
-- Python code sections (+ included shelf tools) inside binary or expanded digital asset folders.
-
+- Digital Assets (binary or expanded asset folders)
+  - Python code sections (PythonModule, OnCreated, etc)
+  - Python code inside DialogScript definition
+    - Callbacks
+    - Default parameter expressions
+    - Menu scripts
+  - Included shelf tools
 
 Currently, the runner tools only function **outside** of Houdini on disk files.
 

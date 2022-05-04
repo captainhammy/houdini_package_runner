@@ -30,7 +30,10 @@ if TYPE_CHECKING:
 # GLOBALS
 # =============================================================================
 
-# Relevant DialogScript grammars
+# The majority of the code below to do the parsing of the DialogScript file
+# is lifted from Houdini's $HFS/bin/py23convert.py tool.  A big thanks to them
+# for the unenviable task of writing this such that we may repurpose it for
+# our own use.
 
 _DS_NAME_EXPR_GRAMMAR = (
     pyparsing.Keyword("name").suppress() + pyparsing.QuotedString('"')
@@ -228,7 +231,16 @@ class DialogScriptItem(BaseFileItem):
 
 
 class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
-    """Base definition for a Python processable item in a DialogScript."""
+    """Base definition for a Python processable item in a DialogScript.
+
+    :param parm: The source parameter definition.
+    :param code: The Python code for the item.
+    :param start_offset: There parameter definition start offset.
+    :param end_offset: There parameter definition end offset.
+    :param display_name: The item display name.
+    :param write_back: Whether the item should write itself back to disk.
+
+    """
 
     def __init__(
         self,
@@ -354,7 +366,16 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 
 
 class DialogScriptCallbackItem(DialogScriptInternalItem):
-    """Item to represent and process a parameter's Python callback script."""
+    """Item to represent and process a parameter's Python callback script.
+
+    :param parm: The source parameter definition.
+    :param code: The Python code for the item.
+    :param parm_start: The start position of the parm.
+    :param span: The span of the parm data.
+    :param display_name: The item display name.
+    :param write_back: Whether the item should write itself back to disk.
+
+    """
 
     def __init__(
         self,
@@ -379,7 +400,16 @@ class DialogScriptCallbackItem(DialogScriptInternalItem):
 
 
 class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
-    """Item to represent and process a parameter's Python default expression."""
+    """Item to represent and process a parameter's Python default expression.
+
+    :param parm: The source parameter definition.
+    :param code: The Python code for the item.
+    :param parm_start: The start position of the parm.
+    :param span: The span of the parm data.
+    :param display_name: The item display name.
+    :param write_back: Whether the item should write itself back to disk.
+
+    """
 
     def __init__(
         self,
@@ -401,7 +431,15 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
 
 
 class DialogScriptMenuScriptItem(DialogScriptInternalItem):
-    """Item to represent and process a parameter's Python menu script."""
+    """Item to represent and process a parameter's Python menu script.
+
+    :param parm: The source parameter definition.
+    :param parm_start: The start position of the parm.
+    :param display_name: The item display name.
+    :param menu_script_data: The Python menu script data
+    :param write_back: Whether the item should write itself back to disk.
+
+    """
 
     def __init__(
         self,
@@ -500,7 +538,15 @@ def _escape_contents_for_single_line(contents: str) -> str:
     return contents
 
 
-def _get_callback_items(parm, parm_start, name):
+def _get_callback_items(parm: str, parm_start: int, name: str) -> List[DialogScriptCallbackItem]:
+    """Build a list of any callback items for a parameter.
+
+    :param parm: The parameter data.
+    :param parm_start: The start position of the parm.
+    :param name: The display name.
+    :return: A list of any callback items.
+
+    """
     items = []
     # Get the parameter's callback script language.
     callback_language = _get_callback_language(parm)
@@ -569,7 +615,15 @@ def _get_default_python_expressions(
     return tuple(expressions)
 
 
-def _get_expression_items(parm, parm_start, name):
+def _get_expression_items(parm: str, parm_start: int, name: str) -> List[DialogScriptDefaultExpressionItem]:
+    """Build a list of any expression items for a parameter.
+
+    :param parm: The parameter data.
+    :param parm_start: The start position of the parm.
+    :param name: The display name.
+    :return: A list of any expression items.
+
+    """
     items = []
 
     default_python_expressions = _get_default_python_expressions(parm)
@@ -582,7 +636,15 @@ def _get_expression_items(parm, parm_start, name):
     return items
 
 
-def _get_menu_items(parm, parm_start, name):
+def _get_menu_items(parm: str, parm_start: int, name: str) -> List[DialogScriptMenuScriptItem]:
+    """Build a list of any menu script items for a parameter.
+
+    :param parm: The parameter data.
+    :param parm_start: The start position of the parm.
+    :param name: The display name.
+    :return: A list of any menu script items.
+
+    """
     items = []
 
     # Get any Python menu script data if it exists.
