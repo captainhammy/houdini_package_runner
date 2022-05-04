@@ -234,7 +234,13 @@ class ExpandedOperatorType(BaseFileItem):
 
 
 class DigitalAssetDirectory(BaseFileItem):
-    """Class representing an extracted otl file."""
+    """Class representing an extracted otl file.
+
+    :param path: The path for the item.
+    :param write_back: Whether the item should write itself back to disk.
+    :param source_file: The binary source file, if any.
+
+    """
 
     def __init__(
         self, path: pathlib.Path, write_back=False, source_file: pathlib.PurePath = None
@@ -276,6 +282,11 @@ class DigitalAssetDirectory(BaseFileItem):
         return operators
 
     def _find_operator_dirs(self) -> List[List[str]]:
+        """Find a list of operator definition directories based on the Sections.list.
+
+        :return: A list of any directories containing operator definitions.
+
+        """
         sections_list = self.path / "Sections.list"
 
         if not sections_list.exists():
