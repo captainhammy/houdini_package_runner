@@ -212,6 +212,7 @@ def init_standard_discoverer(parsed_args: argparse.Namespace) -> PackageItemDisc
 def process_directory(dir_path: pathlib.Path) -> filesystem.DirectoryToProcess:
     """Process a directory to determine its item type.
 
+    :param dir_path: The directory to process.
     :return: The corresponding directory item type.
 
     """

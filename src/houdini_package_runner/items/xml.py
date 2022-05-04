@@ -34,7 +34,13 @@ if TYPE_CHECKING:
 
 
 class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
-    """The base class for XML based Houdini files."""
+    """The base class for XML based Houdini files.
+
+    :param path: The file path to process.
+    :param write_back: Whether the item should write itself back to disk.
+    :param display_name: Optional display name for test output.
+
+    """
 
     def __init__(
         self, path: pathlib.Path, write_back: bool = False, display_name: str = None
@@ -219,6 +225,7 @@ class ShelfFile(XMLBase):
     """A shelf file.
 
     :param path: The shelf file path.
+    :param write_back: Whether the item should write itself back to disk.
     :param display_name: Optional display name.
     :param tool_name: Optional tool name.
 
