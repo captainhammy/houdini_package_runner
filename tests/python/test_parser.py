@@ -56,7 +56,7 @@ def test_build_common_parser(mocker, pass_args):
         mocker.call(
             "--houdini-items",
             action="store",
-            default="otls,toolbar,python_panels,python2.7libs,python3.7libs,scripts,soho,menus",
+            default="otls,toolbar,python_panels,pythonXlibs,scripts,soho,menus",
             help="A list of Houdini items to lint",
         ),
         mocker.call(

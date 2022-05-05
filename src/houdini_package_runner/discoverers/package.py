@@ -124,10 +124,12 @@ def get_houdini_items(
         elif item_name == "menus":
             items.extend(get_menu_items(houdini_root))
 
-        elif item_name in ("python2.7libs", "python3.7libs"):
-            if item_path.exists():
+        elif item_name == "pythonXlibs":
+            python_lib_dirs = houdini_root.glob("python*libs")
+
+            for lib_dir in python_lib_dirs:
                 items.append(
-                    filesystem.HoudiniDirectoryItem(item_path, traverse_children=True)
+                    filesystem.HoudiniDirectoryItem(lib_dir, traverse_children=True)
                 )
 
         else:
