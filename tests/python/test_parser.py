@@ -106,7 +106,13 @@ def test_build_common_parser(mocker, pass_args):
     ),
 )
 def test_process_common_arg_settings(
-    mocker, root_passed, has_py_root, python_exists, skip_python, skip_tests, tests_exists
+    mocker,
+    root_passed,
+    has_py_root,
+    python_exists,
+    skip_python,
+    skip_tests,
+    tests_exists,
 ):
     """Test houdini_package_runner.parser.process_common_arg_settings."""
     namespace = argparse.Namespace()

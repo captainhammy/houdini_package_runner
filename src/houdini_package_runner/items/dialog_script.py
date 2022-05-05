@@ -538,7 +538,9 @@ def _escape_contents_for_single_line(contents: str) -> str:
     return contents
 
 
-def _get_callback_items(parm: str, parm_start: int, name: str) -> List[DialogScriptCallbackItem]:
+def _get_callback_items(
+    parm: str, parm_start: int, name: str
+) -> List[DialogScriptCallbackItem]:
     """Build a list of any callback items for a parameter.
 
     :param parm: The parameter data.
@@ -615,7 +617,9 @@ def _get_default_python_expressions(
     return tuple(expressions)
 
 
-def _get_expression_items(parm: str, parm_start: int, name: str) -> List[DialogScriptDefaultExpressionItem]:
+def _get_expression_items(
+    parm: str, parm_start: int, name: str
+) -> List[DialogScriptDefaultExpressionItem]:
     """Build a list of any expression items for a parameter.
 
     :param parm: The parameter data.
@@ -636,7 +640,9 @@ def _get_expression_items(parm: str, parm_start: int, name: str) -> List[DialogS
     return items
 
 
-def _get_menu_items(parm: str, parm_start: int, name: str) -> List[DialogScriptMenuScriptItem]:
+def _get_menu_items(
+    parm: str, parm_start: int, name: str
+) -> List[DialogScriptMenuScriptItem]:
     """Build a list of any menu script items for a parameter.
 
     :param parm: The parameter data.

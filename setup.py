@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from setuptools import find_packages, setup
 
@@ -45,12 +44,12 @@ setup(
         ]
     },
     entry_points={
-        'console_scripts': [
-            'houdini_package_black=houdini_package_runner.runners.black.runner:main',
-            'houdini_package_flake8=houdini_package_runner.runners.flake8.runner:main',
-            'houdini_package_isort=houdini_package_runner.runners.isort.runner:main',
-            'houdini_package_modernize=houdini_package_runner.runners.modernize.runner:main',
-            'houdini_package_pylint=houdini_package_runner.runners.pylint.runner:main',
+        "console_scripts": [
+            "houdini_package_black=houdini_package_runner.runners.black.runner:main",
+            "houdini_package_flake8=houdini_package_runner.runners.flake8.runner:main",
+            "houdini_package_isort=houdini_package_runner.runners.isort.runner:main",
+            "houdini_package_modernize=houdini_package_runner.runners.modernize.runner:main",
+            "houdini_package_pylint=houdini_package_runner.runners.pylint.runner:main",
         ],
     },
     include_package_data=True,
