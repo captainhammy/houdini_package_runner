@@ -461,7 +461,8 @@ def test_main(mocker):
     )
     mock_runner_init.build_parser.return_value = mock_parser
 
-    houdini_package_runner.runners.isort.runner.main()
+    result = houdini_package_runner.runners.isort.runner.main()
+    assert result == mock_runner.run.return_value
 
     mock_init.assert_called_with(mock_parsed)
 

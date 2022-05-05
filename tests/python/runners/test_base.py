@@ -142,18 +142,27 @@ class TestHoudiniPackageRunner:
         if has_hotl:
             assert inst._hotl_command == mock_hotl
 
-    @pytest.mark.parametrize("write_back", (False, True))
-    def test_run(self, mocker, init_runner, write_back):
+    @pytest.mark.parametrize(
+        "write_back, return_codes, expected",
+        (
+            (False, (0, 0), 0),
+            (True, (0, 1), 1),
+            (True, (1, 0), 1),
+        ),
+    )
+    def test_run(self, mocker, init_runner, write_back, return_codes, expected):
         """Test HoudiniPackageRunner.run."""
         mock_file = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_file.write_back = False
+        mock_file.process.return_value = return_codes[0]
 
         mock_dir = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.DirectoryToProcess
         )
         mock_dir.write_back = False
+        mock_dir.process.return_value = return_codes[1]
 
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
         type(mock_discoverer).items = [mock_file, mock_dir]
@@ -167,7 +176,8 @@ class TestHoudiniPackageRunner:
         inst = init_runner()
         inst._write_back = write_back
 
-        inst.run()
+        result = inst.run()
+        assert result == expected
 
         mock_file.process.assert_called_with(inst)
         mock_dir.process.assert_called_with(inst)

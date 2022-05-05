@@ -172,12 +172,12 @@ class IsortRunner(HoudiniPackageRunner):
         if self.config_file is None:
             self.config_file = self._generate_config(namespace)
 
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to format.
         :param item: The item to format.
-        :return: Whether the black was successful.
+        :return: The process return code.
 
         """
         command = [
@@ -294,8 +294,12 @@ def _save_template_config(config: ConfigParser, temp_dir: pathlib.Path):
 # =============================================================================
 
 
-def main() -> None:
-    """Run 'isort' on package files."""
+def main() -> int:
+    """Run 'isort' on package files.
+
+    :return: The runner return code.
+
+    """
     parser = IsortRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
@@ -305,4 +309,5 @@ def main() -> None:
     run_tool = IsortRunner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)
 
-    run_tool.run()
+    result = run_tool.run()
+    return result

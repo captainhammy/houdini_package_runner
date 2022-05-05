@@ -36,12 +36,12 @@ def add_or_append_to_flags(
         flags.extend((key, flag_str))
 
 
-def execute_subprocess_command(command: List[str], verbose: bool = False) -> bool:
+def execute_subprocess_command(command: List[str], verbose: bool = False) -> int:
     """Execute a command in a subprocess, capturing and optionally outputting the output.
 
     :param command: A subprocess command list.
     :param verbose: Whether to capture output.
-    :return: Whether the command finished successfully.
+    :return: The subprocess return code.
 
     """
     # If verbose mode is turned on then we don't want to capture the output.
@@ -71,4 +71,4 @@ def execute_subprocess_command(command: List[str], verbose: bool = False) -> boo
                 for line in proc.stderr.readlines():
                     print(line.decode("utf-8"))
 
-        return return_code == 0
+        return return_code

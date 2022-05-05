@@ -75,12 +75,12 @@ class HoudiniPackageRunner(abc.ABC):
     # -------------------------------------------------------------------------
 
     @abc.abstractmethod
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to process.
         :param item: The item to process.
-        :return: Whether violations were detected.
+        :return: The process return code.
 
         """
 
@@ -98,14 +98,18 @@ class HoudiniPackageRunner(abc.ABC):
         if hasattr(namespace, "hotl_command"):
             self._hotl_command = namespace.hotl_command
 
-    def run(self):
+    def run(self) -> int:
         """Process all the items.
 
-        :return:
+        :return: The overall execution return code.
 
         """
+        result = 0
+
         for item in self.discoverer.items:
             if self.write_back:
                 item.write_back = True
 
-            item.process(self)
+            result |= item.process(self)
+
+        return result

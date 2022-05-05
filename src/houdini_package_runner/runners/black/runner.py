@@ -83,12 +83,12 @@ class BlackRunner(HoudiniPackageRunner):
 
         self._extra_args = extra_args
 
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to format.
         :param item: The item to format.
-        :return: Whether the black was successful.
+        :return: The process return code.
 
         """
         flags = []
@@ -120,8 +120,12 @@ class BlackRunner(HoudiniPackageRunner):
 # =============================================================================
 
 
-def main() -> None:
-    """Run 'black' on package files."""
+def main() -> int:
+    """Run 'black' on package files.
+
+    :return: The runner return code.
+
+    """
     parser = BlackRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
@@ -131,4 +135,6 @@ def main() -> None:
     run_tool = BlackRunner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)
 
-    run_tool.run()
+    result = run_tool.run()
+
+    return result

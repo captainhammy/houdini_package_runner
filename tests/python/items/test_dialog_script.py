@@ -240,14 +240,22 @@ class TestDialogScriptItem:
     # Methods
 
     @pytest.mark.parametrize(
-        "write_back, has_changed_contents",
+        "write_back, has_changed_contents, return_codes, expected",
         (
-            (True, True),
-            (True, False),
-            (False, True),
+            (True, True, (0, 0), 0),
+            (True, False, (1, 0), 1),
+            (False, True, (0, 1), 1),
         ),
     )
-    def test_process(self, mocker, init_item, write_back, has_changed_contents):
+    def test_process(
+        self,
+        mocker,
+        init_item,
+        write_back,
+        has_changed_contents,
+        return_codes,
+        expected,
+    ):
         """Test DialogScriptItem.process."""
         mock_runner = mocker.MagicMock(
             spec=houdini_package_runner.runners.base.HoudiniPackageRunner
@@ -255,11 +263,11 @@ class TestDialogScriptItem:
 
         mock_file1 = mocker.MagicMock()
         mock_file1.contents_changed = has_changed_contents
-        mock_file1.process.return_value = True
+        mock_file1.process.return_value = return_codes[0]
 
         mock_file2 = mocker.MagicMock()
         mock_file2.contents_changed = False
-        mock_file2.process.return_value = False
+        mock_file2.process.return_value = return_codes[1]
 
         mocker.patch.object(
             houdini_package_runner.items.dialog_script.DialogScriptItem,
@@ -277,7 +285,7 @@ class TestDialogScriptItem:
 
         result = inst.process(mock_runner)
 
-        assert not result
+        assert result == expected
 
         mock_file1.process.assert_called_with(mock_runner)
         mock_file2.process.assert_called_with(mock_runner)

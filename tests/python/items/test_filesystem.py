@@ -114,7 +114,15 @@ class TestDirectoryToProcess:
             for item in result:
                 assert item.is_test_item
 
-    def test__process_children(self, mocker, init_dir_item):
+    @pytest.mark.parametrize(
+        "return_codes, expected",
+        (
+            ((0, 0), 0),
+            ((1, 0), 1),
+            ((0, 1), 1),
+        ),
+    )
+    def test__process_children(self, mocker, init_dir_item, return_codes, expected):
         """Test DirectoryToProcess._process_children."""
         mock_runner = mocker.MagicMock(
             spec=houdini_package_runner.runners.base.HoudiniPackageRunner
@@ -124,11 +132,13 @@ class TestDirectoryToProcess:
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_file.ignored_builtins = []
+        mock_file.process.return_value = return_codes[0]
 
         mock_dir = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.DirectoryToProcess
         )
         mock_dir.ignored_builtins = []
+        mock_dir.process.return_value = return_codes[1]
 
         mock_get_items = mocker.patch.object(
             houdini_package_runner.items.filesystem.DirectoryToProcess,
@@ -139,7 +149,7 @@ class TestDirectoryToProcess:
         inst = init_dir_item()
 
         result = inst._process_children(mock_runner)
-        assert result
+        assert result == expected
 
         mock_get_items.assert_called()
 

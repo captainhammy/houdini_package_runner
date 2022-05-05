@@ -95,20 +95,22 @@ class DirectoryToProcess(BaseFileItem):
 
     def _process_children(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         items = self._get_child_items()
 
+        result = 0
+
         # Process each item with the runner.
         for item in items:
-            item.process(runner)
+            result |= item.process(runner)
 
-        return True
+        return result
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -125,11 +127,11 @@ class DirectoryToProcess(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         # If traversing children then we want to process them.
@@ -180,11 +182,11 @@ class FileToProcess(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         pre_hash = compute_file_hash(self.path)

@@ -215,22 +215,22 @@ class ExpandedOperatorType(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the operator items.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         items_to_process = self._gather_items()
 
-        success = True
+        result = 0
 
         for item in items_to_process:
-            success &= item.process(runner)
+            result |= item.process(runner)
             self.contents_changed |= item.contents_changed
 
-        return success
+        return result
 
 
 class DigitalAssetDirectory(BaseFileItem):
@@ -314,22 +314,22 @@ class DigitalAssetDirectory(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful..
+        :return: The process return code.
 
         """
         operators = self._build_operator_list()
 
-        success = True
+        result = 0
 
         for operator in operators:
-            success &= operator.process(runner)
+            result |= operator.process(runner)
             self.contents_changed |= operator.contents_changed
 
-        return success
+        return result
 
 
 class BinaryDigitalAssetFile(BaseFileItem):
@@ -348,9 +348,9 @@ class BinaryDigitalAssetFile(BaseFileItem):
         """
         command = [hotl_command, "-l", str(target_folder), str(self.path)]
 
-        result = houdini_package_runner.utils.execute_subprocess_command(command)
+        return_code = houdini_package_runner.utils.execute_subprocess_command(command)
 
-        if not result:
+        if return_code:
             raise RuntimeError(f"An error occurred running the command: {command}")
 
     def _extract_file(self, hotl_command: str, target_folder: pathlib.Path) -> None:
@@ -362,9 +362,9 @@ class BinaryDigitalAssetFile(BaseFileItem):
         """
         command = [hotl_command, "-t", str(target_folder), str(self.path)]
 
-        result = houdini_package_runner.utils.execute_subprocess_command(command)
+        return_code = houdini_package_runner.utils.execute_subprocess_command(command)
 
-        if not result:
+        if return_code:
             raise RuntimeError(f"An error occurred running the command: {command}")
 
     # -------------------------------------------------------------------------
@@ -373,11 +373,11 @@ class BinaryDigitalAssetFile(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the binary digital asset file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         target_folder = runner.temp_dir / self.path.name

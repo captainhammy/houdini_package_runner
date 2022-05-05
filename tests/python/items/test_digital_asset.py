@@ -431,9 +431,16 @@ class TestExpandedOperatorType:
     # Methods
 
     @pytest.mark.parametrize(
-        "contents_changed, success", ((True, True), (False, False))
+        "contents_changed, return_codes, expected",
+        (
+            (True, (0, 0, 0), 0),
+            (False, (1, 0, 0), 1),
+            (False, (0, 0, 1), 1),
+        ),
     )
-    def test_process(self, mocker, init_expanded, contents_changed, success):
+    def test_process(
+        self, mocker, init_expanded, contents_changed, return_codes, expected
+    ):
         """Test ExpandedOperatorType.process."""
         mock_runner = mocker.MagicMock(
             spec=houdini_package_runner.runners.base.HoudiniPackageRunner
@@ -443,19 +450,19 @@ class TestExpandedOperatorType:
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_item1.contents_changed = False
-        mock_item1.process.return_value = True
+        mock_item1.process.return_value = return_codes[0]
 
         mock_item2 = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_item2.contents_changed = contents_changed
-        mock_item2.process.return_value = success
+        mock_item2.process.return_value = return_codes[1]
 
         mock_item3 = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_item3.contents_changed = False
-        mock_item3.process.return_value = True
+        mock_item3.process.return_value = return_codes[2]
 
         items = [mock_item1, mock_item2, mock_item3]
 
@@ -470,7 +477,7 @@ class TestExpandedOperatorType:
 
         result = inst.process(mock_runner)
 
-        assert result == success
+        assert result == expected
 
         assert inst._contents_changed == contents_changed
 
@@ -614,9 +621,15 @@ class TestDigitalAssetDirectory:
     # Methods
 
     @pytest.mark.parametrize(
-        "contents_changed, success", ((True, True), (False, False))
+        "contents_changed, return_codes, expected",
+        (
+            (True, (0, 0, 0), 0),
+            (False, (0, 1, 0), 1),
+        ),
     )
-    def test_process(self, mocker, init_asset_dir, contents_changed, success):
+    def test_process(
+        self, mocker, init_asset_dir, contents_changed, return_codes, expected
+    ):
         """Test DigitalAssetDirectory.process."""
         mock_runner = mocker.MagicMock(
             spec=houdini_package_runner.runners.base.HoudiniPackageRunner
@@ -626,19 +639,19 @@ class TestDigitalAssetDirectory:
             spec=houdini_package_runner.items.digital_asset.ExpandedOperatorType
         )
         mock_operator1.contents_changed = False
-        mock_operator1.process.return_value = True
+        mock_operator1.process.return_value = return_codes[0]
 
         mock_operator2 = mocker.MagicMock(
             spec=houdini_package_runner.items.digital_asset.ExpandedOperatorType
         )
         mock_operator2.contents_changed = contents_changed
-        mock_operator2.process.return_value = success
+        mock_operator2.process.return_value = return_codes[1]
 
         mock_operator3 = mocker.MagicMock(
             spec=houdini_package_runner.items.digital_asset.ExpandedOperatorType
         )
         mock_operator3.contents_changed = False
-        mock_operator3.process.return_value = True
+        mock_operator3.process.return_value = return_codes[2]
 
         operators = [mock_operator1, mock_operator2, mock_operator3]
 
@@ -653,7 +666,7 @@ class TestDigitalAssetDirectory:
 
         result = inst.process(mock_runner)
 
-        assert result == success
+        assert result == expected
 
         assert inst._contents_changed == contents_changed
 
@@ -664,8 +677,8 @@ class TestDigitalAssetDirectory:
 class TestBinaryDigitalAssetFile:
     """Test houdini_package_runner.items.digital_asset.BinaryDigitalAssetFile."""
 
-    @pytest.mark.parametrize("error", (True, False))
-    def test__collapse_dir(self, mocker, init_binary, error):
+    @pytest.mark.parametrize("return_code", (1, 0))
+    def test__collapse_dir(self, mocker, init_binary, return_code):
         """Test BinaryDigitalAssetFile._collapse_dir"""
         mock_target = mocker.MagicMock(spec=pathlib.Path)
 
@@ -678,12 +691,12 @@ class TestBinaryDigitalAssetFile:
 
         mock_execute = mocker.patch(
             "houdini_package_runner.utils.execute_subprocess_command",
-            return_value=not error,
+            return_value=return_code,
         )
 
         inst = init_binary()
 
-        if error:
+        if return_code:
             with pytest.raises(RuntimeError):
                 inst._collapse_dir("hotl", mock_target)
 
@@ -694,8 +707,8 @@ class TestBinaryDigitalAssetFile:
             ["hotl", "-l", str(mock_target), str(mock_path)]
         )
 
-    @pytest.mark.parametrize("error", (True, False))
-    def test__extract_file(self, mocker, init_binary, error):
+    @pytest.mark.parametrize("return_code", (1, 0))
+    def test__extract_file(self, mocker, init_binary, return_code):
         """Test BinaryDigitalAssetFile._extract_file"""
         mock_target = mocker.MagicMock(spec=pathlib.Path)
 
@@ -708,12 +721,12 @@ class TestBinaryDigitalAssetFile:
 
         mock_execute = mocker.patch(
             "houdini_package_runner.utils.execute_subprocess_command",
-            return_value=not error,
+            return_value=return_code,
         )
 
         inst = init_binary()
 
-        if error:
+        if return_code:
             with pytest.raises(RuntimeError):
                 inst._extract_file("hotl", mock_target)
 

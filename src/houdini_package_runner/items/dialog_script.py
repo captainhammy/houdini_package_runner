@@ -204,21 +204,21 @@ class DialogScriptItem(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the operator files.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         files_to_process = self._gather_items()
 
-        success = True
+        result = 0
 
         items_with_changed_contents = []
 
         for file_to_process in files_to_process:
-            success &= file_to_process.process(runner)
+            result |= file_to_process.process(runner)
 
             if file_to_process.contents_changed:
                 items_with_changed_contents.append(file_to_process)
@@ -227,7 +227,7 @@ class DialogScriptItem(BaseFileItem):
             self.contents_changed = True
             self._handle_changed_contents(items_with_changed_contents)
 
-        return success
+        return result
 
 
 class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
@@ -334,11 +334,11 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         temp_path = runner.temp_dir / f"{self.display_name}.py"

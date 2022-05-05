@@ -197,7 +197,7 @@ class PyLintRunner(HoudiniPackageRunner):
 # =============================================================================
 
 
-def main() -> None:
+def main() -> int:
     """Run 'pylint' on package files."""
     parser = PyLintRunner.build_parser()
     parsed_args, unknown = parser.parse_known_args()
@@ -207,4 +207,5 @@ def main() -> None:
     run_tool = PyLintRunner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)
 
-    run_tool.run()
+    result = run_tool.run()
+    return result
