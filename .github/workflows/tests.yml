@@ -4,6 +4,7 @@ name: Tests
 
 on:
   - push
+  - workflow_dispatch
   
 jobs:
   build:
@@ -24,4 +25,3 @@ jobs:
           python -m pip install tox tox-gh-actions
       - name: Test with tox
         run: tox
-      
