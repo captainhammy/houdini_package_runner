@@ -1,6 +1,6 @@
 [![PyPI version](https://img.shields.io/pypi/v/houdini_package_runner)](https://pypi.org/pypi/houdini_package_runner)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/houdini_package_runner)](https://pypi.org/pypi/houdini_package_runner)
 [![Tests](https://github.com/captainhammy/houdini_package_runner/actions/workflows/tests.yml/badge.svg)](https://github.com/captainhammy/houdini_package_runner/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/captainhammy/houdini_package_runner/branch/main/graph/badge.svg?token=H9YJQIAKZX)](https://codecov.io/gh/captainhammy/houdini_package_runner)
 
 The **houdini_package_runner** project aims to provide an extensible API and set of tools for analyzing and acting upon
 files in a Houdini package.
