@@ -252,7 +252,7 @@ def compute_file_hash(file_path: pathlib.Path) -> bytes:
             file_hash.update(chunk)
             chunk = handle.read(8192)
 
-    return file_hash.digest()
+    return file_hash.hexdigest()
 
 
 def is_python_file(

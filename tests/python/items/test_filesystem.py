@@ -344,12 +344,12 @@ class TestPythonPackageDirectoryItem:
 @pytest.mark.parametrize(
     "file_name, expected",
     [
-        ("python_file.py", b"\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\t\x98\xec\xf8B~"),
-        ("ls_script", b"k\x81\xfd\xd0$\x0c\xaf\x90\x147\xc1-C\xb6\xb9\x06"),
-        ("no_shbang_script", b"be\xb2+fP-p\xd5\xf0\x04\xf0\x828\xac<"),
-        ("decode_error.hip", b"}\xb2\x0fK\x9b\xffK[\x07\xd0g\xedpR\x1bq"),
-        ("python_script", b"(\xb3V\x12\xb1E\xc3Lgh\x17\xcei\xfb\xfe\xb6"),
-        ("hython_script", b"\x1a?\x00\x1c\x1d\xb9\xd0i\xf2\x1e\x0ep\xce\xa7x\x90"),
+        ("python_file.py", "d41d8cd98f00b204e9800998ecf8427e"),
+        ("ls_script", "6b81fdd0240caf901437c12d43b6b906"),
+        ("no_shbang_script", "6265b22b66502d70d5f004f08238ac3c"),
+        ("decode_error.hip", "7db20f4b9bff4b5b07d067ed70521b71"),
+        ("python_script", "28b35612b145c34c676817ce69fbfeb6"),
+        ("hython_script", "1a3f001c1db9d069f21e0e70cea77890"),
     ],
 )
 def test_compute_file_hash(shared_datadir, file_name, expected):
