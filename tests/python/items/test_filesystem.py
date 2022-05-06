@@ -345,11 +345,7 @@ class TestPythonPackageDirectoryItem:
     "file_name, expected",
     [
         ("python_file.py", "d41d8cd98f00b204e9800998ecf8427e"),
-        ("ls_script", "6b81fdd0240caf901437c12d43b6b906"),
-        ("no_shbang_script", "6265b22b66502d70d5f004f08238ac3c"),
         ("decode_error.hip", "7db20f4b9bff4b5b07d067ed70521b71"),
-        ("python_script", "28b35612b145c34c676817ce69fbfeb6"),
-        ("hython_script", "1a3f001c1db9d069f21e0e70cea77890"),
     ],
 )
 def test_compute_file_hash(shared_datadir, file_name, expected):

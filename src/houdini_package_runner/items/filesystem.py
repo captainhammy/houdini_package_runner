@@ -236,7 +236,7 @@ class PythonPackageDirectoryItem(DirectoryToProcess):
 # =============================================================================
 
 
-def compute_file_hash(file_path: pathlib.Path) -> bytes:
+def compute_file_hash(file_path: pathlib.Path) -> str:
     """Compute a hash for the file contents.
 
     :param file_path: The path to the file to hash.
@@ -245,7 +245,7 @@ def compute_file_hash(file_path: pathlib.Path) -> bytes:
     """
     with open(file_path, "rb") as handle:
         file_hash = hashlib.md5()
-        # TODO: Replace with walrus operator once Houdini uses Python 3.8+
+        # TODO: Replace with walrus operator once we commit to Python 3.8+.
         # while chunk := handle.read(8192):
         chunk = handle.read(8192)
         while chunk:
