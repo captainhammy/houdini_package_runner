@@ -27,5 +27,5 @@ jobs:
       - name: Test with tox
         run: tox
       - name: Upload coverage.xml to codecov
-        if: ${{ matrix.python-version == '3.9' }}
+        if: ${{ matrix.python-version == '3.9' && matrix.platform == "ubuntu-latest" }}
         uses: codecov/codecov-action@v2
