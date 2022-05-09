@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     import argparse
     import pathlib
 
-    from houdini_package_runner.discoverers.package import PackageItemDiscoverer
+    from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
 
@@ -40,7 +40,7 @@ class ModernizeRunner(HoudiniPackageRunner):
 
     def __init__(
         self,
-        discoverer: PackageItemDiscoverer,
+        discoverer: BaseItemDiscoverer,
     ) -> None:
         super().__init__(discoverer, write_back=True)
         self._extra_args: List[str] = []
@@ -137,7 +137,7 @@ def main() -> int:
 
     parsed_args, unknown = parser.parse_known_args()
 
-    discoverer = package.init_standard_discoverer(parsed_args)
+    discoverer = package.init_standard_package_discoverer(parsed_args)
 
     run_tool = ModernizeRunner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)

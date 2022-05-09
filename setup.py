@@ -1,3 +1,4 @@
+"""setup.py for houdini_package_runner."""
 from pathlib import Path
 from setuptools import find_packages, setup
 
@@ -29,6 +30,7 @@ setup(
         "flake8",
         "isort",
         "lxml",
+        "modernize",
         "pylint",
         "pyparsing",
         "termcolor",

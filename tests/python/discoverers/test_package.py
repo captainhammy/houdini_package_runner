@@ -44,7 +44,7 @@ def init_discoverer(mocker):
 # =============================================================================
 
 
-class TestBaseItemDiscoverer:
+class TestPackageItemDiscoverer:
     """Test houdini_package_runner.discoverers.package.PackageItemDiscoverer."""
 
     # Object construction
@@ -55,18 +55,20 @@ class TestBaseItemDiscoverer:
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
         mock_file_path = mocker.MagicMock(spec=pathlib.Path)
+        mock_file_path.is_file.return_value = True
+        mock_file_path.is_dir.return_value = False
 
         mock_file1 = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
-        mock_file2 = mocker.MagicMock(
-            spec=houdini_package_runner.items.filesystem.FileToProcess
+        mock_dir = mocker.MagicMock(
+            spec=houdini_package_runner.items.filesystem.DirectoryToProcess
         )
 
         mock_process_dir = mocker.patch(
             "houdini_package_runner.discoverers.package.process_directory"
         )
-        mock_process_dir.side_effect = (mock_file2, None)
+        mock_process_dir.side_effect = (mock_dir, None)
 
         mock_houdini_item = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.HoudiniDirectoryItem
@@ -75,7 +77,7 @@ class TestBaseItemDiscoverer:
         mock_get_houdini = mocker.patch(
             "houdini_package_runner.discoverers.package.get_houdini_items"
         )
-        mock_get_houdini.return_value = [mock_houdini_item]
+        mock_get_houdini.return_value = [mock_houdini_item] if has_items else []
 
         mock_file_to_process = mocker.patch(
             "houdini_package_runner.items.filesystem.FileToProcess"
@@ -86,33 +88,37 @@ class TestBaseItemDiscoverer:
 
             houdini_items = ["scripts"]
 
-            files = [mock_file_path]
-
             mock_dir1 = mocker.MagicMock(spec=pathlib.Path)
+            mock_dir1.is_file.return_value = False
+            mock_dir1.is_dir.return_value = True
+
             mock_dir2 = mocker.MagicMock(spec=pathlib.Path)
-            directories = [mock_dir1, mock_dir2]
+            mock_dir2.is_file.return_value = False
+            mock_dir2.is_dir.return_value = True
+
+            extra_paths = [mock_file_path, mock_dir1, mock_dir2]
 
             inst = houdini_package_runner.discoverers.package.PackageItemDiscoverer(
                 mock_path,
-                files=files,
-                houdini_items=houdini_items,
-                directories=directories,
+                houdini_items,
+                extra_paths=extra_paths,
                 items=items,
             )
 
             assert inst.items == [
                 mock_file1,
-                mock_file_to_process.return_value,
-                mock_file2,
                 mock_houdini_item,
+                mock_file_to_process.return_value,
+                mock_dir,
             ]
 
             mock_file_to_process.assert_called_with(mock_file_path)
-            mock_get_houdini.assert_called_with(houdini_items, inst.path / "houdini")
+            mock_get_houdini.assert_called_with(houdini_items, inst.path)
 
         else:
             inst = houdini_package_runner.discoverers.package.PackageItemDiscoverer(
-                mock_path
+                mock_path,
+                houdini_items=[],
             )
 
             assert inst.items == []
@@ -291,28 +297,35 @@ def test_get_tool_items(mocker):
     mock_shelf_file.assert_called_with(mock_shelf_path)
 
 
-def test_init_standard_discoverer(
+def test_init_standard_package_discoverer(
     mocker,
 ):
-    """Test houdini_package_runner.discoverers.package.init_standard_discoverer."""
+    """Test houdini_package_runner.discoverers.package.init_standard_package_discoverer."""
     mock_discoverer = mocker.patch(
         "houdini_package_runner.discoverers.package.PackageItemDiscoverer"
     )
 
-    mock_path = mocker.MagicMock(spec=pathlib.Path)
-    mock_dirs = mocker.MagicMock(spec=list)
-    mock_files = mocker.MagicMock(spec=list)
+    mock_root = mocker.MagicMock(spec=pathlib.Path)
+    mock_houdini_root = mocker.MagicMock(spec=pathlib.Path)
+    mock_extra_paths = mocker.MagicMock(spec=list)
     mock_houdini_items = mocker.MagicMock(spec=list)
 
     mock_parse = mocker.patch(
         "houdini_package_runner.parser.process_common_arg_settings"
     )
-    mock_parse.return_value = (mock_path, mock_dirs, mock_files, mock_houdini_items)
+    mock_parse.return_value = (
+        mock_root,
+        mock_houdini_root,
+        mock_extra_paths,
+        mock_houdini_items,
+    )
 
     mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
 
-    result = houdini_package_runner.discoverers.package.init_standard_discoverer(
-        mock_namespace
+    result = (
+        houdini_package_runner.discoverers.package.init_standard_package_discoverer(
+            mock_namespace
+        )
     )
 
     assert result == mock_discoverer.return_value
@@ -320,10 +333,9 @@ def test_init_standard_discoverer(
     mock_parse.assert_called_with(mock_namespace)
 
     mock_discoverer.assert_called_with(
-        mock_path,
+        mock_houdini_root,
         houdini_items=mock_houdini_items,
-        files=mock_files,
-        directories=mock_dirs,
+        extra_paths=mock_extra_paths,
     )
 
 

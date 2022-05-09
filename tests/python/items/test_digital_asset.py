@@ -76,6 +76,38 @@ def init_binary(mocker):
 # =============================================================================
 
 
+class TestDigitalAssetPythonSection:
+    """Test houdini_package_runner.items.digital_asset.DigitalAssetPythonSection."""
+
+    @pytest.mark.parametrize(
+        "section_name, write_back",
+        (
+            ("OnCreated", False),
+            ("PythonModule", True),
+            ("PythonCook", True),
+        ),
+    )
+    def test___init__(self, mocker, section_name, write_back):
+        """Test object initialization."""
+        mock_path = mocker.MagicMock(spec=pathlib.Path)
+        name = "/some/path/" + section_name
+
+        if write_back:
+            inst = houdini_package_runner.items.digital_asset.DigitalAssetPythonSection(
+                mock_path,
+                name,
+                write_back=write_back,
+            )
+
+        else:
+            inst = houdini_package_runner.items.digital_asset.DigitalAssetPythonSection(
+                mock_path, name
+            )
+
+        if section_name not in ("PythonCook", "PythonModule"):
+            assert "kwargs" in inst.ignored_builtins
+
+
 class TestExpandedOperatorType:
     """Test houdini_package_runner.items.digital_asset.ExpandedOperatorType."""
 
@@ -115,14 +147,14 @@ class TestExpandedOperatorType:
     def test__build_python_section_items(self, mocker, init_expanded, has_sourcefile):
         """Test ExpandedOperatorType._build_python_section_items."""
         mock_file1 = mocker.MagicMock(
-            spec=houdini_package_runner.items.filesystem.FileToProcess
+            spec=houdini_package_runner.items.digital_asset.DigitalAssetPythonSection
         )
         mock_file2 = mocker.MagicMock(
-            spec=houdini_package_runner.items.filesystem.FileToProcess
+            spec=houdini_package_runner.items.digital_asset.DigitalAssetPythonSection
         )
 
         mock_init_file = mocker.patch(
-            "houdini_package_runner.items.digital_asset.FileToProcess",
+            "houdini_package_runner.items.digital_asset.DigitalAssetPythonSection",
             side_effect=[mock_file1, mock_file2],
         )
 
@@ -167,13 +199,13 @@ class TestExpandedOperatorType:
             [
                 mocker.call(
                     mock_section1,
+                    str(expected_display_name1),
                     write_back=mock_write_back,
-                    display_name=str(expected_display_name1),
                 ),
                 mocker.call(
                     mock_section2,
+                    str(expected_display_name2),
                     write_back=mock_write_back,
-                    display_name=str(expected_display_name2),
                 ),
             ]
         )

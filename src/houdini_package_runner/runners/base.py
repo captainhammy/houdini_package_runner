@@ -37,6 +37,7 @@ class HoudiniPackageRunner(abc.ABC):
     ) -> None:
         self._discoverer = discoverer
         self._hotl_command = "hotl"
+        self._list_items = False
         self._temp_dir = pathlib.Path(tempfile.mkdtemp())
         self._verbose = False
         self._write_back = write_back
@@ -94,6 +95,7 @@ class HoudiniPackageRunner(abc.ABC):
 
         """
         self._verbose = namespace.verbose
+        self._list_items = namespace.list_items
 
         if hasattr(namespace, "hotl_command"):
             self._hotl_command = namespace.hotl_command
@@ -104,6 +106,12 @@ class HoudiniPackageRunner(abc.ABC):
         :return: The overall execution return code.
 
         """
+        if self._list_items:
+            for item in self.discoverer.items:
+                print(item)
+
+            return 0
+
         result = 0
 
         for item in self.discoverer.items:

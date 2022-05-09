@@ -9,6 +9,7 @@ from __future__ import annotations
 
 # Standard Library
 import json
+import os
 import pathlib
 from typing import TYPE_CHECKING, List, Optional
 
@@ -27,6 +28,26 @@ if TYPE_CHECKING:
 # =============================================================================
 # CLASSES
 # =============================================================================
+
+
+class DigitalAssetPythonSection(FileToProcess):
+    """Class representing a Python digital asset section to process.
+
+    :param path: The file path to process.
+    :param display_name: Display name for test output.
+    :param write_back: Whether the item should write itself back to disk.
+
+    """
+
+    def __init__(
+        self, path: pathlib.Path, display_name: str, write_back: bool = False
+    ) -> None:
+        super().__init__(path, write_back=write_back, display_name=display_name)
+
+        section_name = os.path.basename(display_name)
+
+        if section_name not in ("PythonCook", "PythonModule"):
+            self.ignored_builtins.append("kwargs")
 
 
 class ExpandedOperatorType(BaseFileItem):
@@ -78,10 +99,10 @@ class ExpandedOperatorType(BaseFileItem):
                 display_name = self.path / section_path.name
 
             files_to_process.append(
-                FileToProcess(
+                DigitalAssetPythonSection(
                     section_path,
+                    str(display_name),
                     write_back=self.write_back,
-                    display_name=str(display_name),
                 )
             )
 

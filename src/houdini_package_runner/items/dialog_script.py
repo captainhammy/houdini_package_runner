@@ -162,6 +162,11 @@ class DialogScriptItem(BaseFileItem):
 
             items.extend(_get_menu_items(parm, parm_start, self.name))
 
+        # Set the 'write_back' property of all the items if necessary.
+        if self.write_back:
+            for item in items:
+                item.write_back = True
+
         return tuple(items)
 
     def _handle_changed_contents(

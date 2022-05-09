@@ -163,7 +163,7 @@ def main() -> int:
 
     parsed_args, unknown = parser.parse_known_args()
 
-    discoverer = package.init_standard_discoverer(parsed_args)
+    discoverer = package.init_standard_package_discoverer(parsed_args)
 
     run_tool = Flake8Runner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)

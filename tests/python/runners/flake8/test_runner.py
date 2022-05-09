@@ -248,7 +248,7 @@ def test_main(mocker):
 
     mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
     mock_init = mocker.patch(
-        "houdini_package_runner.runners.flake8.runner.package.init_standard_discoverer",
+        "houdini_package_runner.runners.flake8.runner.package.init_standard_package_discoverer",
         return_value=mock_discoverer,
     )
 
