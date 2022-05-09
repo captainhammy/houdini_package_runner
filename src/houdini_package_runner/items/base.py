@@ -96,11 +96,11 @@ class BaseItem(ABC):
     @abstractmethod
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
 
@@ -136,10 +136,10 @@ class BaseFileItem(BaseItem):
     @abstractmethod
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """

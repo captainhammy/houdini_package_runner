@@ -31,10 +31,9 @@ if TYPE_CHECKING:
 class PackageItemDiscoverer(BaseItemDiscoverer):
     """This class is responsible for searching for various items to process.
 
-    :param path: The path to start searching for items from.
+    :param path: The root path to start searching for Houdini items from.
     :param houdini_items: A list of Houdini related directories to look for.
-    :param files: A list of extra files to search for.
-    :param directories: A list of extra directories to search for.
+    :param extra_paths: A list of extra paths to process.
     :param items: Optional list of specific items to check.
 
     """
@@ -42,27 +41,24 @@ class PackageItemDiscoverer(BaseItemDiscoverer):
     def __init__(
         self,
         path: pathlib.Path,
-        houdini_items: Optional[List[str]] = None,
-        files: Optional[List[pathlib.Path]] = None,
-        directories: Optional[List[pathlib.Path]] = None,
+        houdini_items: List[str],
+        extra_paths: Optional[List[pathlib.Path]] = None,
         items: Optional[List[BaseItem]] = None,
     ) -> None:
         super().__init__(path, items=items)
 
-        if files:
-            self.items.extend(
-                [filesystem.FileToProcess(file_path) for file_path in files]
-            )
+        self.items.extend(get_houdini_items(houdini_items, path))
 
-        if directories:
-            for dir_path in directories:
-                result = process_directory(dir_path)
+        if extra_paths is not None:
+            for extra_path in extra_paths:
+                if extra_path.is_file():
+                    self.items.append(filesystem.FileToProcess(extra_path))
 
-                if result is not None:
-                    self.items.append(result)
+                elif extra_path.is_dir():  # pragma: no branch
+                    result = process_directory(extra_path)
 
-        if houdini_items:
-            self.items.extend(get_houdini_items(houdini_items, self.path / "houdini"))
+                    if result is not None:
+                        self.items.append(result)
 
 
 # =============================================================================
@@ -124,10 +120,12 @@ def get_houdini_items(
         elif item_name == "menus":
             items.extend(get_menu_items(houdini_root))
 
-        elif item_name in ("python2.7libs", "python3.7libs"):
-            if item_path.exists():
+        elif item_name == "pythonXlibs":
+            python_lib_dirs = houdini_root.glob("python*libs")
+
+            for lib_dir in python_lib_dirs:
                 items.append(
-                    filesystem.HoudiniDirectoryItem(item_path, traverse_children=True)
+                    filesystem.HoudiniDirectoryItem(lib_dir, traverse_children=True)
                 )
 
         else:
@@ -185,7 +183,9 @@ def get_tool_items(toolbar_path: pathlib.Path) -> List[xml.ShelfFile]:
     return shelf_files
 
 
-def init_standard_discoverer(parsed_args: argparse.Namespace) -> PackageItemDiscoverer:
+def init_standard_package_discoverer(
+    parsed_args: argparse.Namespace,
+) -> PackageItemDiscoverer:
     """Create a standard PackageItemDiscoverer based on standard args.
 
     :param parsed_args: The parsed script args.
@@ -193,17 +193,16 @@ def init_standard_discoverer(parsed_args: argparse.Namespace) -> PackageItemDisc
 
     """
     (
-        path,
-        dirs,
-        files,
+        _,
+        houdini_path,
+        extra_paths,
         houdini_items,
     ) = houdini_package_runner.parser.process_common_arg_settings(parsed_args)
 
     discoverer = PackageItemDiscoverer(
-        path,
+        houdini_path,
         houdini_items=houdini_items,
-        files=files,
-        directories=dirs,
+        extra_paths=extra_paths,
     )
 
     return discoverer

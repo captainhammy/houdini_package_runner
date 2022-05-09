@@ -218,20 +218,22 @@ class TestXMLBase:
             mock_handle_write_back.assert_not_called()
 
     @pytest.mark.parametrize(
-        "write_back, contents_changed",
+        "write_back, contents_changed, return_codes, expected",
         (
-            (True, True),
-            (True, False),
-            (False, True),
-            (False, False),
+            (True, True, (0, 0), 0),
+            (True, False, (1, 0), 1),
+            (False, True, (0, 1), 1),
+            (False, False, (0, 0), 0),
         ),
     )
-    def test_process(self, mocker, init_base, write_back, contents_changed):
+    def test_process(
+        self, mocker, init_base, write_back, contents_changed, return_codes, expected
+    ):
         """Test XMLBase.process."""
         mock_process = mocker.patch.object(
             houdini_package_runner.items.xml.XMLBase,
             "_process_code_section",
-            side_effect=(False, True),
+            side_effect=return_codes,
         )
 
         mock_section1 = mocker.MagicMock()
@@ -271,7 +273,7 @@ class TestXMLBase:
 
         result = inst.process(mock_runner)
 
-        assert not result
+        assert result == expected
 
         mock_parser.assert_called_with(strip_cdata=False)
         mock_parse.assert_called_with(str(inst.path), mock_parser.return_value)

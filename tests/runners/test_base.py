@@ -125,10 +125,12 @@ class TestHoudiniPackageRunner:
     def test_init_args_options(self, mocker, init_runner, has_hotl):
         """Test HoudiniPackageRunner.init_args_options."""
         mock_verbose = mocker.MagicMock(spec=bool)
+        mock_list = mocker.MagicMock(spec=bool)
         mock_hotl = mocker.MagicMock(spec=str)
 
         namespace = argparse.Namespace()
         namespace.verbose = mock_verbose
+        namespace.list_items = mock_list
 
         if has_hotl:
             namespace.hotl_command = mock_hotl
@@ -142,18 +144,30 @@ class TestHoudiniPackageRunner:
         if has_hotl:
             assert inst._hotl_command == mock_hotl
 
-    @pytest.mark.parametrize("write_back", (False, True))
-    def test_run(self, mocker, init_runner, write_back):
+    @pytest.mark.parametrize(
+        "list_items, write_back, return_codes, expected",
+        (
+            (True, False, (0, 0), 0),
+            (False, False, (0, 0), 0),
+            (False, True, (0, 1), 1),
+            (False, True, (1, 0), 1),
+        ),
+    )
+    def test_run(
+        self, mocker, init_runner, list_items, write_back, return_codes, expected
+    ):
         """Test HoudiniPackageRunner.run."""
         mock_file = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_file.write_back = False
+        mock_file.process.return_value = return_codes[0]
 
         mock_dir = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.DirectoryToProcess
         )
         mock_dir.write_back = False
+        mock_dir.process.return_value = return_codes[1]
 
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
         type(mock_discoverer).items = [mock_file, mock_dir]
@@ -165,12 +179,15 @@ class TestHoudiniPackageRunner:
         )
 
         inst = init_runner()
+        inst._list_items = list_items
         inst._write_back = write_back
 
-        inst.run()
+        result = inst.run()
+        assert result == expected
 
-        mock_file.process.assert_called_with(inst)
-        mock_dir.process.assert_called_with(inst)
+        if not list_items:
+            mock_file.process.assert_called_with(inst)
+            mock_dir.process.assert_called_with(inst)
 
         if write_back:
             assert mock_file.write_back

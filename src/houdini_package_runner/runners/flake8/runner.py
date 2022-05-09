@@ -66,7 +66,12 @@ class Flake8Runner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run flake8 on Houdini package items.
+
+Any unknown args will be passed along to the flake8 command.
+"""
+            )
 
         parser.add_argument(
             "--config",
@@ -95,12 +100,12 @@ class Flake8Runner(HoudiniPackageRunner):
 
         self._extra_args = extra_args
 
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to format.
         :param item: The item to format.
-        :return: Whether the black was successful.
+        :return: The process return code.
 
         """
         command = [
@@ -153,15 +158,20 @@ class Flake8Runner(HoudiniPackageRunner):
 # =============================================================================
 
 
-def main() -> None:
-    """Run 'flake8' on package files."""
+def main() -> int:
+    """Run 'flake8' on package files.
+
+    :return: The runner return code.
+
+    """
     parser = Flake8Runner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 
-    discoverer = package.init_standard_discoverer(parsed_args)
+    discoverer = package.init_standard_package_discoverer(parsed_args)
 
     run_tool = Flake8Runner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)
 
-    run_tool.run()
+    result = run_tool.run()
+    return result

@@ -1,3 +1,4 @@
+"""setup.py for houdini_package_runner."""
 from pathlib import Path
 from setuptools import find_packages, setup
 
@@ -29,6 +30,7 @@ setup(
         "flake8",
         "isort",
         "lxml",
+        "modernize",
         "pylint",
         "pyparsing",
         "termcolor",
@@ -56,6 +58,8 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
+        "Operating System :: MacOS",
+        "Operating System :: Microsoft :: Windows",
         "Operating System :: Unix",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3 :: Only",

@@ -75,7 +75,12 @@ class PyLintRunner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run pylint on Houdini package items.
+
+Any unknown args will be passed along to the pylint command.
+"""
+            )
 
         parser.add_argument(
             "--rcfile",
@@ -197,14 +202,15 @@ class PyLintRunner(HoudiniPackageRunner):
 # =============================================================================
 
 
-def main() -> None:
+def main() -> int:
     """Run 'pylint' on package files."""
     parser = PyLintRunner.build_parser()
     parsed_args, unknown = parser.parse_known_args()
 
-    discoverer = package.init_standard_discoverer(parsed_args)
+    discoverer = package.init_standard_package_discoverer(parsed_args)
 
     run_tool = PyLintRunner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)
 
-    run_tool.run()
+    result = run_tool.run()
+    return result

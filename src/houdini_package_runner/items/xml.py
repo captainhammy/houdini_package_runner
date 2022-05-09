@@ -103,13 +103,13 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         section: etree._Element,  # pylint: disable=protected-access
         runner: HoudiniPackageRunner,
         base_file_name: str,
-    ) -> bool:
+    ) -> int:
         """Process an XML section's text.
 
         :param section: The section to process.
         :param runner: The package runner processing the item.
         :param base_file_name: The name of the temporary file.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         # Create a temp Python file for the code blob.
@@ -130,11 +130,11 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     # METHODS
     # -------------------------------------------------------------------------
 
-    def process(self, runner: HoudiniPackageRunner) -> bool:
+    def process(self, runner: HoudiniPackageRunner) -> int:
         """Process the file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         parser = etree.XMLParser(strip_cdata=False)
@@ -144,15 +144,15 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
 
         items_to_process = self._get_items_to_process(root)
 
-        success = True
+        result = 0
 
         for item in items_to_process:
-            success &= self._process_code_section(item[0], runner, item[1])
+            result |= self._process_code_section(item[0], runner, item[1])
 
         if self.write_back and self.contents_changed:
             tree.write(str(self.path), encoding="utf-8", xml_declaration=True)
 
-        return success
+        return result
 
 
 class MenuFile(XMLBase):

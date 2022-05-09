@@ -114,7 +114,15 @@ class TestDirectoryToProcess:
             for item in result:
                 assert item.is_test_item
 
-    def test__process_children(self, mocker, init_dir_item):
+    @pytest.mark.parametrize(
+        "return_codes, expected",
+        (
+            ((0, 0), 0),
+            ((1, 0), 1),
+            ((0, 1), 1),
+        ),
+    )
+    def test__process_children(self, mocker, init_dir_item, return_codes, expected):
         """Test DirectoryToProcess._process_children."""
         mock_runner = mocker.MagicMock(
             spec=houdini_package_runner.runners.base.HoudiniPackageRunner
@@ -124,11 +132,13 @@ class TestDirectoryToProcess:
             spec=houdini_package_runner.items.filesystem.FileToProcess
         )
         mock_file.ignored_builtins = []
+        mock_file.process.return_value = return_codes[0]
 
         mock_dir = mocker.MagicMock(
             spec=houdini_package_runner.items.filesystem.DirectoryToProcess
         )
         mock_dir.ignored_builtins = []
+        mock_dir.process.return_value = return_codes[1]
 
         mock_get_items = mocker.patch.object(
             houdini_package_runner.items.filesystem.DirectoryToProcess,
@@ -139,7 +149,7 @@ class TestDirectoryToProcess:
         inst = init_dir_item()
 
         result = inst._process_children(mock_runner)
-        assert result
+        assert result == expected
 
         mock_get_items.assert_called()
 
@@ -334,12 +344,8 @@ class TestPythonPackageDirectoryItem:
 @pytest.mark.parametrize(
     "file_name, expected",
     [
-        ("python_file.py", b"\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\t\x98\xec\xf8B~"),
-        ("ls_script", b"k\x81\xfd\xd0$\x0c\xaf\x90\x147\xc1-C\xb6\xb9\x06"),
-        ("no_shbang_script", b"be\xb2+fP-p\xd5\xf0\x04\xf0\x828\xac<"),
-        ("decode_error.hip", b"}\xb2\x0fK\x9b\xffK[\x07\xd0g\xedpR\x1bq"),
-        ("python_script", b"(\xb3V\x12\xb1E\xc3Lgh\x17\xcei\xfb\xfe\xb6"),
-        ("hython_script", b"\x1a?\x00\x1c\x1d\xb9\xd0i\xf2\x1e\x0ep\xce\xa7x\x90"),
+        ("python_file.py", "d41d8cd98f00b204e9800998ecf8427e"),
+        ("decode_error.hip", "7db20f4b9bff4b5b07d067ed70521b71"),
     ],
 )
 def test_compute_file_hash(shared_datadir, file_name, expected):

@@ -37,6 +37,7 @@ class HoudiniPackageRunner(abc.ABC):
     ) -> None:
         self._discoverer = discoverer
         self._hotl_command = "hotl"
+        self._list_items = False
         self._temp_dir = pathlib.Path(tempfile.mkdtemp())
         self._verbose = False
         self._write_back = write_back
@@ -75,12 +76,12 @@ class HoudiniPackageRunner(abc.ABC):
     # -------------------------------------------------------------------------
 
     @abc.abstractmethod
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to process.
         :param item: The item to process.
-        :return: Whether violations were detected.
+        :return: The process return code.
 
         """
 
@@ -94,18 +95,29 @@ class HoudiniPackageRunner(abc.ABC):
 
         """
         self._verbose = namespace.verbose
+        self._list_items = namespace.list_items
 
         if hasattr(namespace, "hotl_command"):
             self._hotl_command = namespace.hotl_command
 
-    def run(self):
+    def run(self) -> int:
         """Process all the items.
 
-        :return:
+        :return: The overall execution return code.
 
         """
+        if self._list_items:
+            for item in self.discoverer.items:
+                print(item)
+
+            return 0
+
+        result = 0
+
         for item in self.discoverer.items:
             if self.write_back:
                 item.write_back = True
 
-            item.process(self)
+            result |= item.process(self)
+
+        return result

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 # Standard Library
 import json
+import os
 import pathlib
 from typing import TYPE_CHECKING, List, Optional
 
@@ -27,6 +28,26 @@ if TYPE_CHECKING:
 # =============================================================================
 # CLASSES
 # =============================================================================
+
+
+class DigitalAssetPythonSection(FileToProcess):
+    """Class representing a Python digital asset section to process.
+
+    :param path: The file path to process.
+    :param display_name: Display name for test output.
+    :param write_back: Whether the item should write itself back to disk.
+
+    """
+
+    def __init__(
+        self, path: pathlib.Path, display_name: str, write_back: bool = False
+    ) -> None:
+        super().__init__(path, write_back=write_back, display_name=display_name)
+
+        section_name = os.path.basename(display_name)
+
+        if section_name not in ("PythonCook", "PythonModule"):
+            self.ignored_builtins.append("kwargs")
 
 
 class ExpandedOperatorType(BaseFileItem):
@@ -78,10 +99,10 @@ class ExpandedOperatorType(BaseFileItem):
                 display_name = self.path / section_path.name
 
             files_to_process.append(
-                FileToProcess(
+                DigitalAssetPythonSection(
                     section_path,
+                    str(display_name),
                     write_back=self.write_back,
-                    display_name=str(display_name),
                 )
             )
 
@@ -215,22 +236,22 @@ class ExpandedOperatorType(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the operator items.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         items_to_process = self._gather_items()
 
-        success = True
+        result = 0
 
         for item in items_to_process:
-            success &= item.process(runner)
+            result |= item.process(runner)
             self.contents_changed |= item.contents_changed
 
-        return success
+        return result
 
 
 class DigitalAssetDirectory(BaseFileItem):
@@ -314,22 +335,22 @@ class DigitalAssetDirectory(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful..
+        :return: The process return code.
 
         """
         operators = self._build_operator_list()
 
-        success = True
+        result = 0
 
         for operator in operators:
-            success &= operator.process(runner)
+            result |= operator.process(runner)
             self.contents_changed |= operator.contents_changed
 
-        return success
+        return result
 
 
 class BinaryDigitalAssetFile(BaseFileItem):
@@ -348,9 +369,9 @@ class BinaryDigitalAssetFile(BaseFileItem):
         """
         command = [hotl_command, "-l", str(target_folder), str(self.path)]
 
-        result = houdini_package_runner.utils.execute_subprocess_command(command)
+        return_code = houdini_package_runner.utils.execute_subprocess_command(command)
 
-        if not result:
+        if return_code:
             raise RuntimeError(f"An error occurred running the command: {command}")
 
     def _extract_file(self, hotl_command: str, target_folder: pathlib.Path) -> None:
@@ -362,9 +383,9 @@ class BinaryDigitalAssetFile(BaseFileItem):
         """
         command = [hotl_command, "-t", str(target_folder), str(self.path)]
 
-        result = houdini_package_runner.utils.execute_subprocess_command(command)
+        return_code = houdini_package_runner.utils.execute_subprocess_command(command)
 
-        if not result:
+        if return_code:
             raise RuntimeError(f"An error occurred running the command: {command}")
 
     # -------------------------------------------------------------------------
@@ -373,11 +394,11 @@ class BinaryDigitalAssetFile(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the binary digital asset file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         target_folder = runner.temp_dir / self.path.name

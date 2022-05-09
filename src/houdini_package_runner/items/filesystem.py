@@ -95,20 +95,22 @@ class DirectoryToProcess(BaseFileItem):
 
     def _process_children(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         items = self._get_child_items()
 
+        result = 0
+
         # Process each item with the runner.
         for item in items:
-            item.process(runner)
+            result |= item.process(runner)
 
-        return True
+        return result
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -125,11 +127,11 @@ class DirectoryToProcess(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process an item.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         # If traversing children then we want to process them.
@@ -180,11 +182,11 @@ class FileToProcess(BaseFileItem):
 
     def process(
         self, runner: houdini_package_runner.runners.base.HoudiniPackageRunner
-    ) -> bool:
+    ) -> int:
         """Process the file.
 
         :param runner: The package runner processing the item.
-        :return: Whether processing was successful.
+        :return: The process return code.
 
         """
         pre_hash = compute_file_hash(self.path)
@@ -234,7 +236,7 @@ class PythonPackageDirectoryItem(DirectoryToProcess):
 # =============================================================================
 
 
-def compute_file_hash(file_path: pathlib.Path) -> bytes:
+def compute_file_hash(file_path: pathlib.Path) -> str:
     """Compute a hash for the file contents.
 
     :param file_path: The path to the file to hash.
@@ -243,14 +245,14 @@ def compute_file_hash(file_path: pathlib.Path) -> bytes:
     """
     with open(file_path, "rb") as handle:
         file_hash = hashlib.md5()
-        # TODO: Replace with walrus operator once Houdini uses Python 3.8+
+        # TODO: Replace with walrus operator once we commit to Python 3.8+.
         # while chunk := handle.read(8192):
         chunk = handle.read(8192)
         while chunk:
             file_hash.update(chunk)
             chunk = handle.read(8192)
 
-    return file_hash.digest()
+    return file_hash.hexdigest()
 
 
 def is_python_file(

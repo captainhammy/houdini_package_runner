@@ -12,6 +12,93 @@ import argparse
 import pathlib
 from typing import List, Tuple
 
+
+# =============================================================================
+# CLASSES
+# =============================================================================
+
+
+class _UltimateHelpFormatter(
+    argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter
+):
+    """Formatter class that combines RawTextHelpFormatter and ArgumentDefaultsHelpFormatter."""
+
+
+# =============================================================================
+# NON-PUBLIC FUNCTIONS
+# =============================================================================
+
+
+def _resolve_houdini_root(
+    parsed_args: argparse.Namespace, root: pathlib.Path
+) -> pathlib.Path:
+    """Resolve the Houdini root from the args and path.
+
+    :param parsed_args: The parsed command args.
+    :param root: The root path.
+    :return: The resolved Houdini root.
+
+    """
+    if parsed_args.houdini_root is not None:
+        houdini_root_value = parsed_args.houdini_root
+
+        if pathlib.Path(houdini_root_value).is_dir():
+            return pathlib.Path(houdini_root_value)
+
+        if (root / houdini_root_value).is_dir():
+            return root / houdini_root_value
+
+        raise OSError("Could not find houdini root")
+
+    if (root / "houdini").is_dir():
+        houdini_root = root / "houdini"
+
+    else:
+        houdini_root = root
+
+    return houdini_root
+
+
+def _resolve_python_packages(
+    parsed_args: argparse.Namespace, root: pathlib.Path
+) -> List[pathlib.Path]:
+    """Find any Python package paths from the args and path.
+
+    :param parsed_args: The parsed command args.
+    :param root: The root path.
+    :return: A list of any found Python package directories.
+
+    """
+    if parsed_args.python_root:
+        python_dir = root / parsed_args.python_root
+
+        if python_dir.is_dir():
+            return [python_dir]
+
+    return []
+
+
+def _resolve_tests(
+    parsed_args: argparse.Namespace, root: pathlib.Path
+) -> List[pathlib.Path]:
+    """Find any test paths from the args and path.
+
+    :param parsed_args: The parsed command args.
+    :param root: The root path.
+    :return: A list of any test directories.
+
+    """
+    directories = []
+
+    if not parsed_args.skip_tests:
+        test_dir = root / "tests"
+
+        if test_dir.is_dir():
+            directories.append(test_dir)
+
+    return directories
+
+
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
@@ -32,7 +119,7 @@ def build_common_parser(
         prog=prog,
         usage=usage,
         description=description,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=_UltimateHelpFormatter,
     )
 
     parser.add_argument(
@@ -54,8 +141,14 @@ def build_common_parser(
     parser.add_argument(
         "--houdini-items",
         action="store",
-        default="otls,toolbar,python_panels,python2.7libs,python3.7libs,scripts,soho,menus",
-        help="A list of Houdini items to lint",
+        default="otls,hda,toolbar,python_panels,pythonXlibs,scripts,soho,menus",
+        help="A list of Houdini items to process",
+    )
+
+    parser.add_argument(
+        "--houdini-root",
+        action="store",
+        help="The root directory that the Houdini items will be in",
     )
 
     parser.add_argument(
@@ -63,12 +156,6 @@ def build_common_parser(
         action="store",
         default="python",
         help="The root directory the package will be in",
-    )
-
-    parser.add_argument(
-        "--skip-python",
-        action="store_true",
-        help="Skip processing of files under the python root.",
     )
 
     parser.add_argument(
@@ -87,40 +174,40 @@ def build_common_parser(
         help="Skip processing of files under {root}/tests.",
     )
 
+    parser.add_argument(
+        "--list-items",
+        action="store_true",
+        help="Only list the found items and do not execute the runner.",
+    )
+
     return parser
 
 
 def process_common_arg_settings(
     parsed_args: argparse.Namespace,
-) -> Tuple[pathlib.Path, List[pathlib.Path], List[pathlib.Path], List[str]]:
+) -> Tuple[pathlib.Path, pathlib.Path, List[pathlib.Path], List[str]]:
     """Generate base settings from common command args.
 
     :param parsed_args: The parsed command args.
-    :return: The root path, directories and files to process, and Houdini item names.
+    :return: The root path, houdini root path, directories and files to process, and Houdini item names.
 
     """
-    if parsed_args.root is not None:
+    if parsed_args.root:
         root = pathlib.Path(parsed_args.root)
 
     else:
         root = pathlib.Path.cwd()
 
-    dirs = [root / dir_name for dir_name in parsed_args.directories]
+    houdini_root = _resolve_houdini_root(parsed_args, root)
 
-    if not parsed_args.skip_python:
-        if parsed_args.python_root is not None:
-            python_dir = root / parsed_args.python_root
+    extra_paths = [root / dir_name for dir_name in parsed_args.directories]
 
-            if python_dir.is_dir():
-                dirs.append(python_dir)
+    extra_paths.extend(_resolve_python_packages(parsed_args, root))
 
-    if not parsed_args.skip_tests:
-        test_dir = root / "tests"
+    extra_paths.extend(_resolve_tests(parsed_args, root))
 
-        if test_dir.is_dir():
-            dirs.append(test_dir)
+    extra_paths.extend([root / file_name for file_name in parsed_args.files])
 
-    files = [root / file_name for file_name in parsed_args.files]
     houdini_items = parsed_args.houdini_items.split(",")
 
-    return root, dirs, files, houdini_items
+    return root, houdini_root, extra_paths, houdini_items

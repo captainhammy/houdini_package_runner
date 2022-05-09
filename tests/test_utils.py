@@ -91,7 +91,7 @@ def test_execute_subprocess_command(mocker, fp, verbose, has_pyhome, return_code
 
     result = houdini_package_runner.utils.execute_subprocess_command(cmd, verbose)
 
-    assert result == bool(return_code == 0)
+    assert result == return_code
 
     # If we are testing with PYTHONHOME in the env, make sure it got removed.
     if has_pyhome:

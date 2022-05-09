@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     import argparse
     import pathlib
 
-    from houdini_package_runner.discoverers.package import PackageItemDiscoverer
+    from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
 
@@ -40,7 +40,7 @@ class ModernizeRunner(HoudiniPackageRunner):
 
     def __init__(
         self,
-        discoverer: PackageItemDiscoverer,
+        discoverer: BaseItemDiscoverer,
     ) -> None:
         super().__init__(discoverer, write_back=True)
         self._extra_args: List[str] = []
@@ -66,7 +66,12 @@ class ModernizeRunner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run modernize on Houdini package items.
+
+Any unknown args will be passed along to the modernize command.
+"""
+            )
 
         return parser
 
@@ -81,12 +86,12 @@ class ModernizeRunner(HoudiniPackageRunner):
 
         self._extra_args = extra_args
 
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to format.
         :param item: The item to format.
-        :return: Whether the black was successful.
+        :return: The process return code.
 
         """
         flags = []
@@ -127,15 +132,20 @@ class ModernizeRunner(HoudiniPackageRunner):
 # =============================================================================
 
 
-def main() -> None:
-    """Run 'python-modernize' on package files."""
+def main() -> int:
+    """Run 'python-modernize' on package files.
+
+    :return: The runner return code.
+
+    """
     parser = ModernizeRunner.build_parser()
 
     parsed_args, unknown = parser.parse_known_args()
 
-    discoverer = package.init_standard_discoverer(parsed_args)
+    discoverer = package.init_standard_package_discoverer(parsed_args)
 
     run_tool = ModernizeRunner(discoverer)
     run_tool.init_args_options(parsed_args, unknown)
 
-    run_tool.run()
+    result = run_tool.run()
+    return result

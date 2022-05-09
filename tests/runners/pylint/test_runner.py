@@ -308,7 +308,7 @@ class TestPyLintRunner:
 
 
 def test_main(mocker):
-    """Test houdini_package_runner.runners.black.runner.main."""
+    """Test houdini_package_runner.runners.pylint.runner.main."""
     mock_parsed = mocker.MagicMock(spec=argparse.Namespace)
     mock_unknown = mocker.MagicMock(spec=list)
 
@@ -317,7 +317,7 @@ def test_main(mocker):
 
     mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
     mock_init = mocker.patch(
-        "houdini_package_runner.runners.pylint.runner.package.init_standard_discoverer",
+        "houdini_package_runner.runners.pylint.runner.package.init_standard_package_discoverer",
         return_value=mock_discoverer,
     )
 
@@ -331,7 +331,8 @@ def test_main(mocker):
     )
     mock_runner_init.build_parser.return_value = mock_parser
 
-    houdini_package_runner.runners.pylint.runner.main()
+    result = houdini_package_runner.runners.pylint.runner.main()
+    assert result == mock_runner.run.return_value
 
     mock_init.assert_called_with(mock_parsed)
 
