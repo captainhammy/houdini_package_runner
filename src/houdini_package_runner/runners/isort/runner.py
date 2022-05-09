@@ -236,7 +236,7 @@ def _find_python_modules(folder: pathlib.Path) -> List[str]:
         if child.is_file() and child.suffix in (".py", ".so"):
             module_names.append(child.stem)
 
-        elif child.is_dir():
+        elif child.is_dir() and not child.stem.startswith("__"):
             module_names.append(child.stem)
 
     return sorted(module_names)
