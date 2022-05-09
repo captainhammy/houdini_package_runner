@@ -18,7 +18,9 @@ from typing import List, Tuple
 # =============================================================================
 
 
-class _UltimateHelpFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+class _UltimateHelpFormatter(
+    argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter
+):
     """Formatter class that combines RawTextHelpFormatter and ArgumentDefaultsHelpFormatter."""
 
 
