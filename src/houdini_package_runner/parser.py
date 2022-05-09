@@ -14,6 +14,15 @@ from typing import List, Tuple
 
 
 # =============================================================================
+# CLASSES
+# =============================================================================
+
+
+class _UltimateHelpFormatter(argparse.RawTextHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    """Formatter class that combines RawTextHelpFormatter and ArgumentDefaultsHelpFormatter."""
+
+
+# =============================================================================
 # NON-PUBLIC FUNCTIONS
 # =============================================================================
 
@@ -108,7 +117,7 @@ def build_common_parser(
         prog=prog,
         usage=usage,
         description=description,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=_UltimateHelpFormatter,
     )
 
     parser.add_argument(
@@ -130,8 +139,8 @@ def build_common_parser(
     parser.add_argument(
         "--houdini-items",
         action="store",
-        default="otls,toolbar,python_panels,pythonXlibs,scripts,soho,menus",
-        help="A list of Houdini items to lint",
+        default="otls,hda,toolbar,python_panels,pythonXlibs,scripts,soho,menus",
+        help="A list of Houdini items to process",
     )
 
     parser.add_argument(

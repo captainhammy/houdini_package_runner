@@ -149,8 +149,8 @@ def test_build_common_parser(mocker, pass_args):
         mocker.call(
             "--houdini-items",
             action="store",
-            default="otls,toolbar,python_panels,pythonXlibs,scripts,soho,menus",
-            help="A list of Houdini items to lint",
+            default="otls,hda,toolbar,python_panels,pythonXlibs,scripts,soho,menus",
+            help="A list of Houdini items to process",
         ),
         mocker.call(
             "--python-root",
@@ -177,7 +177,7 @@ def test_build_common_parser(mocker, pass_args):
             prog="program name",
             usage="usage",
             description="description",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            formatter_class=houdini_package_runner.parser._UltimateHelpFormatter,
         )
 
     assert mock_parser.add_argument.has_calls(calls)

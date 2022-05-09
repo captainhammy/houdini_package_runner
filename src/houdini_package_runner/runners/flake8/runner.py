@@ -66,7 +66,12 @@ class Flake8Runner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run flake8 on Houdini package items.
+
+Any unknown args will be passed along to the flake8 command.
+"""
+            )
 
         parser.add_argument(
             "--config",

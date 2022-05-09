@@ -68,7 +68,12 @@ class BlackRunner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run black on Houdini package items.
+
+Any unknown args will be passed along to the black command.
+"""
+            )
 
         return parser
 

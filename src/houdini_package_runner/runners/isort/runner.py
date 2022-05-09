@@ -130,7 +130,12 @@ class IsortRunner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run isort on Houdini package items.
+
+Any unknown args will be passed along to the isort command.
+"""
+            )
 
         parser.add_argument(
             "--config-file",

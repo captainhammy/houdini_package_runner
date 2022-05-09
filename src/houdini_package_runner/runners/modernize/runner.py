@@ -66,7 +66,12 @@ class ModernizeRunner(HoudiniPackageRunner):
 
         """
         if parser is None:
-            parser = houdini_package_runner.parser.build_common_parser()
+            parser = houdini_package_runner.parser.build_common_parser(
+                description="""Run modernize on Houdini package items.
+
+Any unknown args will be passed along to the modernize command.
+"""
+            )
 
         return parser
 
