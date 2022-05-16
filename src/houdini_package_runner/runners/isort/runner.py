@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 # Standard Library
+import importlib.resources
 import os
 import pathlib
 from configparser import ConfigParser
@@ -23,6 +24,7 @@ from houdini_package_runner.runners.base import HoudiniPackageRunner
 if TYPE_CHECKING:
     import argparse
 
+    from houdini_package_runner.config import BaseRunnerConfig
     from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
@@ -36,14 +38,16 @@ class IsortRunner(HoudiniPackageRunner):
     """Implementation for an isort package runner.
 
     :param discoverer: The item discoverer used by the runner.
+    :param runner_config: Optional BaseRunnerConfig object.
 
     """
 
-    def __init__(self, discoverer: BaseItemDiscoverer) -> None:
-        super().__init__(discoverer, write_back=True)
+    def __init__(
+        self, discoverer: BaseItemDiscoverer, runner_config: BaseRunnerConfig = None
+    ) -> None:
+        super().__init__(discoverer, write_back=True, runner_config=runner_config)
 
         self._config_file: Optional[str] = None
-        self._extra_args: List[str] = []
 
     def _generate_config(self, namespace: argparse.Namespace):
         """Generate a .isort config file for the operation.
@@ -58,16 +62,24 @@ class IsortRunner(HoudiniPackageRunner):
 
         return _save_template_config(config, self.temp_dir)
 
-    def _process_config(
-        self,
-        config: ConfigParser,
-        namespace: argparse.Namespace,
-    ):
-        """Process the ConfigParser object.
+    def _get_first_party_header(  # pylint: disable=no-self-use
+        self, package_names: str
+    ) -> str:
+        """Get a header for the First Party section.
 
-        :param config: The configuration object.
+        This will take the first module name in the comma separated list and use title() on it.
+
+        :param package_names: A comma separated list of first party package names.
+        :return: A header name.
+
+        """
+        return package_names.split(",")[0].replace("_", " ").title()
+
+    def _get_first_party_packages(self, namespace: argparse.Namespace) -> Optional[str]:
+        """Find a list of known first party module names, if any.
+
         :param namespace: The command argparse namespace.
-        :return:
+        :return: A comma separated list of first party names, otherwise None.
 
         """
         first_party_packages = None
@@ -83,19 +95,45 @@ class IsortRunner(HoudiniPackageRunner):
             if python_root.exists():
                 first_party_packages = _find_python_packages_from_path(python_root)
 
+        return first_party_packages
+
+    def _get_houdini_names(  # pylint: disable=no-self-use
+        self, namespace: argparse.Namespace
+    ) -> str:
+        """Find a list of known Houdini shipped module names.
+
+        :param namespace: The command argparse namespace.
+        :return: A comma separated list of Houdini Python modules.
+
+        """
         hfs_path = pathlib.Path(os.path.expandvars(namespace.hfs_path))
 
+        return ",".join(_find_known_houdini(hfs_path))
+
+    def _process_config(
+        self,
+        config: ConfigParser,
+        namespace: argparse.Namespace,
+    ):
+        """Process the ConfigParser object.
+
+        :param config: The configuration object.
+        :param namespace: The command argparse namespace.
+        :return:
+
+        """
         settings = config["settings"]
 
-        settings["known_houdini"] = ",".join(_find_known_houdini(hfs_path))
+        settings["known_houdini"] = self._get_houdini_names(namespace)
+
+        first_party_packages = self._get_first_party_packages(namespace)
 
         if first_party_packages is not None:
             settings["known_first_party"] = first_party_packages
 
-            first_party_header = (
-                first_party_packages.split(",")[0].replace("_", " ").title()
+            settings["import_heading_firstparty"] = self._get_first_party_header(
+                first_party_packages
             )
-            settings["import_heading_firstparty"] = first_party_header
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -113,9 +151,9 @@ class IsortRunner(HoudiniPackageRunner):
     # -------------------------------------------------------------------------
 
     @property
-    def extra_args(self) -> List[str]:
-        """A list of extra args to pass to the format command."""
-        return self._extra_args
+    def name(self) -> str:
+        """The runner name used for identification."""
+        return "isort"
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -270,10 +308,12 @@ def _load_template_config() -> ConfigParser:
     :return: The loaded default config file.
 
     """
-    template_path = pathlib.Path(__file__).parent / "isort.cfg"
-
     config = ConfigParser()
-    config.read(template_path)
+
+    with importlib.resources.open_text(
+        "houdini_package_runner.runners.isort", "isort.cfg"
+    ) as contents:
+        config.read_file(contents)
 
     return config
 

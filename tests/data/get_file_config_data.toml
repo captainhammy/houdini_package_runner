@@ -1,0 +1,10 @@
+
+[file.'OnCreated.py']
+    to_ignore = [
+        "W292",
+    ]
+
+[file.'blorg.py']
+    to_ignore = [
+        "A123",
+    ]

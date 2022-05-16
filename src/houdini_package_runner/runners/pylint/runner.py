@@ -19,16 +19,17 @@ from pylint import lint
 from pylint.reporters.text import ColorizedTextReporter
 
 # Houdini Package Runner
+import houdini_package_runner.config
 import houdini_package_runner.parser
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
-from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
 if TYPE_CHECKING:
     import argparse
 
+    from houdini_package_runner.config import BaseRunnerConfig
     from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
@@ -41,26 +42,25 @@ class PyLintRunner(HoudiniPackageRunner):
     """Implementation for a pylint package runner.
 
     :param discoverer: The item discoverer used by the runner.
+    :param runner_config: Optional BaseRunnerConfig object.
 
     """
 
     def __init__(
-        self,
-        discoverer: BaseItemDiscoverer,
+        self, discoverer: BaseItemDiscoverer, runner_config: BaseRunnerConfig = None
     ) -> None:
-        super().__init__(discoverer)
+        super().__init__(discoverer, runner_config=runner_config)
 
         self._disabled: List[str] = []
-        self._extra_args: List[str] = []
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
     @property
-    def extra_args(self) -> List[str]:
-        """A list of extra args to pass to the lint command."""
-        return self._extra_args
+    def name(self) -> str:
+        """The runner name used for identification."""
+        return "pylint"
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -127,45 +127,15 @@ Any unknown args will be passed along to the pylint command.
         if self._disabled:
             to_disable.extend(self._disabled)
 
-        # Many times the 'hou' module is automatically available in the evaluation
-        # context so for certain types we want to ignore any undefined variable errors
-        # related to it.
-        known_builtins: List[str] = []
+        to_disable.extend(self.config.get_config_data("to_disable", item, file_path))
 
-        known_builtins.extend(item.ignored_builtins)
+        flags.extend(self.config.get_config_data("command", item, file_path))
 
-        if isinstance(item, xml.XMLBase):
-            to_disable.extend(
-                [
-                    "invalid-name",
-                    "missing-final-newline",
-                    "missing-module-docstring",
-                    "missing-docstring",
-                    "return-outside-function",
-                ]
-            )
+        known_builtins: List[str] = item.ignored_builtins
 
-        if isinstance(item, dialog_script.DialogScriptInternalItem):
-            to_disable.extend(
-                [
-                    "invalid-name",
-                    "missing-final-newline",
-                    "missing-module-docstring",
-                    "return-outside-function",
-                ]
-            )
-
-        if item.is_test_item:
-            to_disable.extend(
-                [
-                    "abstract-class-instantiated",
-                    "no-self-use",
-                    "protected-access",
-                    "too-many-arguments",
-                    "too-many-locals",
-                    "cannot-enumerate-pytest-fixtures",
-                ]
-            )
+        known_builtins.extend(
+            self.config.get_config_data("known_builtins", item, file_path)
+        )
 
         if known_builtins:
             houdini_package_runner.utils.add_or_append_to_flags(

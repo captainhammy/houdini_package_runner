@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, List
 import houdini_package_runner.parser
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
-from houdini_package_runner.items import xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
@@ -22,7 +21,6 @@ if TYPE_CHECKING:
     import argparse
     import pathlib
 
-    from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
 
@@ -32,28 +30,16 @@ if TYPE_CHECKING:
 
 
 class BlackRunner(HoudiniPackageRunner):
-    """Implementation for a black package runner.
-
-    :param discoverer: The item discoverer used by the runner.
-
-    """
-
-    def __init__(
-        self,
-        discoverer: BaseItemDiscoverer,
-    ) -> None:
-        super().__init__(discoverer, write_back=True)
-
-        self._extra_args: List[str] = []
+    """Implementation for a black package runner."""
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
     @property
-    def extra_args(self) -> List[str]:
-        """A list of extra args to pass to the black command."""
-        return self._extra_args
+    def name(self) -> str:
+        """The runner name used for identification."""
+        return "black"
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -98,8 +84,7 @@ Any unknown args will be passed along to the black command.
         """
         flags = []
 
-        if isinstance(item, xml.MenuFile):
-            flags.append("--line-length=150")
+        flags.extend(self.config.get_config_data("flags", item, file_path))
 
         flags.extend(self.extra_args)
 

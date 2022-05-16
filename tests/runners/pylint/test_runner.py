@@ -13,6 +13,7 @@ import pathlib
 import pytest
 
 # Houdini Package Runner
+import houdini_package_runner.config
 import houdini_package_runner.items.base
 import houdini_package_runner.items.dialog_script
 import houdini_package_runner.items.digital_asset
@@ -49,7 +50,8 @@ def init_runner(mocker):
 class TestPyLintRunner:
     """Test houdini_package_runner.runners.pylint.runner.PyLintRunner."""
 
-    def test___init__(self, mocker):
+    @pytest.mark.parametrize("pass_optional", (False, True))
+    def test___init__(self, mocker, pass_optional):
         """Test object initialization."""
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
 
@@ -58,29 +60,35 @@ class TestPyLintRunner:
             "__init__",
         )
 
-        inst = houdini_package_runner.runners.pylint.runner.PyLintRunner(
-            mock_discoverer
+        mock_config = (
+            mocker.MagicMock(spec=houdini_package_runner.config.PackageRunnerConfig)
+            if pass_optional
+            else None
         )
 
-        assert inst._disabled == []
-        assert isinstance(inst._extra_args, list)
-        assert not inst._extra_args
+        if pass_optional:
+            inst = houdini_package_runner.runners.pylint.runner.PyLintRunner(
+                mock_discoverer, runner_config=mock_config
+            )
+        else:
+            inst = houdini_package_runner.runners.pylint.runner.PyLintRunner(
+                mock_discoverer
+            )
 
-        mock_super_init.assert_called_with(mock_discoverer)
+        assert inst._disabled == []
+
+        mock_super_init.assert_called_with(mock_discoverer, runner_config=mock_config)
 
     # Properties
 
-    def test_extra_args(self, mocker, init_runner):
-        """Test PyLintRunner.extra_args."""
-        mock_args = mocker.MagicMock(spec=list)
-
+    def test_name(self, init_runner):
+        """Test PyLintRunner.name."""
         inst = init_runner()
-        inst._extra_args = mock_args
 
-        assert inst.extra_args == mock_args
+        assert inst.name == "pylint"
 
         with pytest.raises(AttributeError):
-            inst.extra_args = []
+            inst.name = []
 
     # Methods
 
@@ -166,23 +174,10 @@ class TestPyLintRunner:
             assert inst._disabled == []
 
     @pytest.mark.parametrize(
-        "has_disabled, item_type, has_builtins, verbose, test_item",
+        "has_disabled, has_builtins, verbose",
         (
-            (
-                True,
-                houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
-                True,
-                True,
-                True,
-            ),
-            (False, houdini_package_runner.items.xml.MenuFile, False, False, False),
-            (
-                False,
-                houdini_package_runner.items.filesystem.FileToProcess,
-                False,
-                False,
-                False,
-            ),
+            (True, True, True),
+            (False, False, False),
         ),
     )
     def test_process_path(
@@ -190,10 +185,8 @@ class TestPyLintRunner:
         mocker,
         init_runner,
         has_disabled,
-        item_type,
         has_builtins,
         verbose,
-        test_item,
     ):
         """Test PyLintRunner.process_path."""
         mock_io = mocker.patch("houdini_package_runner.runners.pylint.runner.StringIO")
@@ -209,10 +202,9 @@ class TestPyLintRunner:
 
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
-        mock_item = mocker.MagicMock(spec=item_type)
+        mock_item = mocker.MagicMock(spec=houdini_package_runner.items.base.BaseItem)
 
         mock_item.ignored_builtins = ["hou"] if has_builtins else []
-        mock_item.is_test_item = test_item
 
         mock_add_flags = mocker.patch(
             "houdini_package_runner.utils.add_or_append_to_flags"
@@ -226,56 +218,53 @@ class TestPyLintRunner:
             extra_args,
         )
 
+        to_ignore = (
+            [
+                "ABC",
+            ]
+            if has_disabled
+            else []
+        )
+        extra_command = [
+            "--some-flag",
+        ]
+        builtins = (
+            [
+                "abc",
+            ]
+            if has_builtins
+            else []
+        )
+
+        mock_config = mocker.MagicMock(
+            spec=houdini_package_runner.config.PackageRunnerConfig
+        )
+        mock_config.get_config_data.side_effect = [to_ignore, extra_command, builtins]
+
+        mocker.patch.object(
+            houdini_package_runner.runners.pylint.runner.PyLintRunner,
+            "config",
+            mock_config,
+        )
+
         expected_disabled = []
 
         inst = init_runner()
         inst._disabled = []
+        inst._extra_args = []
         inst._verbose = verbose
 
         if has_disabled:
             inst._disabled = ["one-thing"]
-            expected_disabled = inst._disabled
+            expected_disabled = inst._disabled + to_ignore
 
         inst.process_path(mock_path, mock_item)
 
         expected_args = [str(mock_path)]
         expected_args.extend(extra_args)
+        expected_args.extend(extra_command)
 
-        if isinstance(mock_item, houdini_package_runner.items.xml.XMLBase):
-            expected_disabled.extend(
-                [
-                    "invalid-name",
-                    "missing-final-newline",
-                    "missing-module-docstring",
-                    "missing-docstring",
-                    "return-outside-function",
-                ]
-            )
-
-        elif isinstance(
-            mock_item,
-            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
-        ):
-            expected_disabled.extend(
-                [
-                    "invalid-name",
-                    "missing-final-newline",
-                    "missing-module-docstring",
-                    "return-outside-function",
-                ]
-            )
-
-        if test_item:
-            expected_disabled.extend(
-                [
-                    "abstract-class-instantiated",
-                    "no-self-use",
-                    "protected-access",
-                    "too-many-arguments",
-                    "too-many-locals",
-                    "cannot-enumerate-pytest-fixtures",
-                ]
-            )
+        assert mock_config.get_config_data.call_count == 3
 
         if has_builtins:
             # Only do assert_called() here as the command list will change and be inaccurate.
@@ -305,6 +294,14 @@ class TestPyLintRunner:
 
         mock_reporter.assert_called_with(mock_io.return_value)
         mock_write.assert_called_with(mock_io.return_value.getvalue.return_value)
+
+        mock_config.get_config_data.assert_has_calls(
+            [
+                mocker.call("to_disable", mock_item, mock_path),
+                mocker.call("command", mock_item, mock_path),
+                mocker.call("known_builtins", mock_item, mock_path),
+            ]
+        )
 
 
 def test_main(mocker):

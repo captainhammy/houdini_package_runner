@@ -19,27 +19,6 @@ import houdini_package_runner.items.filesystem
 import houdini_package_runner.items.xml
 
 # =============================================================================
-# FIXTURES
-# =============================================================================
-
-
-@pytest.fixture
-def init_discoverer(mocker):
-    """Initialize a dummy PackageItemDiscoverer for testing."""
-    mocker.patch.multiple(
-        houdini_package_runner.discoverers.package.PackageItemDiscoverer,
-        __init__=lambda x, y, z: None,
-    )
-
-    def _create():
-        return houdini_package_runner.discoverers.package.PackageItemDiscoverer(
-            None, None
-        )
-
-    return _create
-
-
-# =============================================================================
 # TESTS
 # =============================================================================
 

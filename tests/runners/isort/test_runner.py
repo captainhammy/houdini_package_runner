@@ -14,6 +14,7 @@ import pathlib
 import pytest
 
 # Houdini Package Runner
+import houdini_package_runner.config
 import houdini_package_runner.items.base
 import houdini_package_runner.items.dialog_script
 import houdini_package_runner.items.digital_asset
@@ -50,7 +51,8 @@ def init_runner(mocker):
 class TestIsortRunner:
     """Test houdini_package_runner.runners.isort.runner.IsortRunner."""
 
-    def test___init__(self, mocker):
+    @pytest.mark.parametrize("pass_optional", (False, True))
+    def test___init__(self, mocker, pass_optional):
         """Test object initialization."""
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
 
@@ -58,11 +60,23 @@ class TestIsortRunner:
             houdini_package_runner.runners.isort.runner.HoudiniPackageRunner, "__init__"
         )
 
-        inst = houdini_package_runner.runners.isort.runner.IsortRunner(mock_discoverer)
+        mock_config = (
+            mocker.MagicMock(spec=houdini_package_runner.config.PackageRunnerConfig)
+            if pass_optional
+            else None
+        )
 
-        assert inst._extra_args == []
+        if pass_optional:
+            houdini_package_runner.runners.isort.runner.IsortRunner(
+                mock_discoverer, runner_config=mock_config
+            )
 
-        mock_super_init.assert_called_with(mock_discoverer, write_back=True)
+        else:
+            houdini_package_runner.runners.isort.runner.IsortRunner(mock_discoverer)
+
+        mock_super_init.assert_called_with(
+            mock_discoverer, write_back=True, runner_config=mock_config
+        )
 
     # Non-Public Methods
 
@@ -98,6 +112,16 @@ class TestIsortRunner:
         mock_process.assert_called_with(mock_load.return_value, mock_namespace)
         mock_save.assert_called_with(mock_load.return_value, mock_temp_dir)
 
+    def test__get_first_party_header(self, init_runner):
+        """Test IsortRunner._get_first_party_header."""
+        package_names = "first_party1,first_party2"
+
+        inst = init_runner()
+
+        result = inst._get_first_party_header(package_names)
+
+        assert result == "First Party1"
+
     @pytest.mark.parametrize(
         "namespace_packages, python_root_exists",
         (
@@ -107,12 +131,10 @@ class TestIsortRunner:
             (False, False),
         ),
     )
-    def test__process_config(
+    def test__get_first_party_packages(
         self, mocker, init_runner, namespace_packages, python_root_exists
     ):
-        """Test IsortRunner._process_config."""
-        settings = {}
-        config = {"settings": settings}
+        """Test IsortRunner._get_first_party_packages."""
 
         mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
         mock_namespace.package_names = (
@@ -121,7 +143,11 @@ class TestIsortRunner:
         mock_namespace.python_root = (
             "python" if python_root_exists is not None else None
         )
-        mock_namespace.hfs_path = "$TEMP/houdini19.5"
+
+        mock_find_python = mocker.patch(
+            "houdini_package_runner.runners.isort.runner._find_python_packages_from_path",
+            return_value="found_first_party1,found_first_party2",
+        )
 
         mock_discoverer_path = mocker.MagicMock(spec=pathlib.Path)
 
@@ -137,42 +163,79 @@ class TestIsortRunner:
             python_root_exists
         )
 
+        inst = init_runner()
+
+        result = inst._get_first_party_packages(mock_namespace)
+
+        if namespace_packages:
+            assert result == mock_namespace.package_names
+
+        else:
+            if python_root_exists:
+                assert result == "found_first_party1,found_first_party2"
+                mock_find_python.assert_called_with(mock_discoverer_path / "python")
+
+            else:
+                assert result is None
+                mock_find_python.assert_not_called()
+
+    def test__get_houdini_names(self, mocker, init_runner):
+        """Test IsortRunner._get_houdini_names."""
+        mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
+        mock_namespace.hfs_path = "$TEMP/houdini19.5"
+
         mock_find_hfs = mocker.patch(
             "houdini_package_runner.runners.isort.runner._find_known_houdini",
             return_value=["hou", "toolutils"],
         )
-        mock_find_python = mocker.patch(
-            "houdini_package_runner.runners.isort.runner._find_python_packages_from_path",
-            return_value="found_first_party1,found_first_party2",
+
+        inst = init_runner()
+
+        result = inst._get_houdini_names(mock_namespace)
+
+        assert result == "hou,toolutils"
+
+        mock_find_hfs.assert_called_with(
+            pathlib.Path(os.path.expandvars("$TEMP/houdini19.5"))
+        )
+
+    @pytest.mark.parametrize("first_party_packages_set", (True, False))
+    def test__process_config(self, mocker, init_runner, first_party_packages_set):
+        """Test IsortRunner._process_config."""
+        settings = {}
+        config = {"settings": settings}
+
+        mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
+
+        mock_find_houdini = mocker.patch(
+            "houdini_package_runner.runners.isort.runner.IsortRunner._get_houdini_names",
+        )
+        mock_find_first = mocker.patch(
+            "houdini_package_runner.runners.isort.runner.IsortRunner._get_first_party_packages",
+        )
+
+        mock_find_first.return_value = (
+            "package1,package2" if first_party_packages_set else None
+        )
+
+        mock_find_header = mocker.patch(
+            "houdini_package_runner.runners.isort.runner.IsortRunner._get_first_party_header",
         )
 
         inst = init_runner()
 
         inst._process_config(config, mock_namespace)
 
-        if namespace_packages:
-            assert settings["known_first_party"] == mock_namespace.package_names
-            assert settings["import_heading_firstparty"] == "First Party1"
+        assert settings["known_houdini"] == mock_find_houdini.return_value
+
+        if first_party_packages_set:
+            assert settings["known_first_party"] == mock_find_first.return_value
+            assert (
+                settings["import_heading_firstparty"] == mock_find_header.return_value
+            )
 
         else:
-            if python_root_exists:
-                assert (
-                    settings["known_first_party"]
-                    == "found_first_party1,found_first_party2"
-                )
-                assert settings["import_heading_firstparty"] == "Found First Party1"
-
-                mock_find_python.assert_called_with(mock_discoverer_path / "python")
-
-            else:
-                mock_find_python.assert_not_called()
-                assert "known_first_party" not in settings
-
-        assert settings["known_houdini"] == "hou,toolutils"
-
-        mock_find_hfs.assert_called_with(
-            pathlib.Path(os.path.expandvars("$TEMP/houdini19.5"))
-        )
+            assert "known_first_party" not in settings
 
     # Properties
 
@@ -189,17 +252,14 @@ class TestIsortRunner:
         inst.config_file = mock_config
         assert inst._config_file == mock_config
 
-    def test_extra_args(self, mocker, init_runner):
-        """Test IsortRunner.extra_args."""
-        mock_args = mocker.MagicMock(spec=list)
-
+    def test_name(self, init_runner):
+        """Test IsortRunner.name."""
         inst = init_runner()
-        inst._extra_args = mock_args
 
-        assert inst.extra_args == mock_args
+        assert inst.name == "isort"
 
         with pytest.raises(AttributeError):
-            inst.extra_args = []
+            inst.name = []
 
     # Methods
 
@@ -404,6 +464,8 @@ def test__find_python_packages_from_path(shared_datadir, packages_found):
 
 def test__load_template_config(mocker):
     """Test houdini_package_runner.runners.isort.runner._load_template_config."""
+    mock_open_text = mocker.patch("importlib.resources.open_text")
+
     mock_config = mocker.patch(
         "houdini_package_runner.runners.isort.runner.ConfigParser"
     )
@@ -412,9 +474,8 @@ def test__load_template_config(mocker):
 
     assert result == mock_config.return_value
 
-    mock_config.return_value.read.assert_called_with(
-        pathlib.Path(houdini_package_runner.runners.isort.runner.__file__).parent
-        / "isort.cfg"
+    mock_config.return_value.read_file.assert_called_with(
+        mock_open_text.return_value.__enter__.return_value
     )
 
 
