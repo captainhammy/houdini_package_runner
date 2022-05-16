@@ -9,10 +9,14 @@ import pathlib
 import tempfile
 from typing import TYPE_CHECKING, List
 
+# Houdini Package Runner
+from houdini_package_runner.config import PackageRunnerConfig
+
 # Imports for type checking.
 if TYPE_CHECKING:
     import argparse
 
+    from houdini_package_runner.config import BaseRunnerConfig
     from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
@@ -27,6 +31,7 @@ class HoudiniPackageRunner(abc.ABC):
 
     :param discoverer: The item discoverer used by the runner.
     :param write_back: Whether the runner should write the results back.
+    :param runner_config: Optional BaseRunnerConfig object.
 
     """
 
@@ -34,17 +39,29 @@ class HoudiniPackageRunner(abc.ABC):
         self,
         discoverer: BaseItemDiscoverer,
         write_back: bool = False,
+        runner_config: BaseRunnerConfig = None,
     ) -> None:
         self._discoverer = discoverer
+        self._extra_args: List[str] = []
         self._hotl_command = "hotl"
         self._list_items = False
         self._temp_dir = pathlib.Path(tempfile.mkdtemp())
         self._verbose = False
         self._write_back = write_back
 
+        if runner_config is None:
+            runner_config = PackageRunnerConfig(self.name)
+
+        self._config = runner_config
+
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
+
+    @property
+    def config(self) -> BaseRunnerConfig:
+        """The configuration for the runner."""
+        return self._config
 
     @property
     def discoverer(self) -> BaseItemDiscoverer:
@@ -52,9 +69,19 @@ class HoudiniPackageRunner(abc.ABC):
         return self._discoverer
 
     @property
+    def extra_args(self) -> List[str]:
+        """A list of extra args to pass to the runner execution."""
+        return self._extra_args
+
+    @property
     def hotl_command(self) -> str:
         """The hotl command to use when dealing with digital asset files."""
         return self._hotl_command
+
+    @property
+    @abc.abstractmethod
+    def name(self) -> str:
+        """The runner name used for identification."""
 
     @property
     def temp_dir(self) -> pathlib.Path:

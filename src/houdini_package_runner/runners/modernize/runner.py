@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, List
 import houdini_package_runner.parser
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
-from houdini_package_runner.items.dialog_script import DialogScriptInternalItem
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
@@ -22,7 +21,6 @@ if TYPE_CHECKING:
     import argparse
     import pathlib
 
-    from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
 
@@ -32,27 +30,16 @@ if TYPE_CHECKING:
 
 
 class ModernizeRunner(HoudiniPackageRunner):
-    """Implementation for a python-modernize package runner.
-
-    :param discoverer: The item discoverer used by the runner.
-
-    """
-
-    def __init__(
-        self,
-        discoverer: BaseItemDiscoverer,
-    ) -> None:
-        super().__init__(discoverer, write_back=True)
-        self._extra_args: List[str] = []
+    """Implementation for a python-modernize package runner."""
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
     @property
-    def extra_args(self) -> List[str]:
-        """A list of extra args to pass to the format command."""
-        return self._extra_args
+    def name(self) -> str:
+        """The runner name used for identification."""
+        return "modernize"
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -98,14 +85,7 @@ Any unknown args will be passed along to the modernize command.
 
         flags.extend(self.extra_args)
 
-        skip_fixers = []
-
-        # Don't want to run the import or print fixers.  The print one is already automatically
-        # imported by Houdini and the import one is not necessary as there are no relative imports
-        # and because of Houdini's bootstrapping will result in it complaining that __future__ imports
-        # are not on the first line.
-        if isinstance(item, DialogScriptInternalItem):
-            skip_fixers.extend(["import", "print"])
+        skip_fixers = self.config.get_config_data("skip_fixers", item, file_path)
 
         command = [
             "python-modernize",

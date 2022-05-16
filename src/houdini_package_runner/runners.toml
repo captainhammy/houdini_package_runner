@@ -1,0 +1,59 @@
+
+
+[black]
+    [black.item.MenuFile]
+        flags = [
+            "--line-length=150",
+        ]
+
+[pylint]
+
+    [pylint.item.XMLBase]
+        to_disable = [
+            "invalid-name",
+            "missing-final-newline",
+            "missing-module-docstring",
+            "missing-docstring",
+            "return-outside-function",
+        ]
+
+    [pylint.item.DialogScriptInternalItem]
+        to_disable = [
+            "invalid-name",
+            "missing-final-newline",
+            "missing-module-docstring",
+            "return-outside-function",
+        ]
+
+    [pylint.item.test_item]
+        to_disable = [
+            "abstract-class-instantiated",
+            "no-self-use",
+            "protected-access",
+            "too-many-arguments",
+            "too-many-locals",
+            "cannot-enumerate-pytest-fixtures",
+        ]
+
+[flake8]
+
+    [flake8.item.XMLBase]
+        command = ["--max-line-length=150"]
+        to_ignore = [
+            "W292",  # No newline at end of file
+        ]
+
+    [flake8.item.DialogScriptInternalItem]
+        to_ignore = [
+            "W292",  # No newline at end of file
+            "F706",  # 'return' outside function
+        ]
+
+[modernize]
+
+    [modernize.item.DialogScriptInternalItem]
+        # Don't want to run the import or print fixers.  The print one is already automatically
+        # imported by Houdini and the import one is not necessary as there are no relative imports
+        # and because of Houdini's bootstrapping will result in it complaining that __future__ imports
+        # are not on the first line.
+        skip_fixers = ["import", "print"]

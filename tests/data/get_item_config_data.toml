@@ -1,0 +1,25 @@
+
+
+[item.BaseItem]
+to_ignore = [
+        "A123",
+    ]
+
+[item.Foo]
+
+[item.XMLBase]
+    command = ["--max-line-length=150"]
+    to_ignore = [
+        "W292",
+    ]
+
+[item.DialogScriptInternalItem]
+    to_ignore = [
+        "W292",
+        "F706",
+    ]
+
+[item.test_item]
+    to_ignore = [
+    "T789"
+    ]

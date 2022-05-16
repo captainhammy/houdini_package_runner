@@ -15,13 +15,13 @@ from typing import TYPE_CHECKING, List
 import houdini_package_runner.parser
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
-from houdini_package_runner.items import dialog_script, xml
 from houdini_package_runner.runners.base import HoudiniPackageRunner
 
 # Imports for type checking.
 if TYPE_CHECKING:
     import argparse
 
+    from houdini_package_runner.config import BaseRunnerConfig
     from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
@@ -35,23 +35,25 @@ class Flake8Runner(HoudiniPackageRunner):
     """Implementation for a flake8 package runner.
 
     :param discoverer: The item discoverer used by the runner.
+    :param runner_config: Optional BaseRunnerConfig object.
 
     """
 
-    def __init__(self, discoverer: BaseItemDiscoverer) -> None:
-        super().__init__(discoverer, write_back=True)
+    def __init__(
+        self, discoverer: BaseItemDiscoverer, runner_config: BaseRunnerConfig = None
+    ) -> None:
+        super().__init__(discoverer, write_back=True, runner_config=runner_config)
 
         self._ignored: List[str] = []
-        self._extra_args: List[str] = []
 
     # -------------------------------------------------------------------------
     # PROPERTIES
     # -------------------------------------------------------------------------
 
     @property
-    def extra_args(self) -> List[str]:
-        """A list of extra args to pass to the format command."""
-        return self._extra_args
+    def name(self) -> str:
+        """The runner name used for identification."""
+        return "flake8"
 
     # -------------------------------------------------------------------------
     # METHODS
@@ -119,22 +121,13 @@ Any unknown args will be passed along to the flake8 command.
 
         known_builtins: List[str] = item.ignored_builtins
 
-        if isinstance(item, xml.XMLBase):
-            command.append("--max-line-length=150")
+        to_ignore.extend(self.config.get_config_data("to_ignore", item, file_path))
 
-            to_ignore.extend(
-                [
-                    "W292",  # No newline at end of file
-                ]
-            )
+        command.extend(self.config.get_config_data("command", item, file_path))
 
-        elif isinstance(item, dialog_script.DialogScriptInternalItem):
-            to_ignore.extend(
-                [
-                    "W292",  # No newline at end of file
-                    "F706",  # 'return' outside function
-                ]
-            )
+        known_builtins.extend(
+            self.config.get_config_data("known_builtins", item, file_path)
+        )
 
         if known_builtins:
             houdini_package_runner.utils.add_or_append_to_flags(

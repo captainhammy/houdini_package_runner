@@ -1,5 +1,8 @@
 """setup.py for houdini_package_runner."""
+# Standard Library
 from pathlib import Path
+
+# Third Party
 from setuptools import find_packages, setup
 
 # Package meta-data.
@@ -27,6 +30,7 @@ setup(
     packages=find_packages(where="src", exclude=("tests",)),
     install_requires=[
         "black",
+        "deepmerge",
         "flake8",
         "isort",
         "lxml",
@@ -34,6 +38,7 @@ setup(
         "pylint",
         "pyparsing",
         "termcolor",
+        "toml",
     ],
     extras_require={
         "test": [

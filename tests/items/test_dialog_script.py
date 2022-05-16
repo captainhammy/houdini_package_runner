@@ -53,22 +53,6 @@ def init_internal_item(mocker):
 
 
 @pytest.fixture
-def init_callback_item(mocker):
-    """Initialize a dummy DialogScriptCallbackItem for testing."""
-    mocker.patch.multiple(
-        houdini_package_runner.items.dialog_script.DialogScriptCallbackItem,
-        __init__=lambda x, y, z, u, v, w, a: None,
-    )
-
-    def _create():
-        return houdini_package_runner.items.dialog_script.DialogScriptCallbackItem(
-            None, None, None, None, None, None
-        )
-
-    return _create
-
-
-@pytest.fixture
 def init_menu_item(mocker):
     """Initialize a dummy DialogScriptMenuScriptItem for testing."""
     mocker.patch.multiple(
@@ -384,6 +368,43 @@ class TestDialogScriptInternalItem:
 
     # Non-public methods
 
+    @pytest.mark.parametrize(
+        "code, expected_code, is_single_line",
+        (
+            ("foo", "foo", True),
+            ("foo", "foo", False),
+            ("bar\n", "bar", True),
+            ("bar\n", "bar", False),
+        ),
+    )
+    def test__load_contents(
+        self, mocker, init_internal_item, code, expected_code, is_single_line
+    ):
+        """Test DialogScriptInternalItem._load_contents."""
+        mock_temp_path = mocker.MagicMock(spec=pathlib.Path)
+
+        mock_handle = mocker.mock_open()
+        mock_handle.return_value.read.return_value = code
+
+        mock_temp_path.open = mock_handle
+
+        mock_escape = mocker.patch(
+            "houdini_package_runner.items.dialog_script._escape_contents_for_single_line"
+        )
+
+        inst = init_internal_item()
+        inst._code = code
+        inst._is_single_line = is_single_line
+
+        result = inst._load_contents(mock_temp_path)
+
+        if is_single_line:
+            assert result == mock_escape.return_value
+            mock_escape.assert_called_with(expected_code)
+
+        else:
+            assert result == expected_code
+
     def test__post_process_contents(self, mocker, init_internal_item):
         """Test DialogScriptInternalItem._post_process_contents."""
         contents = mocker.MagicMock(spec=str)
@@ -392,6 +413,28 @@ class TestDialogScriptInternalItem:
         result = inst._post_process_contents(contents)
 
         assert result == contents
+
+    @pytest.mark.parametrize(
+        "code, expected_code",
+        (
+            ("foo", "foo\n"),
+            ("bar\n", "bar\n"),
+        ),
+    )
+    def test__write_contents(self, mocker, init_internal_item, code, expected_code):
+        """Test DialogScriptInternalItem._write_contents."""
+        mock_temp_path = mocker.MagicMock(spec=pathlib.Path)
+
+        mock_handle = mocker.mock_open()
+
+        mock_temp_path.open = mock_handle
+
+        inst = init_internal_item()
+        inst._code = code
+
+        inst._write_contents(mock_temp_path)
+
+        mock_handle.return_value.write.assert_called_with(expected_code)
 
     # Properties
 
@@ -488,18 +531,14 @@ class TestDialogScriptInternalItem:
     # Methods
 
     @pytest.mark.parametrize(
-        "write_back, single_line, contents_changed",
+        "write_back, contents_changed",
         (
-            (False, False, False),
-            (True, False, False),
-            (True, True, False),
-            (True, True, True),
-            (True, False, True),
+            (False, False),
+            (True, False),
+            (True, True),
         ),
     )
-    def test_process(
-        self, mocker, init_internal_item, write_back, single_line, contents_changed
-    ):
+    def test_process(self, mocker, init_internal_item, write_back, contents_changed):
         """Test DialogScriptInternalItem.process."""
         mock_temp_path = mocker.MagicMock(spec=pathlib.Path)
 
@@ -512,18 +551,19 @@ class TestDialogScriptInternalItem:
         mock_runner.temp_dir = mock_temp_dir
 
         mock_code = mocker.MagicMock(spec=str)
+
         mock_contents = mocker.MagicMock(spec=str) if contents_changed else mock_code
 
-        mock_handle = mocker.mock_open()
-        mock_handle.return_value.read.return_value = mock_contents
-
-        mock_temp_path.open = mock_handle
-
-        mock_escape = mocker.patch(
-            "houdini_package_runner.items.dialog_script._escape_contents_for_single_line"
+        mock_write = mocker.patch.object(
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "_write_contents",
         )
-        if not contents_changed:
-            mock_escape.return_value = mock_code
+
+        mock_load = mocker.patch.object(
+            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
+            "_load_contents",
+            return_value=mock_contents,
+        )
 
         mock_post = mocker.patch.object(
             houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
@@ -537,7 +577,6 @@ class TestDialogScriptInternalItem:
         inst._write_back = write_back
         inst._display_name = "display_name"
         inst._display_hint = ""
-        inst._is_single_line = single_line
 
         result = inst.process(mock_runner)
 
@@ -545,22 +584,17 @@ class TestDialogScriptInternalItem:
 
         mock_temp_dir.__truediv__.assert_called_with("display_name.py")
 
-        mock_handle.return_value.write.assert_called_with(mock_code)
+        mock_write.assert_called_with(mock_temp_path)
+
         mock_runner.process_path.assert_called_with(mock_temp_path, inst)
 
         if write_back:
-            if single_line:
-                mock_escape.assert_called_with(mock_contents)
-
+            mock_load.assert_called_with(mock_temp_path)
             if contents_changed:
                 assert inst._post_processed_code == mock_post.return_value
                 assert inst._contents_changed
 
-                if single_line:
-                    mock_post.assert_called_with(mock_escape.return_value)
-
-                else:
-                    mock_post.assert_called_with(mock_contents)
+                mock_post.assert_called_with(mock_contents)
 
             else:
                 assert not inst._contents_changed

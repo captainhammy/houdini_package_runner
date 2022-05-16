@@ -274,9 +274,31 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
         # The 'hou' module is always available in these items.
         self.ignored_builtins.append("hou")
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self.display_name}>"
+
     # -------------------------------------------------------------------------
     # NON-PUBLIC METHODS
     # -------------------------------------------------------------------------
+
+    def _load_contents(self, temp_path: pathlib.Path) -> str:
+        """Load the contents from the temp path.
+
+        :param temp_path: The item file path.
+        :return: The file contents.
+
+        """
+        with temp_path.open("r") as handle:
+            contents = handle.read()
+
+        # Strip any final newline that we probably added above.
+        if contents.endswith("\n"):
+            contents = contents[:-1]
+
+        if self.is_single_line:
+            contents = _escape_contents_for_single_line(contents)
+
+        return contents
 
     def _post_process_contents(  # pylint: disable=no-self-use
         self, contents: str
@@ -288,6 +310,25 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 
         """
         return contents
+
+    def _write_contents(self, temp_path: pathlib.Path) -> None:
+        """Write the contents of the item to the temp path.
+
+        :param temp_path: The item file path.
+        :return:
+
+        """
+        code = self.code
+
+        # If the code blob does not end with a new line it can cause problems with
+        # runners such as black.  Add a new line at the end of the code to more properly
+        # resemble an actual file to be processed.
+        if not code.endswith("\n"):
+            code += "\n"
+
+        # Dump the code to the temp file, so it can be processed.
+        with temp_path.open("w") as handle:
+            handle.write(code)
 
     # -------------------------------------------------------------------------
     # PROPERTIES
@@ -348,19 +389,12 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
         """
         temp_path = runner.temp_dir / f"{self.display_name}.py"
 
-        # Dump the code to the temp file, so it can be processed.
-        with temp_path.open("w") as handle:
-            handle.write(self.code)
+        self._write_contents(temp_path)
 
         result = runner.process_path(temp_path, self)
 
         if self.write_back:
-            # Read the possibly modified file.
-            with temp_path.open("r") as handle:
-                contents = handle.read()
-
-            if self.is_single_line:
-                contents = _escape_contents_for_single_line(contents)
+            contents = self._load_contents(temp_path)
 
             if self.code != contents:
                 self.contents_changed = True

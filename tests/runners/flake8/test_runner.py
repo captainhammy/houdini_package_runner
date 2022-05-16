@@ -13,6 +13,7 @@ import pathlib
 import pytest
 
 # Houdini Package Runner
+import houdini_package_runner.config
 import houdini_package_runner.items.base
 import houdini_package_runner.items.dialog_script
 import houdini_package_runner.items.digital_asset
@@ -49,7 +50,8 @@ def init_runner(mocker):
 class TestFlake8Runner:
     """Test houdini_package_runner.runners.flake8.runner.Flake8Runner."""
 
-    def test___init__(self, mocker):
+    @pytest.mark.parametrize("pass_optional", (False, True))
+    def test___init__(self, mocker, pass_optional):
         """Test object initialization."""
         mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
 
@@ -58,28 +60,38 @@ class TestFlake8Runner:
             "__init__",
         )
 
-        inst = houdini_package_runner.runners.flake8.runner.Flake8Runner(
-            mock_discoverer
+        mock_config = (
+            mocker.MagicMock(spec=houdini_package_runner.config.PackageRunnerConfig)
+            if pass_optional
+            else None
         )
 
-        assert inst._ignored == []
-        assert inst._extra_args == []
+        if pass_optional:
+            inst = houdini_package_runner.runners.flake8.runner.Flake8Runner(
+                mock_discoverer, runner_config=mock_config
+            )
 
-        mock_super_init.assert_called_with(mock_discoverer, write_back=True)
+        else:
+            inst = houdini_package_runner.runners.flake8.runner.Flake8Runner(
+                mock_discoverer
+            )
+
+        assert inst._ignored == []
+
+        mock_super_init.assert_called_with(
+            mock_discoverer, write_back=True, runner_config=mock_config
+        )
 
     # Properties
 
-    def test_extra_args(self, mocker, init_runner):
-        """Test Flake8Runner.extra_args."""
-        mock_args = mocker.MagicMock(spec=list)
-
+    def test_name(self, init_runner):
+        """Test Flake8Runner.name."""
         inst = init_runner()
-        inst._extra_args = mock_args
 
-        assert inst.extra_args == mock_args
+        assert inst.name == "flake8"
 
         with pytest.raises(AttributeError):
-            inst.extra_args = []
+            inst.name = []
 
     # Methods
 
@@ -162,26 +174,35 @@ class TestFlake8Runner:
             assert inst._ignored == []
 
     @pytest.mark.parametrize(
-        "has_ignored, item_type, has_builtins",
+        "has_ignored, has_builtins",
         (
-            (
-                True,
-                houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
-                True,
-            ),
-            (False, houdini_package_runner.items.xml.MenuFile, False),
-            (False, houdini_package_runner.items.filesystem.FileToProcess, False),
+            (True, True),
+            (False, False),
+            (False, False),
         ),
     )
-    def test_process_path(
-        self, mocker, init_runner, has_ignored, item_type, has_builtins
-    ):
+    def test_process_path(self, mocker, init_runner, has_ignored, has_builtins):
         """Test Flake8Runner.process_path."""
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
-        mock_item = mocker.MagicMock(spec=item_type)
+        mock_item = mocker.MagicMock(spec=houdini_package_runner.items.base.BaseItem)
 
         mock_item.ignored_builtins = ["hou"] if has_builtins else []
+
+        to_ignore = ["ABC"] if has_builtins else []
+        extra_command = ["--arg1", "arg1_val"]
+        builtins = ["bob"] if has_builtins else []
+
+        mock_config = mocker.MagicMock(
+            spec=houdini_package_runner.config.PackageRunnerConfig
+        )
+        mock_config.get_config_data.side_effect = [to_ignore, extra_command, builtins]
+
+        mocker.patch.object(
+            houdini_package_runner.runners.flake8.runner.Flake8Runner,
+            "config",
+            mock_config,
+        )
 
         mock_add_flags = mocker.patch(
             "houdini_package_runner.utils.add_or_append_to_flags"
@@ -209,21 +230,11 @@ class TestFlake8Runner:
 
         if has_ignored:
             inst._ignored = ["A123"]
-            expected_ignored = inst._ignored
+            expected_ignored = inst._ignored + to_ignore
 
         inst.process_path(mock_path, mock_item)
 
-        expected_args = ["flake8"]
-
-        if isinstance(mock_item, houdini_package_runner.items.xml.XMLBase):
-            expected_args.append("--max-line-length=150")
-            expected_ignored.append("W292")
-
-        elif isinstance(
-            mock_item,
-            houdini_package_runner.items.dialog_script.DialogScriptInternalItem,
-        ):
-            expected_ignored.extend(["W292", "F706"])
+        expected_args = ["flake8"] + extra_command
 
         if has_builtins:
             # Only do assert_called() here as the command list will change and be inaccurate.
@@ -234,6 +245,14 @@ class TestFlake8Runner:
 
         expected_args.extend(extra_args)
         expected_args.append(str(mock_path))
+
+        mock_config.get_config_data.assert_has_calls(
+            [
+                mocker.call("to_ignore", mock_item, mock_path),
+                mocker.call("command", mock_item, mock_path),
+                mocker.call("known_builtins", mock_item, mock_path),
+            ]
+        )
 
         mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
 

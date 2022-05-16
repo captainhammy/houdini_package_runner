@@ -3,3 +3,4 @@ include README.md
 include pyproject.toml
 include setup.py
 include tox.ini
+include src/houdini_package_runner/runners.toml
