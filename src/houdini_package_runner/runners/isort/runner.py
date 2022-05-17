@@ -45,6 +45,7 @@ class IsortRunner(HoudiniPackageRunner):
     def __init__(
         self, discoverer: BaseItemDiscoverer, runner_config: BaseRunnerConfig = None
     ) -> None:
+        # Set write_back as isort will change files by default.
         super().__init__(discoverer, write_back=True, runner_config=runner_config)
 
         self._config_file: Optional[str] = None
@@ -211,6 +212,11 @@ Any unknown args will be passed along to the isort command.
                 self.config_file = self.discoverer.path / config_file
 
         self._extra_args = extra_args
+
+        # If the check flag was passed as an extra arg then disable write_back as it
+        # will just cause unnecessary extra work.
+        if "--check" in extra_args:
+            self._write_back = False
 
         if self.config_file is None:
             self.config_file = self._generate_config(namespace)

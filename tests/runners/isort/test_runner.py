@@ -314,10 +314,14 @@ class TestIsortRunner:
         )
 
     @pytest.mark.parametrize(
-        "namespace_config_exists",
-        (None, True, False),
+        "namespace_config_exists, pass_check",
+        (
+            (None, False),
+            (True, True),
+            (False, False),
+        )
     )
-    def test_init_args_options(self, mocker, init_runner, namespace_config_exists):
+    def test_init_args_options(self, mocker, init_runner, namespace_config_exists, pass_check):
         """Test IsortRunner.init_args_options."""
         mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
         mock_namespace.config_file = None
@@ -340,7 +344,10 @@ class TestIsortRunner:
                 namespace_config_exists
             )
 
-        mock_extra_args = mocker.MagicMock(spec=list)
+        extra_args = ["--foo", "3"]
+
+        if pass_check:
+            extra_args.append("--check")
 
         mock_super_init = mocker.patch.object(
             houdini_package_runner.runners.isort.runner.HoudiniPackageRunner,
@@ -353,12 +360,13 @@ class TestIsortRunner:
 
         inst = init_runner()
         inst._config_file = None
+        inst._write_back = True
 
-        inst.init_args_options(mock_namespace, mock_extra_args)
+        inst.init_args_options(mock_namespace, extra_args)
 
-        mock_super_init.assert_called_with(mock_namespace, mock_extra_args)
+        mock_super_init.assert_called_with(mock_namespace, extra_args)
 
-        assert inst._extra_args == mock_extra_args
+        assert inst._extra_args == extra_args
 
         if namespace_config_exists is not None:
             mock_discoverer.path.__truediv__.assert_called_with(mock_config_file)
@@ -370,6 +378,9 @@ class TestIsortRunner:
             assert inst.config_file == mock_generate.return_value
 
             mock_generate.assert_called_with(mock_namespace)
+
+        if pass_check:
+            assert not inst._write_back
 
     @pytest.mark.parametrize(
         "has_config",
