@@ -319,9 +319,11 @@ class TestIsortRunner:
             (None, False),
             (True, True),
             (False, False),
-        )
+        ),
     )
-    def test_init_args_options(self, mocker, init_runner, namespace_config_exists, pass_check):
+    def test_init_args_options(
+        self, mocker, init_runner, namespace_config_exists, pass_check
+    ):
         """Test IsortRunner.init_args_options."""
         mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
         mock_namespace.config_file = None
