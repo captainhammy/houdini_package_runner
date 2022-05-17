@@ -87,6 +87,11 @@ Any unknown args will be passed along to the black command.
 
         self._extra_args = extra_args
 
+        # If the check flag was passed as an extra arg then disable write_back as it
+        # will just cause unnecessary extra work.
+        if "--check" in extra_args:
+            self._write_back = False
+
     def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 

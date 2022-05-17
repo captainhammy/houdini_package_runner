@@ -113,10 +113,14 @@ class TestBlackRunner:
 
             assert result == mock_build.return_value
 
-    def test_init_args_options(self, mocker, init_runner):
+    @pytest.mark.parametrize("pass_check", (True, False))
+    def test_init_args_options(self, mocker, init_runner, pass_check):
         """Test BlackRunner.init_args_options."""
         mock_namespace = mocker.MagicMock(spec=argparse.Namespace)
-        mock_extra_args = mocker.MagicMock(spec=list)
+        extra_args = ["--foo", "3"]
+
+        if pass_check:
+            extra_args.append("--check")
 
         mock_super_init = mocker.patch.object(
             houdini_package_runner.runners.black.runner.HoudiniPackageRunner,
@@ -124,12 +128,16 @@ class TestBlackRunner:
         )
 
         inst = init_runner()
+        inst._write_back = True
 
-        inst.init_args_options(mock_namespace, mock_extra_args)
+        inst.init_args_options(mock_namespace, extra_args)
 
-        mock_super_init.assert_called_with(mock_namespace, mock_extra_args)
+        mock_super_init.assert_called_with(mock_namespace, extra_args)
 
-        assert inst._extra_args == mock_extra_args
+        assert inst._extra_args == extra_args
+
+        if pass_check:
+            assert not inst._write_back
 
     @pytest.mark.parametrize("pass_target_version", (True, False))
     def test_process_path(self, mocker, init_runner, pass_target_version):
