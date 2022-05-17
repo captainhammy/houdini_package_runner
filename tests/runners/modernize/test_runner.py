@@ -49,6 +49,36 @@ def init_runner(mocker):
 class TestModernizeRunner:
     """Test houdini_package_runner.runners.modernize.runner.ModernizeRunner."""
 
+    @pytest.mark.parametrize("pass_optional", (False, True))
+    def test___init__(self, mocker, pass_optional):
+        """Test object initialization."""
+        mock_discoverer = mocker.MagicMock(spec=BaseItemDiscoverer)
+
+        mock_super_init = mocker.patch.object(
+            houdini_package_runner.runners.modernize.runner.HoudiniPackageRunner,
+            "__init__",
+        )
+
+        mock_config = (
+            mocker.MagicMock(spec=houdini_package_runner.config.PackageRunnerConfig)
+            if pass_optional
+            else None
+        )
+
+        if pass_optional:
+            houdini_package_runner.runners.modernize.runner.ModernizeRunner(
+                mock_discoverer, runner_config=mock_config
+            )
+
+        else:
+            houdini_package_runner.runners.modernize.runner.ModernizeRunner(
+                mock_discoverer
+            )
+
+        mock_super_init.assert_called_with(
+            mock_discoverer, write_back=True, runner_config=mock_config
+        )
+
     # Properties
 
     def test_name(self, init_runner):
