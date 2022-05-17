@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     import argparse
     import pathlib
 
+    from houdini_package_runner.config import BaseRunnerConfig
+    from houdini_package_runner.discoverers.base import BaseItemDiscoverer
     from houdini_package_runner.items.base import BaseItem
 
 
@@ -30,7 +32,18 @@ if TYPE_CHECKING:
 
 
 class ModernizeRunner(HoudiniPackageRunner):
-    """Implementation for a python-modernize package runner."""
+    """Implementation for a python-modernize package runner.
+
+    :param discoverer: The item discoverer used by the runner.
+    :param runner_config: Optional BaseRunnerConfig object.
+
+    """
+
+    def __init__(
+        self, discoverer: BaseItemDiscoverer, runner_config: BaseRunnerConfig = None
+    ) -> None:
+        # Set write_back as the runner will change files.
+        super().__init__(discoverer, write_back=True, runner_config=runner_config)
 
     # -------------------------------------------------------------------------
     # PROPERTIES
