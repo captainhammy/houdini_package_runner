@@ -65,10 +65,10 @@ def execute_subprocess_command(command: List[str], verbose: bool = False) -> int
         if return_code and not verbose:
             if proc.stdout is not None:  # pragma: no branch
                 for line in proc.stdout.readlines():
-                    print(line.decode("utf-8"))
+                    print(line.decode("utf-8").rstrip())
 
             if proc.stderr is not None:  # pragma: no branch
                 for line in proc.stderr.readlines():
-                    print(line.decode("utf-8"))
+                    print(line.decode("utf-8").rstrip())
 
         return return_code
