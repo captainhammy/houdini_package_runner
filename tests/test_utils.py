@@ -67,8 +67,8 @@ def test_add_or_append_to_flags(flags, key, values, sep, expected):
 )
 def test_execute_subprocess_command(mocker, fp, verbose, has_pyhome, return_code):
     """Test houdini_package_runner.utils.execute_subprocess_command."""
-    stdout = "This is stdout" if return_code and not verbose else None
-    stderr = "This is stderr" if return_code and not verbose else None
+    stdout = "This is stdout\n" if return_code and not verbose else None
+    stderr = "This is stderr\n" if return_code and not verbose else None
 
     mock_print = mocker.patch("builtins.print")
 
@@ -100,7 +100,7 @@ def test_execute_subprocess_command(mocker, fp, verbose, has_pyhome, return_code
     if return_code and not verbose:
         mock_print.assert_has_calls(
             [
-                mocker.call(stdout),
-                mocker.call(stderr),
+                mocker.call(stdout.rstrip()),
+                mocker.call(stderr.rstrip()),
             ]
         )
