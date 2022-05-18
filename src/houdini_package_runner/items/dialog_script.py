@@ -371,7 +371,7 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 
     @property
     def post_processed_code(self) -> str:
-        """The post-processing contents"""
+        """The post-processing contents."""
         return self._post_processed_code
 
     # -------------------------------------------------------------------------

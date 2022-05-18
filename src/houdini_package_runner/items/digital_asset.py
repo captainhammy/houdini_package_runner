@@ -213,11 +213,10 @@ class ExpandedOperatorType(BaseFileItem):
 
             for key, values in data.items():
                 # Look for sections that are Python.
-                if "IsPython" in key:
-                    if values["value"]:
-                        script_name = key.split("/")[0]
-                        section_path = self.path / script_name
-                        python_sections.append(section_path)
+                if "IsPython" in key and values["value"]:
+                    script_name = key.split("/")[0]
+                    section_path = self.path / script_name
+                    python_sections.append(section_path)
 
         return python_sections
 
@@ -323,9 +322,8 @@ class DigitalAssetDirectory(BaseFileItem):
         for line in data:
             components = line.split()
 
-            if len(components) == 2:
-                if (self.path / components[0]).is_dir():
-                    results.append(components)
+            if len(components) == 2 and (self.path / components[0]).is_dir():
+                results.append(components)
 
         return results
 

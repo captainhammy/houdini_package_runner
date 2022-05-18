@@ -33,6 +33,9 @@ build-backend = "setuptools.build_meta"
         module = "deepmerge.*"
         ignore_missing_imports = true
 
+[tool.pydocstringformatter]
+write = true
+
 [tool.coverage]
 
     [tool.coverage.run]
@@ -79,8 +82,8 @@ build-backend = "setuptools.build_meta"
         extension-pkg-whitelist = ['PySide2']
         ignore=['CVS']
         ignore-patterns=["icons.py"]
+        ignore-paths=["^tests/.*$"]
         persistent = ['no']
-        load-plugins = ['pylint_pytest']
         suggestion-mode = ['yes']
         unsafe-load-any-extension = ['no']
 

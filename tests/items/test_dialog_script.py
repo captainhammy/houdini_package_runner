@@ -134,7 +134,7 @@ class TestDialogScriptItem:
     def test__gather_items(
         self, mocker, shared_datadir, init_item, write_back, test_file
     ):
-        """Test DialogScriptItem._gather_items"""
+        """Test DialogScriptItem._gather_items."""
         if test_file is not None:
             with (shared_datadir / test_file).open() as handle:
                 contents = handle.read()
@@ -186,7 +186,7 @@ class TestDialogScriptItem:
             assert not result
 
     def test__handle_changed_contents(self, mocker, shared_datadir, init_item):
-        """Test DialogScriptItem._handle_changed_contents"""
+        """Test DialogScriptItem._handle_changed_contents."""
         output_path = shared_datadir / "_handle_changed_contents.ds"
 
         with (
@@ -226,7 +226,7 @@ class TestDialogScriptItem:
     # Properties
 
     def test_name(self, mocker, init_item):
-        """Test DialogScriptItem.name"""
+        """Test DialogScriptItem.name."""
         mock_name = mocker.MagicMock(spec=str)
 
         inst = init_item()

@@ -207,9 +207,8 @@ Any unknown args will be passed along to the isort command.
 
         config_file = namespace.config_file
 
-        if config_file is not None:
-            if (self.discoverer.path / config_file).exists():
-                self.config_file = self.discoverer.path / config_file
+        if config_file is not None and (self.discoverer.path / config_file).exists():
+            self.config_file = self.discoverer.path / config_file
 
         self._extra_args = extra_args
 
@@ -282,10 +281,9 @@ def _find_python_modules(folder: pathlib.Path) -> List[str]:
     module_names = []
 
     for child in folder.iterdir():
-        if child.is_file() and child.suffix in (".py", ".so"):
-            module_names.append(child.stem)
-
-        elif child.is_dir() and not child.stem.startswith("__"):
+        if (child.is_file() and child.suffix in (".py", ".so")) or (
+            child.is_dir() and not child.stem.startswith("__")
+        ):
             module_names.append(child.stem)
 
     return sorted(module_names)

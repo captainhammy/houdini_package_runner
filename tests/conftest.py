@@ -1,4 +1,4 @@
-"""conftest.py file for testing houdini_package_runner."""
+"""Conftest.py file for testing houdini_package_runner."""
 
 # =============================================================================
 # IMPORTS

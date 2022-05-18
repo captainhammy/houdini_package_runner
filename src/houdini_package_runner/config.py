@@ -203,7 +203,7 @@ def _get_base_classes(cls: type) -> List[type]:
     :return: A list of all the base classes.
 
     """
-    bases = [base for base in cls.__bases__ if not base == object]
+    bases = [base for base in cls.__bases__ if base != object]
 
     for base in bases:
         bases.extend(_get_base_classes(base))

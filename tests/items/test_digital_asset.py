@@ -711,7 +711,7 @@ class TestBinaryDigitalAssetFile:
 
     @pytest.mark.parametrize("return_code", (1, 0))
     def test__collapse_dir(self, mocker, init_binary, return_code):
-        """Test BinaryDigitalAssetFile._collapse_dir"""
+        """Test BinaryDigitalAssetFile._collapse_dir."""
         mock_target = mocker.MagicMock(spec=pathlib.Path)
 
         mock_path = mocker.MagicMock(spec=pathlib.Path)
@@ -741,7 +741,7 @@ class TestBinaryDigitalAssetFile:
 
     @pytest.mark.parametrize("return_code", (1, 0))
     def test__extract_file(self, mocker, init_binary, return_code):
-        """Test BinaryDigitalAssetFile._extract_file"""
+        """Test BinaryDigitalAssetFile._extract_file."""
         mock_target = mocker.MagicMock(spec=pathlib.Path)
 
         mock_path = mocker.MagicMock(spec=pathlib.Path)

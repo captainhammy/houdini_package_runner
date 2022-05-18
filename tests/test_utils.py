@@ -41,7 +41,7 @@ import houdini_package_runner.utils
     ),
 )
 def test_add_or_append_to_flags(flags, key, values, sep, expected):
-    """Test houdini_package_runner.utils.add_or_append_to_flags"""
+    """Test houdini_package_runner.utils.add_or_append_to_flags."""
     test_flags = copy.copy(flags)
 
     if sep is not None:
