@@ -174,10 +174,10 @@ class TestPyLintRunner:
             assert inst._disabled == []
 
     @pytest.mark.parametrize(
-        "has_disabled, has_builtins, verbose",
+        "has_disabled, has_builtins, verbose, has_output",
         (
-            (True, True, True),
-            (False, False, False),
+            (True, True, True, False),
+            (False, False, False, True),
         ),
     )
     def test_process_path(
@@ -187,9 +187,12 @@ class TestPyLintRunner:
         has_disabled,
         has_builtins,
         verbose,
+        has_output,
     ):
         """Test PyLintRunner.process_path."""
         mock_io = mocker.patch("houdini_package_runner.runners.pylint.runner.StringIO")
+        mock_io.return_value.getvalue.return_value = "foo" if has_output else ""
+
         mock_run = mocker.patch("houdini_package_runner.runners.pylint.runner.lint.Run")
         mock_reporter = mocker.patch(
             "houdini_package_runner.runners.pylint.runner.ColorizedTextReporter"
@@ -258,7 +261,9 @@ class TestPyLintRunner:
             inst._disabled = ["one-thing"]
             expected_disabled = inst._disabled + to_ignore
 
-        inst.process_path(mock_path, mock_item)
+        result = inst.process_path(mock_path, mock_item)
+
+        assert result == mock_run.return_value.linter.msg_status
 
         expected_args = [str(mock_path)]
         expected_args.extend(extra_args)
@@ -277,7 +282,7 @@ class TestPyLintRunner:
             mock_print.assert_has_calls(
                 (
                     mocker.call(mock_colored.return_value, mock_colored.return_value),
-                    mocker.call(),
+                    # mocker.call(),
                 )
             )
 
@@ -293,7 +298,9 @@ class TestPyLintRunner:
         )
 
         mock_reporter.assert_called_with(mock_io.return_value)
-        mock_write.assert_called_with(mock_io.return_value.getvalue.return_value)
+
+        if has_output:
+            mock_write.assert_called_with(mock_io.return_value.getvalue.return_value)
 
         mock_config.get_config_data.assert_has_calls(
             [

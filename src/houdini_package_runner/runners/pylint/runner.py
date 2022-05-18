@@ -110,12 +110,12 @@ Any unknown args will be passed along to the pylint command.
         if extra_args:
             self._extra_args.extend(extra_args)
 
-    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> bool:
+    def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
         :param file_path: The path to lint.
         :param item: The item to lint.
-        :return: Whether violations were detected.
+        :return: The process return code.
 
         """
         flags = []
@@ -145,26 +145,24 @@ Any unknown args will be passed along to the pylint command.
         if to_disable:
             flags.append(f"--disable={','.join(to_disable)}")
 
-        buf = StringIO()
-
         if self.verbose:
             print(
                 termcolor.colored(str(item), "cyan"),
                 termcolor.colored(" ".join(flags), "magenta"),
             )
 
-        lint.Run(
+        buf = StringIO()
+
+        result = lint.Run(
             [str(file_path)] + flags, reporter=ColorizedTextReporter(buf), exit=False
         )
 
-        stdout = buf.getvalue()
+        output = buf.getvalue()
 
-        sys.stdout.write(stdout)
+        if output:
+            sys.stdout.write(output)
 
-        if self.verbose:
-            print()
-
-        return not stdout
+        return result.linter.msg_status
 
 
 # =============================================================================
