@@ -5,6 +5,7 @@
 # =============================================================================
 
 # Standard Library
+import abc
 import importlib.resources
 import os
 import pathlib
@@ -77,7 +78,7 @@ class TestBaseRunnerConfig:
     # Properties
 
     def test_data(self, mocker, init_base_config):
-        """Test BaseRunnerConfig.data"""
+        """Test BaseRunnerConfig.data."""
         mock_data = mocker.MagicMock(spec=dict)
 
         inst = init_base_config()
@@ -89,7 +90,7 @@ class TestBaseRunnerConfig:
             inst.data = {}
 
     def test_runner_name(self, mocker, init_base_config):
-        """Test BaseRunnerConfig.runner_name"""
+        """Test BaseRunnerConfig.runner_name."""
         mock_name = mocker.MagicMock(spec=str)
 
         inst = init_base_config()
@@ -105,7 +106,7 @@ class TestPackageRunnerConfig:
     """Test houdini_package_runner.config.PackageRunnerConfig."""
 
     def test__get_file_config_data(self, mocker, shared_datadir, init_package_config):
-        """Test PackageRunnerConfig._get_file_config_data"""
+        """Test PackageRunnerConfig._get_file_config_data."""
         config_file = shared_datadir / "get_file_config_data.toml"
 
         with config_file.open() as handle:
@@ -124,7 +125,7 @@ class TestPackageRunnerConfig:
     def test__get_item_config_data(
         self, mocker, shared_datadir, init_package_config, test_item
     ):
-        """Test PackageRunnerConfig._get_item_config_data"""
+        """Test PackageRunnerConfig._get_item_config_data."""
         config_file = shared_datadir / "get_item_config_data.toml"
 
         with config_file.open() as handle:
@@ -153,7 +154,7 @@ class TestPackageRunnerConfig:
         mock_build.assert_called_with(mock_item)
 
     def test_get_config_data(self, mocker, init_package_config):
-        """Test PackageRunnerConfig.get_config_data"""
+        """Test PackageRunnerConfig.get_config_data."""
         mock_key = mocker.MagicMock(spec=str)
         mock_item = mocker.MagicMock(spec=houdini_package_runner.items.base.BaseItem)
         mock_path = mocker.MagicMock(spec=pathlib.Path)
@@ -179,7 +180,7 @@ class TestPackageRunnerConfig:
         mock_get_file_data.assert_called_with(mock_path, mock_key)
 
     def test_load_config(self, mocker, init_package_config):
-        """Test PackageRunnerConfig.load_config"""
+        """Test PackageRunnerConfig.load_config."""
         mock_load = mocker.patch(
             "houdini_package_runner.config._load_default_runner_config"
         )
@@ -248,17 +249,20 @@ def test_build_config_item_list():
 
     """
 
-    class A:
+    class A(abc.ABC):
         """Test base class."""
 
     class B(A):
-        """Another class"""
+        """Another class."""
 
-    class C(B):
-        """Child class"""
+    class C(B, metaclass=abc.ABCMeta):
+        """Child class."""
 
-    inst = C()
+    class D(C):
+        """Another child class."""
+
+    inst = D()
 
     result = houdini_package_runner.config.build_config_item_list(inst)
 
-    assert result == ("C", "B", "A")
+    assert result == ("D", "C", "B", "A")
