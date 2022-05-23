@@ -61,6 +61,7 @@ class ModernizeRunner(HoudiniPackageRunner):
     @staticmethod
     def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
         """Build a parser for the runner.
+
         :param parser: Optional parser to add arguments to, otherwise a new one will be created.
         :return: The common parser for the runner.
 

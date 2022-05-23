@@ -1,4 +1,4 @@
-"""setup.py for houdini_package_runner."""
+"""Setup.py for houdini_package_runner."""
 # Standard Library
 from pathlib import Path
 
