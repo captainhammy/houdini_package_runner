@@ -104,3 +104,27 @@ def test_execute_subprocess_command(mocker, fp, verbose, has_pyhome, return_code
                 mocker.call(stderr.rstrip()),
             ]
         )
+
+
+@pytest.mark.parametrize(
+    "flags, to_ignore, expected",
+    (
+        (
+            ["foo", "--bar=123", "--baz=456", "--bar=789"],
+            None,
+            ["foo", "--bar=123", "--baz=456"],
+        ),
+        (
+            ["foo", "--bar=123", "--baz=456", "--bar=789"],
+            ["--bar"],
+            ["foo", "--bar=123", "--baz=456", "--bar=789"],
+        ),
+    ),
+)
+def test_remove_duplicate_flags(flags, to_ignore, expected):
+    """Test houdini_package_runner.utils.remove_duplicate_flags."""
+    result = houdini_package_runner.utils.remove_duplicate_flags(
+        flags, to_ignore=to_ignore
+    )
+
+    assert result == expected

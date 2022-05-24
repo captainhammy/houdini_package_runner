@@ -157,6 +157,11 @@ class TestBlackRunner:
             mock_config,
         )
 
+        mock_remove = mocker.patch(
+            "houdini_package_runner.utils.remove_duplicate_flags",
+            side_effect=lambda f: f,
+        )
+
         mock_execute = mocker.patch(
             "houdini_package_runner.utils.execute_subprocess_command"
         )
@@ -185,6 +190,8 @@ class TestBlackRunner:
 
         if not pass_target_version:
             expected_args.insert(1, "--target-version=py37")
+
+        mock_remove.assert_called()
 
         mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
 

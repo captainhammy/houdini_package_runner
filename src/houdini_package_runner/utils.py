@@ -7,7 +7,7 @@
 # Standard Library
 import os
 import subprocess
-from typing import List
+from typing import List, Optional
 
 # =============================================================================
 # FUNCTIONS
@@ -72,3 +72,41 @@ def execute_subprocess_command(command: List[str], verbose: bool = False) -> int
                     print(line.decode("utf-8").rstrip())
 
         return return_code
+
+
+def remove_duplicate_flags(
+    flags: List[str], to_ignore: Optional[List[str]] = None
+) -> List[str]:
+    """Remove any duplicate flag items even if the values differ.
+
+    >>> remove_duplicate_flags(["foo", "--bar=123", "--baz=456", "--bar=789"])
+    ['foo', '--bar=123', '--baz=456']
+    >>> remove_duplicate_flags(["foo", "--bar=123", "--baz=456", "--bar=789"], to_ignore=["--bar"])
+    ['foo', '--bar=123', '--baz=456', '--bar=789']
+
+    :param flags: A list of flags to check.
+    :param to_ignore: An optional list of flag names to ignore duplicate of.
+    :return: The filtered list of flags.
+
+    """
+    if to_ignore is None:
+        to_ignore = []
+
+    new_flags = []
+
+    seen = []
+
+    for flag in flags:
+        if "=" in flag:
+            name, value = flag.split("=")
+
+            # If we've seen this flag already, and we're not ignoring
+            # duplicates of it specifically then skip it.
+            if name in seen and name not in to_ignore:
+                continue
+
+            seen.append(name)
+
+        new_flags.append(flag)
+
+    return new_flags
