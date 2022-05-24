@@ -371,7 +371,7 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 
     @property
     def post_processed_code(self) -> str:
-        """The post-processing contents"""
+        """The post-processing contents."""
         return self._post_processed_code
 
     # -------------------------------------------------------------------------
@@ -446,6 +446,7 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
     :param parm_start: The start position of the parm.
     :param span: The span of the parm data.
     :param display_name: The item display name.
+    :param parm_index: The parameter index.
     :param write_back: Whether the item should write itself back to disk.
 
     """
@@ -457,6 +458,7 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
         parm_start: int,
         span: Tuple[int, int],
         display_name: str,
+        parm_index: int,
         write_back: bool = False,
     ) -> None:
         start_offset, end_offset = _get_ds_file_offset(parm_start, span)
@@ -465,7 +467,7 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
             parm, code, start_offset, end_offset, display_name, write_back=write_back
         )
 
-        self._display_hint = "default"
+        self._display_hint = "default" + str(parm_index)
         self._is_single_line = True
 
 
@@ -671,9 +673,13 @@ def _get_expression_items(
 
     default_python_expressions = _get_default_python_expressions(parm)
 
-    for expr, span in default_python_expressions:
+    # Enumerate so we can get an index to make the items unique in the event the
+    # parameter has more than one component.  This is not guaranteed to match the
+    # actual parameter index of the data as it is possible that any of the components
+    # have defaults which are not expressions or are Hscript expressions.
+    for idx, (expr, span) in enumerate(default_python_expressions):
         items.append(
-            DialogScriptDefaultExpressionItem(parm, expr, parm_start, span, name)
+            DialogScriptDefaultExpressionItem(parm, expr, parm_start, span, name, idx)
         )
 
     return items

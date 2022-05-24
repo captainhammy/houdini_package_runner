@@ -134,7 +134,7 @@ class TestDialogScriptItem:
     def test__gather_items(
         self, mocker, shared_datadir, init_item, write_back, test_file
     ):
-        """Test DialogScriptItem._gather_items"""
+        """Test DialogScriptItem._gather_items."""
         if test_file is not None:
             with (shared_datadir / test_file).open() as handle:
                 contents = handle.read()
@@ -186,7 +186,7 @@ class TestDialogScriptItem:
             assert not result
 
     def test__handle_changed_contents(self, mocker, shared_datadir, init_item):
-        """Test DialogScriptItem._handle_changed_contents"""
+        """Test DialogScriptItem._handle_changed_contents."""
         output_path = shared_datadir / "_handle_changed_contents.ds"
 
         with (
@@ -226,7 +226,7 @@ class TestDialogScriptItem:
     # Properties
 
     def test_name(self, mocker, init_item):
-        """Test DialogScriptItem.name"""
+        """Test DialogScriptItem.name."""
         mock_name = mocker.MagicMock(spec=str)
 
         inst = init_item()
@@ -697,12 +697,19 @@ class TestDialogScriptDefaultExpressionItem:
         mock_parm_start = mocker.MagicMock(spec=int)
         mock_span = mocker.MagicMock(spec=tuple)
         mock_display_name = mocker.MagicMock(spec=str)
+        mock_index = mocker.MagicMock(spec=int)
         mock_write_back = mocker.MagicMock(spec=bool)
 
         if pass_defaults:
             inst = houdini_package_runner.items.dialog_script.DialogScriptDefaultExpressionItem(
-                mock_parm, mock_code, mock_parm_start, mock_span, mock_display_name
+                mock_parm,
+                mock_code,
+                mock_parm_start,
+                mock_span,
+                mock_display_name,
+                mock_index,
             )
+
             mock_super_init.assert_called_with(
                 mock_parm,
                 mock_code,
@@ -719,8 +726,10 @@ class TestDialogScriptDefaultExpressionItem:
                 mock_parm_start,
                 mock_span,
                 mock_display_name,
+                mock_index,
                 write_back=mock_write_back,
             )
+
             mock_super_init.assert_called_with(
                 mock_parm,
                 mock_code,
@@ -732,7 +741,7 @@ class TestDialogScriptDefaultExpressionItem:
 
         mock_get_offset.assert_called_with(mock_parm_start, mock_span)
 
-        assert inst._display_hint == "default"
+        assert inst._display_hint == "default" + str(mock_index)
         assert inst._is_single_line
 
 
@@ -990,10 +999,13 @@ def test__get_expression_items(mocker):
     mock_parm_start = mocker.MagicMock(spec=int)
     mock_name = mocker.MagicMock(spec=str)
 
-    mock_expr = mocker.MagicMock(spec=str)
-    mock_span = mocker.MagicMock(spec=tuple)
+    mock_expr1 = mocker.MagicMock(spec=str)
+    mock_span1 = mocker.MagicMock(spec=tuple)
 
-    mock_default_expressions = [(mock_expr, mock_span)]
+    mock_expr2 = mocker.MagicMock(spec=str)
+    mock_span2 = mocker.MagicMock(spec=tuple)
+
+    mock_default_expressions = [(mock_expr1, mock_span1), (mock_expr2, mock_span2)]
     mock_get_exprs = mocker.patch(
         "houdini_package_runner.items.dialog_script._get_default_python_expressions",
         return_value=mock_default_expressions,
@@ -1007,12 +1019,19 @@ def test__get_expression_items(mocker):
         mock_parm, mock_parm_start, mock_name
     )
 
-    assert result == [mock_expr_item.return_value]
+    assert result == [mock_expr_item.return_value, mock_expr_item.return_value]
 
     mock_get_exprs.assert_called_with(mock_parm)
 
-    mock_expr_item.assert_called_with(
-        mock_parm, mock_expr, mock_parm_start, mock_span, mock_name
+    mock_expr_item.assert_has_calls(
+        [
+            mocker.call(
+                mock_parm, mock_expr1, mock_parm_start, mock_span1, mock_name, 0
+            ),
+            mocker.call(
+                mock_parm, mock_expr2, mock_parm_start, mock_span2, mock_name, 1
+            ),
+        ]
     )
 
 

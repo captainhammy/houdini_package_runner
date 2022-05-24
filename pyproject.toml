@@ -80,7 +80,6 @@ build-backend = "setuptools.build_meta"
         ignore=['CVS']
         ignore-patterns=["icons.py"]
         persistent = ['no']
-        load-plugins = ['pylint_pytest']
         suggestion-mode = ['yes']
         unsafe-load-any-extension = ['no']
 
@@ -147,7 +146,7 @@ build-backend = "setuptools.build_meta"
         bad-functions='apply,input'
 
     [tool.pylint.'DESIGN']
-        max-args = 7
+        max-args = 8
         max-attributes = 30
         max-bool-expr = 5
         max-branches = 40
