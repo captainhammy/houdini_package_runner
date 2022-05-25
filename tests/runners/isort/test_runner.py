@@ -385,11 +385,18 @@ class TestIsortRunner:
             assert not inst._write_back
 
     @pytest.mark.parametrize(
-        "has_config",
-        (True, False),
+        "has_config, verbose",
+        (
+            (True, True),
+            (False, False),
+        ),
     )
-    def test_process_path(self, mocker, init_runner, has_config):
+    def test_process_path(self, mocker, init_runner, has_config, verbose):
         """Test IsortRunner.process_path."""
+        mock_print = mocker.patch(
+            "houdini_package_runner.runners.utils.print_runner_command"
+        )
+
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
         mock_item = mocker.MagicMock(
@@ -417,10 +424,8 @@ class TestIsortRunner:
             config_file,
         )
 
-        mock_verbose = mocker.MagicMock(spec=bool)
-
         inst = init_runner()
-        inst._verbose = mock_verbose
+        inst._verbose = verbose
 
         inst.process_path(mock_path, mock_item)
 
@@ -431,7 +436,13 @@ class TestIsortRunner:
 
         expected_args.extend(extra_args + [str(mock_path)])
 
-        mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
+        if verbose:
+            mock_print.assert_called_with(mock_item, expected_args)
+
+        else:
+            mock_print.assert_not_called()
+
+        mock_execute.assert_called_with(expected_args, verbose=verbose)
 
 
 def test__find_known_houdini(shared_datadir):

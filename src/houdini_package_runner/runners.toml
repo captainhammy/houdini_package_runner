@@ -2,7 +2,7 @@
 
 [black]
     [black.item.MenuFile]
-        flags = [
+        command = [
             "--line-length=150",
         ]
 

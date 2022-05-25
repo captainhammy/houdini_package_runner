@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 # Houdini Package Runner
 import houdini_package_runner.parser
+import houdini_package_runner.runners.utils
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
 from houdini_package_runner.runners.base import HoudiniPackageRunner
@@ -240,8 +241,11 @@ Any unknown args will be passed along to the isort command.
 
         command.append(str(file_path))
 
+        if self.verbose:
+            houdini_package_runner.runners.utils.print_runner_command(item, command)
+
         return houdini_package_runner.utils.execute_subprocess_command(
-            command, verbose=self._verbose
+            command, verbose=self.verbose
         )
 
 
