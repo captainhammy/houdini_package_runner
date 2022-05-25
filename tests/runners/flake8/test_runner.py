@@ -208,6 +208,11 @@ class TestFlake8Runner:
             "houdini_package_runner.utils.add_or_append_to_flags"
         )
 
+        mock_remove = mocker.patch(
+            "houdini_package_runner.utils.remove_duplicate_flags",
+            side_effect=lambda f: f,
+        )
+
         mock_execute = mocker.patch(
             "houdini_package_runner.utils.execute_subprocess_command"
         )
@@ -253,6 +258,8 @@ class TestFlake8Runner:
                 mocker.call("known_builtins", mock_item, mock_path),
             ]
         )
+
+        mock_remove.assert_called()
 
         mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
 

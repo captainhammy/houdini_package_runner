@@ -139,6 +139,9 @@ Any unknown args will be passed along to the flake8 command.
 
         command.extend(self.extra_args)
 
+        # Remove any duplicate items that could result in unexpected behavior.
+        command = houdini_package_runner.utils.remove_duplicate_flags(command)
+
         command.append(str(file_path))
 
         return houdini_package_runner.utils.execute_subprocess_command(
