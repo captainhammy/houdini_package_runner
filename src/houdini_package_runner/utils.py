@@ -98,7 +98,7 @@ def remove_duplicate_flags(
 
     for flag in flags:
         if "=" in flag:
-            name, value = flag.split("=")
+            name = flag.split("=")[0]
 
             # If we've seen this flag already, and we're not ignoring
             # duplicates of it specifically then skip it.
