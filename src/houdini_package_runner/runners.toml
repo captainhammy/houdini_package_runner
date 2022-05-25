@@ -6,6 +6,12 @@
             "--line-length=150",
         ]
 
+    [black.item.DialogScriptCallbackItem]
+        command = ["--line-length=1000"]
+
+    [black.item.DialogScriptDefaultExpressionItem]
+        command = ["--line-length=1000"]
+
 [pylint]
 
     [pylint.item.XMLBase]
@@ -15,6 +21,11 @@
             "missing-module-docstring",
             "missing-docstring",
             "return-outside-function",
+        ]
+
+    [pylint.item.DialogScriptDefaultExpressionItem]
+        to_disable = [
+            "expression-not-assigned",
         ]
 
     [pylint.item.DialogScriptInternalItem]
@@ -48,6 +59,12 @@
             "W292",  # No newline at end of file
             "F706",  # 'return' outside function
         ]
+
+    [flake8.item.DialogScriptCallbackItem]
+        command = ["--max-line-length=1000"]
+
+    [flake8.item.DialogScriptDefaultExpressionItem]
+        command = ["--max-line-length=1000"]
 
 [modernize]
 
