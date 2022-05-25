@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, List
 
 # Houdini Package Runner
 import houdini_package_runner.parser
+import houdini_package_runner.runners.utils
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
 from houdini_package_runner.runners.base import HoudiniPackageRunner
