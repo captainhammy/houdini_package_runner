@@ -1,4 +1,4 @@
-"""Base class implementation for a package runner"""
+"""Base class implementation for a package runner."""
 
 # Future
 from __future__ import annotations

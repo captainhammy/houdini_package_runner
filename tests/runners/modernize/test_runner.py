@@ -132,9 +132,19 @@ class TestModernizeRunner:
 
         assert inst._extra_args == mock_extra_args
 
-    @pytest.mark.parametrize("has_fixers", (True, False))
-    def test_process_path(self, mocker, init_runner, has_fixers):
+    @pytest.mark.parametrize(
+        "has_fixers, verbose",
+        (
+            (True, True),
+            (False, False),
+        ),
+    )
+    def test_process_path(self, mocker, init_runner, has_fixers, verbose):
         """Test ModernizeRunner.process_path."""
+        mock_print = mocker.patch(
+            "houdini_package_runner.runners.utils.print_runner_command"
+        )
+
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
         mock_config = mocker.MagicMock(
@@ -164,10 +174,8 @@ class TestModernizeRunner:
             extra_args,
         )
 
-        mock_verbose = mocker.MagicMock(spec=bool)
-
         inst = init_runner()
-        inst._verbose = mock_verbose
+        inst._verbose = verbose
 
         inst.process_path(mock_path, mock_item)
 
@@ -181,7 +189,13 @@ class TestModernizeRunner:
             expected_args.insert(5, "import,print")
             expected_args.insert(5, "--nofix")
 
-        mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
+        if verbose:
+            mock_print.assert_called_with(mock_item, expected_args)
+
+        else:
+            mock_print.assert_not_called()
+
+        mock_execute.assert_called_with(expected_args, verbose=verbose)
 
 
 def test_main(mocker):

@@ -144,8 +144,11 @@ Any unknown args will be passed along to the flake8 command.
 
         command.append(str(file_path))
 
+        if self.verbose:
+            houdini_package_runner.runners.utils.print_runner_command(item, command)
+
         return houdini_package_runner.utils.execute_subprocess_command(
-            command, verbose=self._verbose
+            command, verbose=self.verbose
         )
 
 

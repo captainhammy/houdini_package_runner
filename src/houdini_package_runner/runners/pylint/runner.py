@@ -14,13 +14,13 @@ from io import StringIO
 from typing import TYPE_CHECKING, List
 
 # Third Party
-import termcolor
 from pylint import lint
 from pylint.reporters.text import ColorizedTextReporter
 
 # Houdini Package Runner
 import houdini_package_runner.config
 import houdini_package_runner.parser
+import houdini_package_runner.runners.utils
 import houdini_package_runner.utils
 from houdini_package_runner.discoverers import package
 from houdini_package_runner.runners.base import HoudiniPackageRunner
@@ -145,17 +145,16 @@ Any unknown args will be passed along to the pylint command.
         if to_disable:
             flags.append(f"--disable={','.join(to_disable)}")
 
+        command = flags + [str(file_path)]
+
         if self.verbose:
-            print(
-                termcolor.colored(str(item), "cyan"),
-                termcolor.colored(" ".join(flags), "magenta"),
+            houdini_package_runner.runners.utils.print_runner_command(
+                item, command, extra="pylint --output-format=colorized "
             )
 
         buf = StringIO()
 
-        result = lint.Run(
-            [str(file_path)] + flags, reporter=ColorizedTextReporter(buf), exit=False
-        )
+        result = lint.Run(command, reporter=ColorizedTextReporter(buf), exit=False)
 
         output = buf.getvalue()
 

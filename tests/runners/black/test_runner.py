@@ -139,9 +139,19 @@ class TestBlackRunner:
         if pass_check:
             assert not inst._write_back
 
-    @pytest.mark.parametrize("pass_target_version", (True, False))
-    def test_process_path(self, mocker, init_runner, pass_target_version):
+    @pytest.mark.parametrize(
+        "pass_target_version, verbose",
+        (
+            (True, True),
+            (False, False),
+        ),
+    )
+    def test_process_path(self, mocker, init_runner, pass_target_version, verbose):
         """Test BlackRunner.process_path."""
+        mock_print = mocker.patch(
+            "houdini_package_runner.runners.utils.print_runner_command"
+        )
+
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
         mock_item = mocker.MagicMock(spec=houdini_package_runner.items.base.BaseItem)
@@ -177,14 +187,12 @@ class TestBlackRunner:
             extra_args,
         )
 
-        mock_verbose = mocker.MagicMock(spec=bool)
-
         inst = init_runner()
-        inst._verbose = mock_verbose
+        inst._verbose = verbose
 
         inst.process_path(mock_path, mock_item)
 
-        mock_config.get_config_data.assert_called_with("flags", mock_item, mock_path)
+        mock_config.get_config_data.assert_called_with("command", mock_item, mock_path)
 
         expected_args = ["black"] + ["--foo", "bar"] + extra_args + [str(mock_path)]
 
@@ -193,7 +201,13 @@ class TestBlackRunner:
 
         mock_remove.assert_called()
 
-        mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
+        if verbose:
+            mock_print.assert_called_with(mock_item, expected_args)
+
+        else:
+            mock_print.assert_not_called()
+
+        mock_execute.assert_called_with(expected_args, verbose=verbose)
 
 
 def test_main(mocker):

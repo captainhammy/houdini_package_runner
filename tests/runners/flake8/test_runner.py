@@ -174,15 +174,20 @@ class TestFlake8Runner:
             assert inst._ignored == []
 
     @pytest.mark.parametrize(
-        "has_ignored, has_builtins",
+        "has_ignored, has_builtins, verbose",
         (
-            (True, True),
-            (False, False),
-            (False, False),
+            (True, True, True),
+            (False, False, False),
         ),
     )
-    def test_process_path(self, mocker, init_runner, has_ignored, has_builtins):
+    def test_process_path(
+        self, mocker, init_runner, has_ignored, has_builtins, verbose
+    ):
         """Test Flake8Runner.process_path."""
+        mock_print = mocker.patch(
+            "houdini_package_runner.runners.utils.print_runner_command"
+        )
+
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
         mock_item = mocker.MagicMock(spec=houdini_package_runner.items.base.BaseItem)
@@ -225,13 +230,11 @@ class TestFlake8Runner:
             extra_args,
         )
 
-        mock_verbose = mocker.MagicMock(spec=bool)
-
         expected_ignored = []
 
         inst = init_runner()
         inst._ignored = []
-        inst._verbose = mock_verbose
+        inst._verbose = verbose
 
         if has_ignored:
             inst._ignored = ["A123"]
@@ -261,7 +264,13 @@ class TestFlake8Runner:
 
         mock_remove.assert_called()
 
-        mock_execute.assert_called_with(expected_args, verbose=mock_verbose)
+        if verbose:
+            mock_print.assert_called_with(mock_item, expected_args)
+
+        else:
+            mock_print.assert_not_called()
+
+        mock_execute.assert_called_with(expected_args, verbose=verbose)
 
 
 def test_main(mocker):

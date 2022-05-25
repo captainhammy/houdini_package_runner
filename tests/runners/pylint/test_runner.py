@@ -198,10 +198,10 @@ class TestPyLintRunner:
             "houdini_package_runner.runners.pylint.runner.ColorizedTextReporter"
         )
 
-        mock_print = mocker.patch("builtins.print")
+        mock_print = mocker.patch(
+            "houdini_package_runner.runners.utils.print_runner_command"
+        )
         mock_write = mocker.patch("sys.stdout.write")
-
-        mock_colored = mocker.patch("termcolor.colored")
 
         mock_path = mocker.MagicMock(spec=pathlib.Path)
 
@@ -265,9 +265,7 @@ class TestPyLintRunner:
 
         assert result == mock_run.return_value.linter.msg_status
 
-        expected_args = [str(mock_path)]
-        expected_args.extend(extra_args)
-        expected_args.extend(extra_command)
+        expected_args = extra_args + extra_command
 
         assert mock_config.get_config_data.call_count == 3
 
@@ -278,20 +276,15 @@ class TestPyLintRunner:
         if expected_disabled:
             expected_args.append(f"--disable={','.join(expected_disabled)}")
 
+        expected_args.append(str(mock_path))
+
         if verbose:
-            mock_print.assert_has_calls(
-                (
-                    mocker.call(mock_colored.return_value, mock_colored.return_value),
-                    # mocker.call(),
-                )
+            mock_print.assert_called_with(
+                mock_item, expected_args, extra="pylint --output-format=colorized "
             )
 
-            mock_colored.assert_has_calls(
-                (
-                    mocker.call(str(mock_item), "cyan"),
-                    mocker.call(" ".join(expected_args[1:]), "magenta"),
-                )
-            )
+        else:
+            mock_print.assert_not_called()
 
         mock_run.assert_called_with(
             expected_args, reporter=mock_reporter.return_value, exit=False
