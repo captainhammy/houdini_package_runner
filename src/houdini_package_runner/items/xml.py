@@ -36,9 +36,10 @@ if TYPE_CHECKING:
 class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     """The base class for XML based Houdini files.
 
-    :param path: The file path to process.
-    :param write_back: Whether the item should write itself back to disk.
-    :param display_name: Optional display name for test output.
+    Args:
+      path: The file path to process.
+      write_back: Whether the item should write itself back to disk.
+      display_name: Optional display name for test output.
 
     """
 
@@ -61,8 +62,11 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     ) -> ItemsToProcess:
         """Get any xml items that need to be processed.
 
-        :param root: An xml element.
-        :return: A list of items to be processed.
+        Args:
+          root: An xml element.
+
+        Returns:
+          A list of items to be processed.
 
         """
 
@@ -70,12 +74,12 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         self,
         section: etree._Element,  # pylint: disable=protected-access
         temp_path: pathlib.Path,
-    ):
+    ) -> None:
         """Handle updating the section and checking if the contents changed.
 
-        :param section: The section to process.
-        :param temp_path: The temp file name for the code.
-        :return:
+        Args:
+          section: The section to process.
+          temp_path: The temp file name for the code.
 
         """
         # Stash the pre-updated text.
@@ -106,10 +110,13 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     ) -> int:
         """Process an XML section's text.
 
-        :param section: The section to process.
-        :param runner: The package runner processing the item.
-        :param base_file_name: The name of the temporary file.
-        :return: The process return code.
+        Args:
+          section: The section to process.
+          runner: The package runner processing the item.
+          base_file_name: The name of the temporary file.
+
+        Returns:
+          The process return code.
 
         """
         # Create a temp Python file for the code blob.
@@ -133,8 +140,11 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     def process(self, runner: HoudiniPackageRunner) -> int:
         """Process the file.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         parser = etree.XMLParser(strip_cdata=False)
@@ -171,8 +181,11 @@ class MenuFile(XMLBase):
         For XML menu files we look for 'scriptItem' entries and attempt to
         grab their 'scriptCode' and 'context/expression' contents.
 
-        :param root: An xml element.
-        :return: A list of items to be processed.
+        Args:
+          root: An xml element.
+
+        Returns:
+          A list of items to be processed.
 
         """
         items = []
@@ -204,8 +217,11 @@ class PythonPanelFile(XMLBase):
     ) -> ItemsToProcess:
         """Get any xml items that need to be processed.
 
-        :param root: An xml element.
-        :return: A list of items to be processed.
+        Args:
+          root: An xml element.
+
+        Returns:
+          A list of items to be processed.
 
         """
         items = []
@@ -224,10 +240,11 @@ class PythonPanelFile(XMLBase):
 class ShelfFile(XMLBase):
     """A shelf file.
 
-    :param path: The shelf file path.
-    :param write_back: Whether the item should write itself back to disk.
-    :param display_name: Optional display name.
-    :param tool_name: Optional tool name.
+    Args:
+      path: The shelf file path.
+      write_back: Whether the item should write itself back to disk.
+      display_name: Optional display name.
+      tool_name: Optional tool name.
 
     """
 
@@ -252,8 +269,11 @@ class ShelfFile(XMLBase):
     ) -> ItemsToProcess:
         """Get any xml items that need to be processed.
 
-        :param root: An xml element.
-        :return: A list of items to be processed.
+        Args:
+          root: An xml element.
+
+        Returns:
+          A list of items to be processed.
 
         """
         items = []

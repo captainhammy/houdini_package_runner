@@ -25,7 +25,12 @@ if TYPE_CHECKING:
 
 
 class BaseRunnerConfig(abc.ABC):
-    """Base class for runner configuration."""
+    """Base class for runner configuration.
+
+    Args:
+      runner_name: The name of the runner.
+
+    """
 
     def __init__(self, runner_name: str):
         self._runner_name = runner_name
@@ -58,10 +63,13 @@ class BaseRunnerConfig(abc.ABC):
     ) -> List:
         """Get config data for an item, and it's file path.
 
-        :param key: The data key.
-        :param item: The item to get config data for.
-        :param file_path: The item file path to get config data for.
-        :return: Any found config data.
+        Args:
+          key: The data key.
+          item: The item to get config data for.
+          file_path: The item file path to get config data for.
+
+        Returns:
+          Any found config data.
 
         """
 
@@ -69,7 +77,8 @@ class BaseRunnerConfig(abc.ABC):
     def load_config(self) -> dict:
         """Load the configuration data.
 
-        :return: Any found config data.
+        Returns:
+          Any found config data.
 
         """
 
@@ -88,9 +97,12 @@ class PackageRunnerConfig(BaseRunnerConfig):
     def _get_file_config_data(self, file_path: pathlib.Path, key: str) -> List:
         """Get config data based on the file name.
 
-        :param file_path: The file path to get config data for.
-        :param key: The data key.
-        :return: Any found config data.
+        Args:
+          file_path: The file path to get config data for.
+          key: The data key.
+
+        Returns:
+          Any found config data.
 
         """
         data = []
@@ -106,9 +118,12 @@ class PackageRunnerConfig(BaseRunnerConfig):
     def _get_item_config_data(self, item: BaseItem, key: str) -> List:
         """Get config data based on an item.
 
-        :param item: The item to get config data for.
-        :param key: The data key.
-        :return: Any found config data.
+        Args:
+          item: The item to get config data for.
+          key: The data key.
+
+        Returns:
+          Any found config data.
 
         """
         config_names = build_config_item_list(item)
@@ -139,10 +154,13 @@ class PackageRunnerConfig(BaseRunnerConfig):
     ) -> List:
         """Get config data for an item, and it's file path.
 
-        :param key: The data key.
-        :param item: The item to get config data for.
-        :param file_path: The item file path to get config data for.
-        :return: Any found config data.
+        Args:
+          key: The data key.
+          item: The item to get config data for.
+          file_path: The item file path to get config data for.
+
+        Returns:
+          Any found config data.
 
         """
         data = []
@@ -155,7 +173,8 @@ class PackageRunnerConfig(BaseRunnerConfig):
     def load_config(self) -> dict:
         """Load the configuration data.
 
-        :return: Any found config data.
+        Returns:
+          Any found config data.
 
         """
         return _load_default_runner_config(self.runner_name)
@@ -172,7 +191,8 @@ def _find_config_files() -> List[pathlib.Path]:
     This uses HOUDINI_PACKAGE_RUNNER_CONFIG_PATH to find any specified config files,
     otherwise it will return the packaged resource.
 
-    :return: One or more config files.
+    Returns:
+      One or more config files.
 
     """
     path_env = os.getenv("HOUDINI_PACKAGE_RUNNER_CONFIG_PATH")
@@ -199,8 +219,11 @@ def _get_base_classes(cls: type) -> List[type]:
 
     This will exclude the base "object" class.
 
-    :param cls: The class to get the base classes for.
-    :return: A list of all the base classes.
+    Args:
+      cls: The class to get the base classes for.
+
+    Returns:
+      A list of all the base classes.
 
     """
     cls_bases = [base for base in cls.__bases__ if base not in (abc.ABC, object)]
@@ -218,8 +241,11 @@ def _get_base_classes(cls: type) -> List[type]:
 def _load_default_runner_config(runner_name: str) -> dict:
     """Load the configuration for a runner.
 
-    :param runner_name: The name of the runner.
-    :return: The configuration dictionary for the runner.
+    Args:
+      runner_name: The name of the runner.
+
+    Returns:
+      The configuration dictionary for the runner.
 
     """
     paths = _find_config_files()
@@ -244,8 +270,11 @@ def _load_default_runner_config(runner_name: str) -> dict:
 def build_config_item_list(item: BaseItem) -> Tuple[str, ...]:
     """Build a list of the item's class and super class names.
 
-    :param item: The item to get class names for.
-    :return: A list containing the item's class name as well as any super class names.
+    Args:
+      item: The item to get class names for.
+
+    Returns:
+      A list containing the item's class name as well as any super class names.
 
     """
     bases = [base.__name__ for base in _get_base_classes(type(item))]

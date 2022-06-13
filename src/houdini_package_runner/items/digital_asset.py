@@ -33,9 +33,10 @@ if TYPE_CHECKING:
 class DigitalAssetPythonSection(FileToProcess):
     """Class representing a Python digital asset section to process.
 
-    :param path: The file path to process.
-    :param display_name: Display name for test output.
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      path: The file path to process.
+      display_name: Display name for test output.
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -54,10 +55,11 @@ class ExpandedOperatorType(BaseFileItem):
     """Class representing an operator type inside an expanded digital asset
     folder.
 
-    :param path: The path to the operator specific folder.
-    :param name: The name of the operator.
-    :param write_back: Whether the item should write itself back to disk.
-    :param source_file: Optional source file for the expanded operator definition.
+    Args:
+      path: The path to the operator specific folder.
+      name: The name of the operator.
+      write_back: Whether the item should write itself back to disk.
+      source_file: Optional source file for the expanded operator definition.
 
     """
 
@@ -85,8 +87,11 @@ class ExpandedOperatorType(BaseFileItem):
     ) -> List[FileToProcess]:
         """Build a list of files to process based on Python sections.
 
-        :param python_sections: The Python section files to process.
-        :return: The created Python section items.
+        Args:
+          python_sections: The Python section files to process.
+
+        Returns:
+          The created Python section items.
 
         """
         files_to_process = []
@@ -111,7 +116,8 @@ class ExpandedOperatorType(BaseFileItem):
     def _find_internal_shelf_item(self) -> Optional[ShelfFile]:
         """Find the internal shelf item to process, if possible.
 
-        :return: An item representing the internal tool shelves, if any.
+        Returns:
+          An item representing the internal tool shelves, if any.
 
         """
 
@@ -140,7 +146,8 @@ class ExpandedOperatorType(BaseFileItem):
         This list will include any section files with IsPython in ExtraFileOptions
         and the PythonCook section if it exists.
 
-        :return: A list of Python file sections.
+        Returns:
+          A list of Python file sections.
 
         """
         python_sections = self._get_extra_python_section_files()
@@ -158,7 +165,8 @@ class ExpandedOperatorType(BaseFileItem):
 
         This includes any Python sections, shelf tools or Python code from the DialogScript.
 
-        :return: A list of all the processable items associated with the expanded digital asset.
+        Returns:
+          A list of all the processable items associated with the expanded digital asset.
 
         """
         python_sections = self._find_python_section_paths()
@@ -179,7 +187,8 @@ class ExpandedOperatorType(BaseFileItem):
     def _get_dialog_script_item(self) -> DialogScriptItem:
         """Get an item for processing the DialogScript section.
 
-        :return: The DialogScript item.
+        Returns:
+          The DialogScript item.
 
         """
         dialog_script_path = self.path / "DialogScript"
@@ -199,7 +208,8 @@ class ExpandedOperatorType(BaseFileItem):
     def _get_extra_python_section_files(self) -> List[pathlib.Path]:
         """Find any sections which contain Python code.
 
-        :return: Any section files which contain Python code.
+        Returns:
+          Any section files which contain Python code.
 
         """
         python_sections = []
@@ -239,8 +249,11 @@ class ExpandedOperatorType(BaseFileItem):
     ) -> int:
         """Process the operator items.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         items_to_process = self._gather_items()
@@ -257,9 +270,10 @@ class ExpandedOperatorType(BaseFileItem):
 class DigitalAssetDirectory(BaseFileItem):
     """Class representing an extracted otl file.
 
-    :param path: The path for the item.
-    :param write_back: Whether the item should write itself back to disk.
-    :param source_file: The binary source file, if any.
+    Args:
+      path: The path for the item.
+      write_back: Whether the item should write itself back to disk.
+      source_file: The binary source file, if any.
 
     """
 
@@ -277,7 +291,8 @@ class DigitalAssetDirectory(BaseFileItem):
     def _build_operator_list(self) -> List[ExpandedOperatorType]:
         """Build a list of operators in the extracted library.
 
-        :return: A list of operators inside the library.
+        Returns:
+          A list of operators inside the library.
 
         """
         operators = []
@@ -305,7 +320,8 @@ class DigitalAssetDirectory(BaseFileItem):
     def _find_operator_dirs(self) -> List[List[str]]:
         """Find a list of operator definition directories based on the Sections.list.
 
-        :return: A list of any directories containing operator definitions.
+        Returns:
+          A list of any directories containing operator definitions.
 
         """
         sections_list = self.path / "Sections.list"
@@ -338,8 +354,11 @@ class DigitalAssetDirectory(BaseFileItem):
     ) -> int:
         """Process the file.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         operators = self._build_operator_list()
@@ -363,8 +382,9 @@ class BinaryDigitalAssetFile(BaseFileItem):
     def _collapse_dir(self, hotl_command: str, target_folder: pathlib.Path) -> None:
         """Collapse the target folder to the digital asset file.
 
-        :param hotl_command: The hotl command to use.
-        :param target_folder: The folder to collapse.
+        Args:
+          hotl_command: The hotl command to use.
+          target_folder: The folder to collapse.
 
         """
         command = [hotl_command, "-l", str(target_folder), str(self.path)]
@@ -377,8 +397,9 @@ class BinaryDigitalAssetFile(BaseFileItem):
     def _extract_file(self, hotl_command: str, target_folder: pathlib.Path) -> None:
         """Expand the digital asset file to the target folder.
 
-        :param hotl_command: The hotl command to use.
-        :param target_folder: The folder to expand to.
+        Args:
+          hotl_command: The hotl command to use.
+          target_folder: The folder to expand to.
 
         """
         command = [hotl_command, "-t", str(target_folder), str(self.path)]
@@ -397,8 +418,11 @@ class BinaryDigitalAssetFile(BaseFileItem):
     ) -> int:
         """Process the binary digital asset file.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         target_folder = runner.temp_dir / self.path.name
@@ -431,8 +455,12 @@ def is_expanded_digital_asset_dir(path: pathlib.Path) -> bool:
 
     We say a folder is an expanded digital asset if it has a "Sections.list" file inside.
 
-    :param path: The folder to check.
-    :return: Whether the folder is an expanded digital asset.
+    Args:
+      path: The folder to check.
+      path: pathlib.Path:
+
+    Returns:
+      Whether the folder is an expanded digital asset.
 
     """
     return (path / "Sections.list").is_file()

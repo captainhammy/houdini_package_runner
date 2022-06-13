@@ -31,10 +31,11 @@ if TYPE_CHECKING:
 class PackageItemDiscoverer(BaseItemDiscoverer):
     """This class is responsible for searching for various items to process.
 
-    :param path: The root path to start searching for Houdini items from.
-    :param houdini_items: A list of Houdini related directories to look for.
-    :param extra_paths: A list of extra paths to process.
-    :param items: Optional list of specific items to check.
+    Args:
+      path: The root path to start searching for Houdini items from.
+      houdini_items: A list of Houdini related directories to look for.
+      extra_paths: A list of extra paths to process.
+      items: Optional list of specific items to check.
 
     """
 
@@ -69,8 +70,12 @@ class PackageItemDiscoverer(BaseItemDiscoverer):
 def get_digital_asset_items(otl_path: pathlib.Path) -> List[BaseFileItem]:
     """Get a list of shelf items to process.
 
-    :param otl_path: The path to the otls folder.
-    :return: A list otl items.
+    Args:
+      otl_path: The path to the otls folder.
+      otl_path: pathlib.Path:
+
+    Returns:
+      A list otl items.
 
     """
     items: List[BaseFileItem] = []
@@ -92,9 +97,12 @@ def get_houdini_items(
 ) -> List[BaseItem]:
     """Get Houdini-related items to process.
 
-    :param houdini_items: The Houdini item names.
-    :param houdini_root: The root houdini directory.
-    :return: The Houdini items to process.
+    Args:
+      houdini_items: The Houdini item names.
+      houdini_root: The root houdini directory.
+
+    Returns:
+      The Houdini items to process.
 
     """
     items: List[BaseItem] = []
@@ -143,8 +151,11 @@ def get_houdini_items(
 def get_menu_items(houdini_root: pathlib.Path) -> List[xml.MenuFile]:
     """Get a list of xml menu items to process.
 
-    :param houdini_root: The path to a houdini directory.
-    :return: A list of menu items.
+    Args:
+      houdini_root: The path to a houdini directory.
+
+    Returns:
+      A list of menu items.
 
     """
     menu_files = [xml.MenuFile(menu_file) for menu_file in houdini_root.glob("*.xml")]
@@ -157,8 +168,11 @@ def get_python_panel_items(
 ) -> List[xml.PythonPanelFile]:
     """Get a list of python panel items to process.
 
-    :param python_panel_path: The path to a python_panel directory.
-    :return: A list of shelf python panel items.
+    Args:
+      python_panel_path: The path to a python_panel directory.
+
+    Returns:
+      A list of shelf python panel items.
 
     """
     panel_files = [
@@ -172,8 +186,11 @@ def get_python_panel_items(
 def get_tool_items(toolbar_path: pathlib.Path) -> List[xml.ShelfFile]:
     """Get a list of shelf items to process.
 
-    :param toolbar_path: The path to a toolbar directory.
-    :return: A list of shelf tool items.
+    Args:
+      toolbar_path: The path to a toolbar directory.
+
+    Returns:
+      A list of shelf tool items.
 
     """
     shelf_files = [
@@ -188,8 +205,11 @@ def init_standard_package_discoverer(
 ) -> PackageItemDiscoverer:
     """Create a standard PackageItemDiscoverer based on standard args.
 
-    :param parsed_args: The parsed script args.
-    :return: A discoverer object based on the parsed args.
+    Args:
+      parsed_args: The parsed script args.
+
+    Returns:
+      A discoverer object based on the parsed args.
 
     """
     (
@@ -211,8 +231,11 @@ def init_standard_package_discoverer(
 def process_directory(dir_path: pathlib.Path) -> filesystem.DirectoryToProcess:
     """Process a directory to determine its item type.
 
-    :param dir_path: The directory to process.
-    :return: The corresponding directory item type.
+    Args:
+      dir_path: The directory to process.
+
+    Returns:
+      The corresponding directory item type.
 
     """
     if (dir_path / "__init__.py").exists():

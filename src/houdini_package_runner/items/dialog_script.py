@@ -114,10 +114,11 @@ PythonMenuScriptResult = namedtuple(
 class DialogScriptItem(BaseFileItem):
     """Item representing a DialogScript section inside a digital asset definition.
 
-    :param path: The file path to process.
-    :param name: The display name for test output.
-    :param write_back: Whether the item should write itself back to disk.
-    :param source_file: Optional source file for the expanded operator definition.
+    Args:
+      path: The file path to process.
+      name: The display name for test output.
+      write_back: Whether the item should write itself back to disk.
+      source_file: Optional source file for the expanded operator definition.
 
     """
 
@@ -147,7 +148,8 @@ class DialogScriptItem(BaseFileItem):
     def _gather_items(self) -> Tuple[DialogScriptInternalItem, ...]:
         """Gather the items from the DialogScript to process.
 
-        :return: Any items to be processed.
+        Returns:
+          Any items to be processed.
 
         """
         items: List[DialogScriptInternalItem] = []
@@ -174,7 +176,8 @@ class DialogScriptItem(BaseFileItem):
     ):
         """Handle writing any items with changed contents to the file.
 
-        :param items_with_changed_contents: A list of items with changed contents.
+        Args:
+          items_with_changed_contents: A list of items with changed contents.
 
         """
         items_with_changed_contents.sort(key=operator.attrgetter("start_offset"))
@@ -212,8 +215,11 @@ class DialogScriptItem(BaseFileItem):
     ) -> int:
         """Process the operator files.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         files_to_process = self._gather_items()
@@ -238,12 +244,13 @@ class DialogScriptItem(BaseFileItem):
 class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
     """Base definition for a Python processable item in a DialogScript.
 
-    :param parm: The source parameter definition.
-    :param code: The Python code for the item.
-    :param start_offset: There parameter definition start offset.
-    :param end_offset: There parameter definition end offset.
-    :param display_name: The item display name.
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      parm: The source parameter definition.
+      code: The Python code for the item.
+      start_offset: There parameter definition start offset.
+      end_offset: There parameter definition end offset.
+      display_name: The item display name.
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -284,8 +291,11 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
     def _load_contents(self, temp_path: pathlib.Path) -> str:
         """Load the contents from the temp path.
 
-        :param temp_path: The item file path.
-        :return: The file contents.
+        Args:
+          temp_path: The item file path.
+
+        Returns:
+          The file contents.
 
         """
         with temp_path.open("r") as handle:
@@ -305,8 +315,11 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
     ) -> str:
         """Perform any post-processing on the contents.
 
-        :param contents: The script contents.
-        :return: The processed contents.
+        Args:
+          contents: The script contents.
+
+        Returns:
+          The processed contents.
 
         """
         return contents
@@ -314,8 +327,8 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
     def _write_contents(self, temp_path: pathlib.Path) -> None:
         """Write the contents of the item to the temp path.
 
-        :param temp_path: The item file path.
-        :return:
+        Args:
+          temp_path: The item file path.
 
         """
         code = self.code
@@ -383,8 +396,11 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
     ) -> int:
         """Process an item.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         temp_path = runner.temp_dir / f"{self.display_name}.py"
@@ -407,12 +423,13 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 class DialogScriptCallbackItem(DialogScriptInternalItem):
     """Item to represent and process a parameter's Python callback script.
 
-    :param parm: The source parameter definition.
-    :param code: The Python code for the item.
-    :param parm_start: The start position of the parm.
-    :param span: The span of the parm data.
-    :param display_name: The item display name.
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      parm: The source parameter definition.
+      code: The Python code for the item.
+      parm_start: The start position of the parm.
+      span: The span of the parm data.
+      display_name: The item display name.
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -441,13 +458,14 @@ class DialogScriptCallbackItem(DialogScriptInternalItem):
 class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
     """Item to represent and process a parameter's Python default expression.
 
-    :param parm: The source parameter definition.
-    :param code: The Python code for the item.
-    :param parm_start: The start position of the parm.
-    :param span: The span of the parm data.
-    :param display_name: The item display name.
-    :param parm_index: The parameter index.
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      parm: The source parameter definition.
+      code: The Python code for the item.
+      parm_start: The start position of the parm.
+      span: The span of the parm data.
+      display_name: The item display name.
+      parm_index: The parameter index.
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -474,11 +492,12 @@ class DialogScriptDefaultExpressionItem(DialogScriptInternalItem):
 class DialogScriptMenuScriptItem(DialogScriptInternalItem):
     """Item to represent and process a parameter's Python menu script.
 
-    :param parm: The source parameter definition.
-    :param parm_start: The start position of the parm.
-    :param display_name: The item display name.
-    :param menu_script_data: The Python menu script data
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      parm: The source parameter definition.
+      parm_start: The start position of the parm.
+      display_name: The item display name.
+      menu_script_data: The Python menu script data
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -518,8 +537,11 @@ class DialogScriptMenuScriptItem(DialogScriptInternalItem):
 
         This will ensure the multiline menu script is properly wrapped.
 
-        :param contents: The script contents.
-        :return: The processed contents.
+        Args:
+          contents: The script contents.
+
+        Returns:
+          The processed contents.
 
         """
         lines = contents.splitlines()
@@ -551,9 +573,12 @@ class DialogScriptMenuScriptItem(DialogScriptInternalItem):
 def _discard_newlines(parm: str, start: int) -> int:
     """Discard any newline characters.
 
-    :param parm: The parameter data.
-    :param start: The start index.
-    :return: The start index offset to discard any newlines
+    Args:
+      parm: The parameter data.
+      start: The start index.
+
+    Returns:
+      The start index offset to discard any newlines
 
     """
     pos = start
@@ -570,8 +595,11 @@ def _discard_newlines(parm: str, start: int) -> int:
 def _escape_contents_for_single_line(contents: str) -> str:
     """Escape characters to write as a single line.
 
-    :param contents: The contents to escape.
-    :return: The contents with \r, \n and " escaped
+    Args:
+      contents: The contents to escape.
+
+    Returns:
+      The contents with \r, \n and " escaped
 
     """
     contents = contents.replace("\r", "\\r").replace("\n", "\\n").replace('"', '\\"')
@@ -584,10 +612,13 @@ def _get_callback_items(
 ) -> List[DialogScriptCallbackItem]:
     """Build a list of any callback items for a parameter.
 
-    :param parm: The parameter data.
-    :param parm_start: The start position of the parm.
-    :param name: The display name.
-    :return: A list of any callback items.
+    Args:
+      parm: The parameter data.
+      parm_start: The start position of the parm.
+      name: The display name.
+
+    Returns:
+      A list of any callback items.
 
     """
     items = []
@@ -611,8 +642,11 @@ def _get_callback_items(
 def _get_callback_language(parm: str) -> Optional[str]:
     """Get a parameter's callback script language.
 
-    :param parm: The parameter data.
-    :return: The script callback language.
+    Args:
+      parm: The parameter data.
+
+    Returns:
+      The script callback language.
 
     """
     for match in _DS_CB_SCRIPT_LANG_GRAMMAR.searchString(parm):
@@ -626,10 +660,13 @@ def _get_ds_file_offset(
 ) -> Tuple[int, int]:
     """Get the file offsets for the parameter.
 
-    :param parm_start: The start position of the parm.
-    :param span: The span of the parm data.
-    :param inclusive: Whether to include the start and end chars.
-    :return: The file offsets for the parameter.
+    Args:
+      parm_start: The start position of the parm.
+      span: The span of the parm data.
+      inclusive: Whether to include the start and end chars.
+
+    Returns:
+      The file offsets for the parameter.
 
     """
     extra_offset = 0 if inclusive else 1
@@ -642,8 +679,11 @@ def _get_default_python_expressions(
 ) -> Tuple[Tuple[str, Tuple[int, int]], ...]:
     """Get default Python expressions for a parameter tuple.
 
-    :param parm: The parameter data.
-    :return: Any default expressions which are Python.
+    Args:
+      parm: The parameter data.
+
+    Returns:
+      Any default expressions which are Python.
 
     """
     expressions = []
@@ -663,10 +703,13 @@ def _get_expression_items(
 ) -> List[DialogScriptDefaultExpressionItem]:
     """Build a list of any expression items for a parameter.
 
-    :param parm: The parameter data.
-    :param parm_start: The start position of the parm.
-    :param name: The display name.
-    :return: A list of any expression items.
+    Args:
+      parm: The parameter data.
+      parm_start: The start position of the parm.
+      name: The display name.
+
+    Returns:
+      A list of any expression items.
 
     """
     items = []
@@ -690,10 +733,13 @@ def _get_menu_items(
 ) -> List[DialogScriptMenuScriptItem]:
     """Build a list of any menu script items for a parameter.
 
-    :param parm: The parameter data.
-    :param parm_start: The start position of the parm.
-    :param name: The display name.
-    :return: A list of any menu script items.
+    Args:
+      parm: The parameter data.
+      parm_start: The start position of the parm.
+      name: The display name.
+
+    Returns:
+      A list of any menu script items.
 
     """
     items = []
@@ -710,8 +756,11 @@ def _get_menu_items(
 def _get_python_menu_script(parm: str) -> Optional[PythonMenuScriptResult]:
     """Get any Python menu script data for a parameter.
 
-    :param parm: The parameter data.
-    :return: The menu script data if the parameter has a Python one.
+    Args:
+      parm: The parameter data.
+
+    Returns:
+      The menu script data if the parameter has a Python one.
 
     """
     for match in _DS_MENU_GRAMMAR.searchString(parm):
@@ -745,8 +794,11 @@ def _get_script_callback(parm: str) -> Optional[Tuple[str, Tuple[int, int]]]:
 
     The result contains the script contents and start/end offset values.
 
-    :param parm: The parameter data.
-    :return: The parameter callback script if the parameter has one.
+    Args:
+      parm: The parameter data.
+
+    Returns:
+      The parameter callback script if the parameter has one.
 
     """
     for match in _DS_CB_SCRIPT_GRAMMAR.searchString(parm):

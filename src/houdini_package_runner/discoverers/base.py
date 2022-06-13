@@ -25,8 +25,9 @@ if TYPE_CHECKING:
 class BaseItemDiscoverer(metaclass=abc.ABCMeta):
     """This class is responsible for searching for various items to process.
 
-    :param path: The path to start searching for items from.
-    :param items: Optional list of specific items to check.
+    Args:
+      path: The path to start searching for items from.
+      items: Optional list of specific items to check.
 
     """
 

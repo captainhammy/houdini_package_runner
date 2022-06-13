@@ -29,9 +29,10 @@ if TYPE_CHECKING:
 class DirectoryToProcess(BaseFileItem):
     """Class representing a directory to be processed.
 
-    :param path: The path for the item.
-    :param write_back: Whether the item should write itself back to disk.
-    :param traverse_children: Whether to traverse a directories children.
+    Args:
+      path: The path for the item.
+      write_back: Whether the item should write itself back to disk.
+      traverse_children: Whether to traverse a directories children.
 
     """
 
@@ -55,7 +56,8 @@ class DirectoryToProcess(BaseFileItem):
     def _get_child_items(self) -> List[BaseItem]:
         """Find child items to process.
 
-        :return: A list of found child items.
+        Returns:
+          A list of found child items.
 
         """
         items: List[BaseItem] = []
@@ -98,8 +100,11 @@ class DirectoryToProcess(BaseFileItem):
     ) -> int:
         """Process an item.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         items = self._get_child_items()
@@ -130,8 +135,11 @@ class DirectoryToProcess(BaseFileItem):
     ) -> int:
         """Process an item.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         # If traversing children then we want to process them.
@@ -145,9 +153,10 @@ class DirectoryToProcess(BaseFileItem):
 class FileToProcess(BaseFileItem):
     """Class representing a file to process.
 
-    :param path: The file path to process.
-    :param write_back: Whether the item should write itself back to disk.
-    :param display_name: Optional display name for test output.
+    Args:
+      path: The file path to process.
+      write_back: Whether the item should write itself back to disk.
+      display_name: Optional display name for test output.
 
     """
 
@@ -185,8 +194,11 @@ class FileToProcess(BaseFileItem):
     ) -> int:
         """Process the file.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
         pre_hash = compute_file_hash(self.path)
@@ -207,7 +219,8 @@ class HoudiniScriptsDirectoryItem(DirectoryToProcess):
     def _get_child_items(self) -> List[BaseItem]:
         """Find child items to process.
 
-        :return: A list of found child items.
+        Returns:
+          A list of found child items.
 
         """
         items = super()._get_child_items()
@@ -224,6 +237,7 @@ class HoudiniScriptsDirectoryItem(DirectoryToProcess):
 class PythonPackageDirectoryItem(DirectoryToProcess):
     """Subclass to represent a directory which is a Python package."""
 
+    # TODO: Why is this here?
     def __init__(self, path: pathlib.Path, write_back: bool = False) -> None:
         super().__init__(path, write_back=write_back)
 
@@ -239,8 +253,11 @@ class PythonPackageDirectoryItem(DirectoryToProcess):
 def compute_file_hash(file_path: pathlib.Path) -> str:
     """Compute a hash for the file contents.
 
-    :param file_path: The path to the file to hash.
-    :return: The computed file hash.
+    Args:
+      file_path: The path to the file to hash.
+
+    Returns:
+      The computed file hash.
 
     """
     with open(file_path, "rb") as handle:
@@ -266,9 +283,12 @@ def is_python_file(
       - Check if the extension is .py
       - Check if the first line is a #! line and Whether any of the python_bin names are in the line.
 
-    :param file_path: The path to check.
-    :param python_bins: Optional list of python executable names.
-    :return: Whether this is a Python file.
+    Args:
+      file_path: The path to check.
+      python_bins: Optional list of python executable names.
+
+    Returns:
+      Whether this is a Python file.
 
     """
     ext = file_path.suffix

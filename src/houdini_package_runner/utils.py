@@ -16,14 +16,14 @@ from typing import List, Optional
 
 def add_or_append_to_flags(
     flags: List[str], key: str, values: List[str], separator: str = ","
-):
+) -> None:
     """Add or append to an existing arg flag with the separator.
 
-    :param flags: The list of flags to modify.
-    :param key: The new flag.
-    :param values: The flag options.
-    :param separator: The character used to join flag values.
-    :return:
+    Args:
+      flags: The list of flags to modify.
+      key: The new flag.
+      values: The flag options.
+      separator: The character used to join flag values.
 
     """
     flag_str = separator.join(values)
@@ -39,9 +39,12 @@ def add_or_append_to_flags(
 def execute_subprocess_command(command: List[str], verbose: bool = False) -> int:
     """Execute a command in a subprocess, capturing and optionally outputting the output.
 
-    :param command: A subprocess command list.
-    :param verbose: Whether to capture output.
-    :return: The subprocess return code.
+    Args:
+      command: A subprocess command list.
+      verbose: Whether to capture output.
+
+    Returns:
+      The subprocess return code.
 
     """
     # If verbose mode is turned on then we don't want to capture the output.
@@ -79,15 +82,17 @@ def remove_duplicate_flags(
 ) -> List[str]:
     """Remove any duplicate flag items even if the values differ.
 
+    Args:
+      flags: A list of flags to check.
+      to_ignore: An optional list of flag names to ignore duplicate of.
+
+    Returns:
+      The filtered list of flags.
+
     >>> remove_duplicate_flags(["foo", "--bar=123", "--baz=456", "--bar=789"])
     ['foo', '--bar=123', '--baz=456']
     >>> remove_duplicate_flags(["foo", "--bar=123", "--baz=456", "--bar=789"], to_ignore=["--bar"])
     ['foo', '--bar=123', '--baz=456', '--bar=789']
-
-    :param flags: A list of flags to check.
-    :param to_ignore: An optional list of flag names to ignore duplicate of.
-    :return: The filtered list of flags.
-
     """
     if to_ignore is None:
         to_ignore = []

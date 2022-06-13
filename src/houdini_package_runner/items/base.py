@@ -26,7 +26,8 @@ if TYPE_CHECKING:
 class BaseItem(ABC):
     """Base class for a runnable item.
 
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -99,8 +100,11 @@ class BaseItem(ABC):
     ) -> int:
         """Process an item.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """
 
@@ -108,8 +112,9 @@ class BaseItem(ABC):
 class BaseFileItem(BaseItem):
     """Base class for a runnable item.
 
-    :param path: The path for the item.
-    :param write_back: Whether the item should write itself back to disk.
+    Args:
+      path: The path for the item.
+      write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -139,7 +144,10 @@ class BaseFileItem(BaseItem):
     ) -> int:
         """Process an item.
 
-        :param runner: The package runner processing the item.
-        :return: The process return code.
+        Args:
+          runner: The package runner processing the item.
+
+        Returns:
+          The process return code.
 
         """

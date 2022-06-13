@@ -33,9 +33,12 @@ def _resolve_houdini_root(
 ) -> pathlib.Path:
     """Resolve the Houdini root from the args and path.
 
-    :param parsed_args: The parsed command args.
-    :param root: The root path.
-    :return: The resolved Houdini root.
+    Args:
+      parsed_args: The parsed command args.
+      root: The root path.
+
+    Returns:
+      The resolved Houdini root.
 
     """
     if parsed_args.houdini_root is not None:
@@ -63,9 +66,12 @@ def _resolve_python_packages(
 ) -> List[pathlib.Path]:
     """Find any Python package paths from the args and path.
 
-    :param parsed_args: The parsed command args.
-    :param root: The root path.
-    :return: A list of any found Python package directories.
+    Args:
+      parsed_args: The parsed command args.
+      root: The root path.
+
+    Returns:
+      A list of any found Python package directories.
 
     """
     if parsed_args.python_root:
@@ -82,9 +88,12 @@ def _resolve_tests(
 ) -> List[pathlib.Path]:
     """Find any test paths from the args and path.
 
-    :param parsed_args: The parsed command args.
-    :param root: The root path.
-    :return: A list of any test directories.
+    Args:
+      parsed_args: The parsed command args.
+      root: The root path.
+
+    Returns:
+      A list of any test directories.
 
     """
     directories = []
@@ -108,10 +117,13 @@ def build_common_parser(
 ) -> argparse.ArgumentParser:
     """Build an argument parser for the script args.
 
-    :param prog: The name of the program (default: sys.argv[0])
-    :param usage: The string describing the program usage (default: generated from arguments added to parser)
-    :param description: Text to display before the argument help.
-    :return: The constructed parser.
+    Args:
+      prog: The name of the program (default: sys.argv[0])
+      usage: The string describing the program usage (default: generated from arguments added to parser)
+      description: Text to display before the argument help.
+
+    Returns:
+      The constructed parser.
 
     """
     parser = argparse.ArgumentParser(
@@ -187,8 +199,11 @@ def process_common_arg_settings(
 ) -> Tuple[pathlib.Path, pathlib.Path, List[pathlib.Path], List[str]]:
     """Generate base settings from common command args.
 
-    :param parsed_args: The parsed command args.
-    :return: The root path, houdini root path, directories and files to process, and Houdini item names.
+    Args:
+      parsed_args: The parsed command args.
+
+    Returns:
+      The root path, houdini root path, directories and files to process, and Houdini item names.
 
     """
     if parsed_args.root:

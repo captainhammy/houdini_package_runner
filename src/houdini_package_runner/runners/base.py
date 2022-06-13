@@ -29,9 +29,10 @@ if TYPE_CHECKING:
 class HoudiniPackageRunner(abc.ABC):
     """The base package runner class.
 
-    :param discoverer: The item discoverer used by the runner.
-    :param write_back: Whether the runner should write the results back.
-    :param runner_config: Optional BaseRunnerConfig object.
+    Args:
+      discoverer: The item discoverer used by the runner.
+      write_back: Whether the runner should write the results back.
+      runner_config: Optional BaseRunnerConfig object.
 
     """
 
@@ -106,19 +107,23 @@ class HoudiniPackageRunner(abc.ABC):
     def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
-        :param file_path: The path to process.
-        :param item: The item to process.
-        :return: The process return code.
+        Args:
+          file_path: The path to process.
+          item: The item to process.
+
+        Returns:
+          The process return code.
 
         """
 
     def init_args_options(
-        self, namespace: argparse.Namespace, extra_args: List[str]
-    ):  # pylint: disable=unused-argument
+        self, namespace: argparse.Namespace, extra_args: List[str]  # pylint: disable=unused-argument
+    ) -> None:
         """Initialize any extra options from parser data.
 
-        :param namespace: Argument parser namespace.
-        :param extra_args: Optional list of extra_args to pass to isort.
+        Args:
+          namespace: Argument parser namespace.
+          extra_args: Optional list of extra_args to pass to isort.
 
         """
         self._verbose = namespace.verbose
@@ -130,7 +135,8 @@ class HoudiniPackageRunner(abc.ABC):
     def run(self) -> int:
         """Process all the items.
 
-        :return: The overall execution return code.
+        Returns:
+          The overall execution return code.
 
         """
         if self._list_items:

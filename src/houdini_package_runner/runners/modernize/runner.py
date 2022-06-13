@@ -35,8 +35,9 @@ if TYPE_CHECKING:
 class ModernizeRunner(HoudiniPackageRunner):
     """Implementation for a python-modernize package runner.
 
-    :param discoverer: The item discoverer used by the runner.
-    :param runner_config: Optional BaseRunnerConfig object.
+    Args:
+      discoverer: The item discoverer used by the runner.
+      runner_config: Optional BaseRunnerConfig object.
 
     """
 
@@ -62,8 +63,12 @@ class ModernizeRunner(HoudiniPackageRunner):
     @staticmethod
     def build_parser(parser: argparse.ArgumentParser = None) -> argparse.ArgumentParser:
         """Build a parser for the runner.
-        :param parser: Optional parser to add arguments to, otherwise a new one will be created.
-        :return: The common parser for the runner.
+
+        Args:
+          parser: Optional parser to add arguments to, otherwise a new one will be created.
+
+        Returns:
+          The common parser for the runner.
 
         """
         if parser is None:
@@ -76,11 +81,12 @@ Any unknown args will be passed along to the modernize command.
 
         return parser
 
-    def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]):
+    def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]) -> None:
         """Initialize any extra options from parser data.
 
-        :param namespace: Argument parser namespace.
-        :param extra_args: Optional list of extra_args to pass to isort.
+        Args:
+          namespace: Argument parser namespace.
+          extra_args: Optional list of extra_args to pass to isort.
 
         """
         super().init_args_options(namespace, extra_args)
@@ -90,9 +96,12 @@ Any unknown args will be passed along to the modernize command.
     def process_path(self, file_path: pathlib.Path, item: BaseItem) -> int:
         """Process a file path.
 
-        :param file_path: The path to format.
-        :param item: The item to format.
-        :return: The process return code.
+        Args:
+          file_path: The path to format.
+          item: The item to format.
+
+        Returns:
+          The process return code.
 
         """
         flags = []
@@ -132,7 +141,8 @@ Any unknown args will be passed along to the modernize command.
 def main() -> int:
     """Run 'python-modernize' on package files.
 
-    :return: The runner return code.
+    Returns:
+      The runner return code.
 
     """
     parser = ModernizeRunner.build_parser()
