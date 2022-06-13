@@ -117,7 +117,9 @@ class HoudiniPackageRunner(abc.ABC):
         """
 
     def init_args_options(
-        self, namespace: argparse.Namespace, extra_args: List[str]  # pylint: disable=unused-argument
+        self,
+        namespace: argparse.Namespace,
+        extra_args: List[str],  # pylint: disable=unused-argument
     ) -> None:
         """Initialize any extra options from parser data.
 

@@ -90,7 +90,9 @@ Any unknown args will be passed along to the flake8 command.
 
         return parser
 
-    def init_args_options(self, namespace: argparse.Namespace, extra_args: List[str]) -> None:
+    def init_args_options(
+        self, namespace: argparse.Namespace, extra_args: List[str]
+    ) -> None:
         """Initialize any extra options from parser data.
 
         Args:
