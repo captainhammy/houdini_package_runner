@@ -30,9 +30,9 @@ class HoudiniPackageRunner(abc.ABC):
     """The base package runner class.
 
     Args:
-      discoverer: The item discoverer used by the runner.
-      write_back: Whether the runner should write the results back.
-      runner_config: Optional BaseRunnerConfig object.
+        discoverer: The item discoverer used by the runner.
+        write_back: Whether the runner should write the results back.
+        runner_config: Optional BaseRunnerConfig object.
 
     """
 
@@ -108,11 +108,11 @@ class HoudiniPackageRunner(abc.ABC):
         """Process a file path.
 
         Args:
-          file_path: The path to process.
-          item: The item to process.
+            file_path: The path to process.
+            item: The item to process.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
 
@@ -122,8 +122,8 @@ class HoudiniPackageRunner(abc.ABC):
         """Initialize any extra options from parser data.
 
         Args:
-          namespace: Argument parser namespace.
-          extra_args: Optional list of extra_args to pass to isort.
+            namespace: Argument parser namespace.
+            extra_args: Optional list of extra_args to pass to isort.
 
         """
         self._verbose = namespace.verbose
@@ -136,7 +136,7 @@ class HoudiniPackageRunner(abc.ABC):
         """Process all the items.
 
         Returns:
-          The overall execution return code.
+            The overall execution return code.
 
         """
         if self._list_items:

@@ -36,8 +36,8 @@ class ModernizeRunner(HoudiniPackageRunner):
     """Implementation for a python-modernize package runner.
 
     Args:
-      discoverer: The item discoverer used by the runner.
-      runner_config: Optional BaseRunnerConfig object.
+        discoverer: The item discoverer used by the runner.
+        runner_config: Optional BaseRunnerConfig object.
 
     """
 
@@ -65,10 +65,10 @@ class ModernizeRunner(HoudiniPackageRunner):
         """Build a parser for the runner.
 
         Args:
-          parser: Optional parser to add arguments to, otherwise a new one will be created.
+            parser: Optional parser to add arguments to, otherwise a new one will be created.
 
         Returns:
-          The common parser for the runner.
+            The common parser for the runner.
 
         """
         if parser is None:
@@ -85,8 +85,8 @@ Any unknown args will be passed along to the modernize command.
         """Initialize any extra options from parser data.
 
         Args:
-          namespace: Argument parser namespace.
-          extra_args: Optional list of extra_args to pass to isort.
+            namespace: Argument parser namespace.
+            extra_args: Optional list of extra_args to pass to isort.
 
         """
         super().init_args_options(namespace, extra_args)
@@ -97,11 +97,11 @@ Any unknown args will be passed along to the modernize command.
         """Process a file path.
 
         Args:
-          file_path: The path to format.
-          item: The item to format.
+            file_path: The path to format.
+            item: The item to format.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         flags = []
@@ -142,7 +142,7 @@ def main() -> int:
     """Run 'python-modernize' on package files.
 
     Returns:
-      The runner return code.
+        The runner return code.
 
     """
     parser = ModernizeRunner.build_parser()

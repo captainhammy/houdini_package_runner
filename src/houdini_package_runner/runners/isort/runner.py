@@ -39,8 +39,8 @@ class IsortRunner(HoudiniPackageRunner):
     """Implementation for an isort package runner.
 
     Args:
-      discoverer: The item discoverer used by the runner.
-      runner_config: Optional BaseRunnerConfig object.
+        discoverer: The item discoverer used by the runner.
+        runner_config: Optional BaseRunnerConfig object.
 
     """
 
@@ -56,10 +56,10 @@ class IsortRunner(HoudiniPackageRunner):
         """Generate a .isort config file for the operation.
 
         Args:
-          namespace: The command argparse namespace.
+            namespace: The command argparse namespace.
 
         Returns:
-          The path to the generated config file.
+            The path to the generated config file.
 
         """
         config = _load_template_config()
@@ -76,10 +76,10 @@ class IsortRunner(HoudiniPackageRunner):
         This will take the first module name in the comma separated list and use title() on it.
 
         Args:
-          package_names: A comma separated list of first party package names.
+            package_names: A comma separated list of first party package names.
 
         Returns:
-          A header name.
+            A header name.
 
         """
         return package_names.split(",")[0].replace("_", " ").title()
@@ -88,10 +88,10 @@ class IsortRunner(HoudiniPackageRunner):
         """Find a list of known first party module names, if any.
 
         Args:
-          namespace: The command argparse namespace.
+            namespace: The command argparse namespace.
 
         Returns:
-          A comma separated list of first party names, otherwise None.
+            A comma separated list of first party names, otherwise None.
 
         """
         first_party_packages = None
@@ -115,10 +115,10 @@ class IsortRunner(HoudiniPackageRunner):
         """Find a list of known Houdini shipped module names.
 
         Args:
-          namespace: The command argparse namespace.
+            namespace: The command argparse namespace.
 
         Returns:
-          A comma separated list of Houdini Python modules.
+            A comma separated list of Houdini Python modules.
 
         """
         hfs_path = pathlib.Path(os.path.expandvars(namespace.hfs_path))
@@ -133,8 +133,8 @@ class IsortRunner(HoudiniPackageRunner):
         """Process the ConfigParser object.
 
         Args:
-          config: The configuration object.
-          namespace: The command argparse namespace.
+            config: The configuration object.
+            namespace: The command argparse namespace.
 
         """
         settings = config["settings"]
@@ -179,10 +179,10 @@ class IsortRunner(HoudiniPackageRunner):
         """Build a parser for the runner.
 
         Args:
-          parser: Optional parser to add arguments to, otherwise a new one will be created.
+            parser: Optional parser to add arguments to, otherwise a new one will be created.
 
         Returns:
-          The common parser for the runner.
+            The common parser for the runner.
 
         """
         if parser is None:
@@ -217,8 +217,8 @@ Any unknown args will be passed along to the isort command.
         """Initialize any extra options from parser data.
 
         Args:
-          namespace: Argument parser namespace.
-          extra_args: Optional list of extra_args to pass to isort.
+            namespace: Argument parser namespace.
+            extra_args: Optional list of extra_args to pass to isort.
 
         """
         super().init_args_options(namespace, extra_args)
@@ -243,11 +243,11 @@ Any unknown args will be passed along to the isort command.
         """Process a file path.
 
         Args:
-          file_path: The path to format.
-          item: The item to format.
+            file_path: The path to format.
+            item: The item to format.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         command = [
@@ -278,10 +278,10 @@ def _find_known_houdini(hfs_path: pathlib.Path) -> List[str]:
     """Find a list of known Houdini Python modules.
 
     Args:
-      hfs_path: The path to a Houdini install directory ($HFS)
+        hfs_path: The path to a Houdini install directory ($HFS)
 
     Returns:
-      A list of Houdini module names.
+        A list of Houdini module names.
 
     """
     module_names = []
@@ -303,10 +303,10 @@ def _find_python_modules(folder: pathlib.Path) -> List[str]:
     """Find modules in a directory.
 
     Args:
-      folder: The directory to look for Python modules in.
+        folder: The directory to look for Python modules in.
 
     Returns:
-      A list of Python module names.
+        A list of Python module names.
 
     """
     module_names = []
@@ -325,10 +325,10 @@ def _find_python_packages_from_path(search_root: pathlib.Path) -> Optional[str]:
     """Attempt to find any Python package names under the search path.
 
     Args:
-      search_root: The path to search under.
+        search_root: The path to search under.
 
     Returns:
-      Any found package names.
+        Any found package names.
 
     """
     package_names = []
@@ -345,7 +345,7 @@ def _load_template_config() -> ConfigParser:
     """Load the template config file.
 
     Returns:
-      The loaded default config file.
+        The loaded default config file.
 
     """
     config = ConfigParser()
@@ -362,11 +362,11 @@ def _save_template_config(config: ConfigParser, temp_dir: pathlib.Path) -> pathl
     """Save the config to a temporary file for running.
 
     Args:
-      config: The configuration to save.
-      temp_dir: The runner temporary directory.
+        config: The configuration to save.
+        temp_dir: The runner temporary directory.
 
     Returns:
-      The saved configuration file path.
+        The saved configuration file path.
 
     """
     file_path = temp_dir / ".isort.cfg"
@@ -386,7 +386,7 @@ def main() -> int:
     """Run 'isort' on package files.
 
     Returns:
-      The runner return code.
+        The runner return code.
 
     """
     parser = IsortRunner.build_parser()

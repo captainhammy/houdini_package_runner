@@ -30,9 +30,9 @@ class DirectoryToProcess(BaseFileItem):
     """Class representing a directory to be processed.
 
     Args:
-      path: The path for the item.
-      write_back: Whether the item should write itself back to disk.
-      traverse_children: Whether to traverse a directories children.
+        path: The path for the item.
+        write_back: Whether the item should write itself back to disk.
+        traverse_children: Whether to traverse a directories children.
 
     """
 
@@ -57,7 +57,7 @@ class DirectoryToProcess(BaseFileItem):
         """Find child items to process.
 
         Returns:
-          A list of found child items.
+            A list of found child items.
 
         """
         items: List[BaseItem] = []
@@ -101,10 +101,10 @@ class DirectoryToProcess(BaseFileItem):
         """Process an item.
 
         Args:
-          runner: The package runner processing the item.
+            runner: The package runner processing the item.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         items = self._get_child_items()
@@ -136,10 +136,10 @@ class DirectoryToProcess(BaseFileItem):
         """Process an item.
 
         Args:
-          runner: The package runner processing the item.
+            runner: The package runner processing the item.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         # If traversing children then we want to process them.
@@ -154,9 +154,9 @@ class FileToProcess(BaseFileItem):
     """Class representing a file to process.
 
     Args:
-      path: The file path to process.
-      write_back: Whether the item should write itself back to disk.
-      display_name: Optional display name for test output.
+        path: The file path to process.
+        write_back: Whether the item should write itself back to disk.
+        display_name: Optional display name for test output.
 
     """
 
@@ -195,10 +195,10 @@ class FileToProcess(BaseFileItem):
         """Process the file.
 
         Args:
-          runner: The package runner processing the item.
+            runner: The package runner processing the item.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         pre_hash = compute_file_hash(self.path)
@@ -220,7 +220,7 @@ class HoudiniScriptsDirectoryItem(DirectoryToProcess):
         """Find child items to process.
 
         Returns:
-          A list of found child items.
+            A list of found child items.
 
         """
         items = super()._get_child_items()
@@ -254,10 +254,10 @@ def compute_file_hash(file_path: pathlib.Path) -> str:
     """Compute a hash for the file contents.
 
     Args:
-      file_path: The path to the file to hash.
+        file_path: The path to the file to hash.
 
     Returns:
-      The computed file hash.
+        The computed file hash.
 
     """
     with open(file_path, "rb") as handle:
@@ -284,11 +284,11 @@ def is_python_file(
       - Check if the first line is a #! line and Whether any of the python_bin names are in the line.
 
     Args:
-      file_path: The path to check.
-      python_bins: Optional list of python executable names.
+        file_path: The path to check.
+        python_bins: Optional list of python executable names.
 
     Returns:
-      Whether this is a Python file.
+        Whether this is a Python file.
 
     """
     ext = file_path.suffix

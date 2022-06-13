@@ -26,8 +26,8 @@ class BaseItemDiscoverer(metaclass=abc.ABCMeta):
     """This class is responsible for searching for various items to process.
 
     Args:
-      path: The path to start searching for items from.
-      items: Optional list of specific items to check.
+        path: The path to start searching for items from.
+        items: Optional list of specific items to check.
 
     """
 

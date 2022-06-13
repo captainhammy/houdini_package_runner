@@ -34,11 +34,14 @@ def _resolve_houdini_root(
     """Resolve the Houdini root from the args and path.
 
     Args:
-      parsed_args: The parsed command args.
-      root: The root path.
+        parsed_args: The parsed command args.
+        root: The root path.
 
     Returns:
-      The resolved Houdini root.
+        The resolved Houdini root.
+
+    Raises:
+        OSError: If no Houdini root could be determined.
 
     """
     if parsed_args.houdini_root is not None:
@@ -67,11 +70,11 @@ def _resolve_python_packages(
     """Find any Python package paths from the args and path.
 
     Args:
-      parsed_args: The parsed command args.
-      root: The root path.
+        parsed_args: The parsed command args.
+        root: The root path.
 
     Returns:
-      A list of any found Python package directories.
+        A list of any found Python package directories.
 
     """
     if parsed_args.python_root:
@@ -89,11 +92,11 @@ def _resolve_tests(
     """Find any test paths from the args and path.
 
     Args:
-      parsed_args: The parsed command args.
-      root: The root path.
+        parsed_args: The parsed command args.
+        root: The root path.
 
     Returns:
-      A list of any test directories.
+        A list of any test directories.
 
     """
     directories = []
@@ -118,12 +121,12 @@ def build_common_parser(
     """Build an argument parser for the script args.
 
     Args:
-      prog: The name of the program (default: sys.argv[0])
-      usage: The string describing the program usage (default: generated from arguments added to parser)
-      description: Text to display before the argument help.
+        prog: The name of the program (default: sys.argv[0])
+        usage: The string describing the program usage (default: generated from arguments added to parser)
+        description: Text to display before the argument help.
 
     Returns:
-      The constructed parser.
+        The constructed parser.
 
     """
     parser = argparse.ArgumentParser(
@@ -200,10 +203,10 @@ def process_common_arg_settings(
     """Generate base settings from common command args.
 
     Args:
-      parsed_args: The parsed command args.
+        parsed_args: The parsed command args.
 
     Returns:
-      The root path, houdini root path, directories and files to process, and Houdini item names.
+        The root path, houdini root path, directories and files to process, and Houdini item names.
 
     """
     if parsed_args.root:

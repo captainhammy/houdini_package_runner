@@ -37,9 +37,9 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
     """The base class for XML based Houdini files.
 
     Args:
-      path: The file path to process.
-      write_back: Whether the item should write itself back to disk.
-      display_name: Optional display name for test output.
+        path: The file path to process.
+        write_back: Whether the item should write itself back to disk.
+        display_name: Optional display name for test output.
 
     """
 
@@ -63,10 +63,10 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         """Get any xml items that need to be processed.
 
         Args:
-          root: An xml element.
+            root: An xml element.
 
         Returns:
-          A list of items to be processed.
+            A list of items to be processed.
 
         """
 
@@ -78,8 +78,8 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         """Handle updating the section and checking if the contents changed.
 
         Args:
-          section: The section to process.
-          temp_path: The temp file name for the code.
+            section: The section to process.
+            temp_path: The temp file name for the code.
 
         """
         # Stash the pre-updated text.
@@ -111,12 +111,12 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         """Process an XML section's text.
 
         Args:
-          section: The section to process.
-          runner: The package runner processing the item.
-          base_file_name: The name of the temporary file.
+            section: The section to process.
+            runner: The package runner processing the item.
+            base_file_name: The name of the temporary file.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         # Create a temp Python file for the code blob.
@@ -141,10 +141,10 @@ class XMLBase(FileToProcess, metaclass=abc.ABCMeta):
         """Process the file.
 
         Args:
-          runner: The package runner processing the item.
+            runner: The package runner processing the item.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
         parser = etree.XMLParser(strip_cdata=False)
@@ -182,10 +182,10 @@ class MenuFile(XMLBase):
         grab their 'scriptCode' and 'context/expression' contents.
 
         Args:
-          root: An xml element.
+            root: An xml element.
 
         Returns:
-          A list of items to be processed.
+            A list of items to be processed.
 
         """
         items = []
@@ -218,10 +218,10 @@ class PythonPanelFile(XMLBase):
         """Get any xml items that need to be processed.
 
         Args:
-          root: An xml element.
+            root: An xml element.
 
         Returns:
-          A list of items to be processed.
+            A list of items to be processed.
 
         """
         items = []
@@ -241,10 +241,10 @@ class ShelfFile(XMLBase):
     """A shelf file.
 
     Args:
-      path: The shelf file path.
-      write_back: Whether the item should write itself back to disk.
-      display_name: Optional display name.
-      tool_name: Optional tool name.
+        path: The shelf file path.
+        write_back: Whether the item should write itself back to disk.
+        display_name: Optional display name.
+        tool_name: Optional tool name.
 
     """
 
@@ -270,10 +270,10 @@ class ShelfFile(XMLBase):
         """Get any xml items that need to be processed.
 
         Args:
-          root: An xml element.
+            root: An xml element.
 
         Returns:
-          A list of items to be processed.
+            A list of items to be processed.
 
         """
         items = []

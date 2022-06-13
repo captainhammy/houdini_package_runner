@@ -28,7 +28,7 @@ class BaseRunnerConfig(abc.ABC):
     """Base class for runner configuration.
 
     Args:
-      runner_name: The name of the runner.
+        runner_name: The name of the runner.
 
     """
 
@@ -64,12 +64,12 @@ class BaseRunnerConfig(abc.ABC):
         """Get config data for an item, and it's file path.
 
         Args:
-          key: The data key.
-          item: The item to get config data for.
-          file_path: The item file path to get config data for.
+            key: The data key.
+            item: The item to get config data for.
+            file_path: The item file path to get config data for.
 
         Returns:
-          Any found config data.
+            Any found config data.
 
         """
 
@@ -78,7 +78,7 @@ class BaseRunnerConfig(abc.ABC):
         """Load the configuration data.
 
         Returns:
-          Any found config data.
+            Any found config data.
 
         """
 
@@ -98,11 +98,11 @@ class PackageRunnerConfig(BaseRunnerConfig):
         """Get config data based on the file name.
 
         Args:
-          file_path: The file path to get config data for.
-          key: The data key.
+            file_path: The file path to get config data for.
+            key: The data key.
 
         Returns:
-          Any found config data.
+            Any found config data.
 
         """
         data = []
@@ -119,11 +119,11 @@ class PackageRunnerConfig(BaseRunnerConfig):
         """Get config data based on an item.
 
         Args:
-          item: The item to get config data for.
-          key: The data key.
+            item: The item to get config data for.
+            key: The data key.
 
         Returns:
-          Any found config data.
+            Any found config data.
 
         """
         config_names = build_config_item_list(item)
@@ -155,12 +155,12 @@ class PackageRunnerConfig(BaseRunnerConfig):
         """Get config data for an item, and it's file path.
 
         Args:
-          key: The data key.
-          item: The item to get config data for.
-          file_path: The item file path to get config data for.
+            key: The data key.
+            item: The item to get config data for.
+            file_path: The item file path to get config data for.
 
         Returns:
-          Any found config data.
+            Any found config data.
 
         """
         data = []
@@ -174,7 +174,7 @@ class PackageRunnerConfig(BaseRunnerConfig):
         """Load the configuration data.
 
         Returns:
-          Any found config data.
+            Any found config data.
 
         """
         return _load_default_runner_config(self.runner_name)
@@ -192,7 +192,7 @@ def _find_config_files() -> List[pathlib.Path]:
     otherwise it will return the packaged resource.
 
     Returns:
-      One or more config files.
+        One or more config files.
 
     """
     path_env = os.getenv("HOUDINI_PACKAGE_RUNNER_CONFIG_PATH")
@@ -220,10 +220,10 @@ def _get_base_classes(cls: type) -> List[type]:
     This will exclude the base "object" class.
 
     Args:
-      cls: The class to get the base classes for.
+        cls: The class to get the base classes for.
 
     Returns:
-      A list of all the base classes.
+        A list of all the base classes.
 
     """
     cls_bases = [base for base in cls.__bases__ if base not in (abc.ABC, object)]
@@ -242,10 +242,10 @@ def _load_default_runner_config(runner_name: str) -> dict:
     """Load the configuration for a runner.
 
     Args:
-      runner_name: The name of the runner.
+        runner_name: The name of the runner.
 
     Returns:
-      The configuration dictionary for the runner.
+        The configuration dictionary for the runner.
 
     """
     paths = _find_config_files()
@@ -271,10 +271,10 @@ def build_config_item_list(item: BaseItem) -> Tuple[str, ...]:
     """Build a list of the item's class and super class names.
 
     Args:
-      item: The item to get class names for.
+        item: The item to get class names for.
 
     Returns:
-      A list containing the item's class name as well as any super class names.
+        A list containing the item's class name as well as any super class names.
 
     """
     bases = [base.__name__ for base in _get_base_classes(type(item))]

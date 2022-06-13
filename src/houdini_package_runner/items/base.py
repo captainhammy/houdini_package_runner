@@ -27,7 +27,7 @@ class BaseItem(ABC):
     """Base class for a runnable item.
 
     Args:
-      write_back: Whether the item should write itself back to disk.
+        write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -101,10 +101,10 @@ class BaseItem(ABC):
         """Process an item.
 
         Args:
-          runner: The package runner processing the item.
+            runner: The package runner processing the item.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """
 
@@ -113,8 +113,8 @@ class BaseFileItem(BaseItem):
     """Base class for a runnable item.
 
     Args:
-      path: The path for the item.
-      write_back: Whether the item should write itself back to disk.
+        path: The path for the item.
+        write_back: Whether the item should write itself back to disk.
 
     """
 
@@ -145,9 +145,9 @@ class BaseFileItem(BaseItem):
         """Process an item.
 
         Args:
-          runner: The package runner processing the item.
+            runner: The package runner processing the item.
 
         Returns:
-          The process return code.
+            The process return code.
 
         """

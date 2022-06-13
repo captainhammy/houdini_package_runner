@@ -27,9 +27,9 @@ def print_runner_command(
     The item will be output as cyan and the command as magenta, when possible.
 
     Args:
-      item: The item being processed.
-      command: The list of command args being executed.
-      extra: Optional value to prepend to the command output.
+        item: The item being processed.
+        command: The list of command args being executed.
+        extra: Optional value to prepend to the command output.
 
     """
     if extra is None:
