@@ -39,7 +39,6 @@
     [pylint.item.test_item]
         to_disable = [
             "abstract-class-instantiated",
-            "no-self-use",
             "protected-access",
             "too-many-arguments",
             "too-many-locals",

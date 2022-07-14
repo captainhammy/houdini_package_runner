@@ -109,7 +109,6 @@ build-backend = "setuptools.build_meta"
         indent-string = '    '
         max-line-length = 100
         max-module-lines = 1000
-        no-space-check = ['trailing-comma,dict-separator']
         single-line-class-stmt = ['no']
         single-line-if-stmt = ['no']
 
@@ -143,7 +142,6 @@ build-backend = "setuptools.build_meta"
         no-docstring-rgx='^_'
         property-classes='abc.abstractproperty'
         variable-naming-style='snake_case'
-        bad-functions='apply,input'
 
     [tool.pylint.'DESIGN']
         max-args = 8
