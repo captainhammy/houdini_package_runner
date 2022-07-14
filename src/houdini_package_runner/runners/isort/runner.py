@@ -68,9 +68,7 @@ class IsortRunner(HoudiniPackageRunner):
 
         return _save_template_config(config, self.temp_dir)
 
-    def _get_first_party_header(
-        self, package_names: str
-    ) -> str:
+    def _get_first_party_header(self, package_names: str) -> str:
         """Get a header for the First Party section.
 
         This will take the first module name in the comma separated list and use title() on it.
@@ -109,9 +107,7 @@ class IsortRunner(HoudiniPackageRunner):
 
         return first_party_packages
 
-    def _get_houdini_names(
-        self, namespace: argparse.Namespace
-    ) -> str:
+    def _get_houdini_names(self, namespace: argparse.Namespace) -> str:
         """Find a list of known Houdini shipped module names.
 
         Args:

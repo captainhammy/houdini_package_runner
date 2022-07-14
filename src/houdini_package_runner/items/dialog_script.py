@@ -310,9 +310,7 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
 
         return contents
 
-    def _post_process_contents(
-        self, contents: str
-    ) -> str:
+    def _post_process_contents(self, contents: str) -> str:
         """Perform any post-processing on the contents.
 
         Args:
