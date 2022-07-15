@@ -50,9 +50,9 @@ class IsortRunner(HoudiniPackageRunner):
         # Set write_back as isort will change files by default.
         super().__init__(discoverer, write_back=True, runner_config=runner_config)
 
-        self._config_file: Optional[str] = None
+        self._config_file: Optional[pathlib.Path] = None
 
-    def _generate_config(self, namespace: argparse.Namespace):
+    def _generate_config(self, namespace: argparse.Namespace) -> pathlib.Path:
         """Generate a .isort config file for the operation.
 
         Args:
@@ -151,12 +151,12 @@ class IsortRunner(HoudiniPackageRunner):
     # -------------------------------------------------------------------------
 
     @property
-    def config_file(self) -> Optional[str]:
+    def config_file(self) -> Optional[pathlib.Path]:
         """Optional isort config file."""
         return self._config_file
 
     @config_file.setter
-    def config_file(self, setting_file: str):
+    def config_file(self, setting_file: pathlib.Path) -> None:
         self._config_file = setting_file
 
     # -------------------------------------------------------------------------

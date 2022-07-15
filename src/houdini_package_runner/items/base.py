@@ -38,7 +38,7 @@ class BaseItem(ABC):
         self._is_test_item = False
         self._write_back = write_back
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__}>"
 
     # -------------------------------------------------------------------------
@@ -51,7 +51,7 @@ class BaseItem(ABC):
         return self._contents_changed
 
     @contents_changed.setter
-    def contents_changed(self, contents_changed: bool):
+    def contents_changed(self, contents_changed: bool) -> None:
         self._contents_changed = contents_changed
 
     # -------------------------------------------------------------------------
@@ -76,7 +76,7 @@ class BaseItem(ABC):
         return self._is_test_item
 
     @is_test_item.setter
-    def is_test_item(self, is_test_item: bool):
+    def is_test_item(self, is_test_item: bool) -> None:
         self._is_test_item = is_test_item
 
     # -------------------------------------------------------------------------
@@ -87,7 +87,7 @@ class BaseItem(ABC):
         return self._write_back
 
     @write_back.setter
-    def write_back(self, write_back):
+    def write_back(self, write_back: bool) -> None:
         self._write_back = write_back
 
     # -------------------------------------------------------------------------
@@ -122,7 +122,7 @@ class BaseFileItem(BaseItem):
         super().__init__(write_back=write_back)
         self._path = path
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.path}>"
 
     # -------------------------------------------------------------------------

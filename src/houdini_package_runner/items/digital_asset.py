@@ -75,7 +75,7 @@ class ExpandedOperatorType(BaseFileItem):
         self._name = name
         self._source_file = source_file
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.name} ({self.path})>"
 
     # -------------------------------------------------------------------------
@@ -278,7 +278,10 @@ class DigitalAssetDirectory(BaseFileItem):
     """
 
     def __init__(
-        self, path: pathlib.Path, write_back=False, source_file: pathlib.PurePath = None
+        self,
+        path: pathlib.Path,
+        write_back: bool = False,
+        source_file: pathlib.PurePath = None,
     ) -> None:
         super().__init__(path, write_back=write_back)
 

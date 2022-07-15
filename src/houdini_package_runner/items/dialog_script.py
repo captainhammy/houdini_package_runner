@@ -138,7 +138,7 @@ class DialogScriptItem(BaseFileItem):
         with self.path.open(encoding="utf-8") as handle:
             self._ds_contents = handle.read()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.name} ({self.path})>"
 
     # -------------------------------------------------------------------------
@@ -173,7 +173,7 @@ class DialogScriptItem(BaseFileItem):
 
     def _handle_changed_contents(
         self, items_with_changed_contents: List[DialogScriptInternalItem]
-    ):
+    ) -> None:
         """Handle writing any items with changed contents to the file.
 
         Args:
@@ -281,7 +281,7 @@ class DialogScriptInternalItem(BaseItem, metaclass=abc.ABCMeta):
         # The 'hou' module is always available in these items.
         self.ignored_builtins.append("hou")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.display_name}>"
 
     # -------------------------------------------------------------------------

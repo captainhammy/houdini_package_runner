@@ -46,7 +46,7 @@ class DirectoryToProcess(BaseFileItem):
 
         self._traverse_children = traverse_children
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.path} traverse_children={self.traverse_children}>"
 
     # -------------------------------------------------------------------------
@@ -167,7 +167,7 @@ class FileToProcess(BaseFileItem):
 
         self._display_name = display_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         path = self.display_name if self.display_name is not None else self.path
 
         return f"<{self.__class__.__name__} {path}>"
@@ -182,7 +182,7 @@ class FileToProcess(BaseFileItem):
         return self._display_name
 
     @display_name.setter
-    def display_name(self, display_name: str):
+    def display_name(self, display_name: str) -> None:
         self._display_name = display_name
 
     # -------------------------------------------------------------------------
@@ -241,7 +241,7 @@ class PythonPackageDirectoryItem(DirectoryToProcess):
     def __init__(self, path: pathlib.Path, write_back: bool = False) -> None:
         super().__init__(path, write_back=write_back)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.path}>"
 
 
